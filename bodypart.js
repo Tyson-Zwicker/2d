@@ -1,6 +1,7 @@
 
 export default class BodyPart {
   name = undefined;
+  root = undefined;
   position = undefined; //offset from parent.
   facing = 0;
   spin = 0;
@@ -20,6 +21,8 @@ export default class BodyPart {
   partAdd(part, offset) {
     part.position = offset;
     this.parts.push(part);
+    part.root = this.root;    
+    this.root.recalculateProperties();
   }
   partGet(name) {
     for (let part of this.parts) {

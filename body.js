@@ -10,14 +10,55 @@ export default class Body {
   facing = 0;
   spin = 0;
   parts = [];
-  totalMasss = 0;
-  calculatedFaces = []; //Applied by Transform..
+  totalMass = 0;          //Done in recalculate(), after part addition
+  centerOfMass = { x: 0, y: 0 }//Done in recalculate(), after part addition 
+  momentOfInertia = 0;    //Done in recalcuate(), after part addition
+  calculatedFaces = [];   //Applied by Transform..
   constructor(name) {
     this.name = name;
   }
   partAdd(part, offset) {
-    part.position = offset;
+    part.position = offset
+    part.root = this;
     this.parts.push(part);
+    this.recalculateProperties()
+  }
+  recalculateProperties() {
+    Transform.bodyPartsToLocal(this); //let all the parts know where they are
+    this.totalMass = this.calcTotalMass(this, 0);
+    this.invTotalMass = 1 / this.totalMass;
+    this.centerOfMass = Vec.scale(this.calcCenterOfMass(this, {x:0,y:0}), this.invTotalMass);;
+    this.momentOfInertia = this.calcMomentOfInertia(this, 0);
+    this.invMomentOfInertia = 1 / this.momentOfInertia;
+  }
+  calcTotalMass(part, m) {
+    for (let p of part.parts) {
+      m += this.calcTotalMass(p, m,);
+    }
+    if (part.mass) m += part.mass;
+    return m;
+  }
+  calcCenterOfMass(part, cm) {
+    for (let p of part.parts) {
+      cm  = Vec.add(cm, this.calcCenterOfMass(p, cm));
+    }
+    if (part.mass) {      
+      cm = Vec.add(cm, Vec.scale(part.calculatedPosition, part.mass));      
+    }
+    return cm;
+  }
+  calcMomentOfInertia(part, i) {
+    console.log ('moment:',part,i);
+    for (let p of part.parts){
+      i+= this.calcMomentOfInertia (p, i);
+    }
+    if (this.mass){
+      let del = Vec.sub (part.calculatedPosition, this.centerOfMass);
+      let dsqr = Vec.distSqr (del);
+      console.log ('calcmoment',del,dsqr);
+      i += (part.mass * dsqr); 
+    }
+    return i;
   }
   partGet(name) {
     for (let part of this.parts) {
@@ -32,33 +73,14 @@ export default class Body {
   move() {
     this.position = Vec.add(this.position, Vec.scale(this.velocity, Main.delta));
     this.facing += this.spin * Main.delta
-    //TODO: You have to spin your parts too!
-    for (let part of this.parts){
-      this.#spinPart (part);  
+    for (let part of this.parts) {
+      this.#spinPart(part);
     }
   }
-  #spinPart (part){
-    for (let p of part.parts){
-      this.#spinPart (p);  
+  #spinPart(part) {
+    for (let p of part.parts) {
+      this.#spinPart(p);
     }
-    part.facing+=part.spin;
-  }
-  draw() {
-    for (let face of this.calculatedFaces) {
-      let points = [];
-      for (let p of face.points) points.push(Transform.worldToScreen(p));
-      if (points.length < 3) {
-        console.warn ('A polygon with less than 3 parts wanted to be drawm');
-        continue;
-      }
-      View.context.fillStyle = face.color;
-      let path = new Path2D();
-      path.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        path.lineTo(points[i].x, points[i].y);
-      }
-      path.closePath();
-      View.context.fill(path);
-    }
+    part.facing += part.spin;
   }
 }
