@@ -8,17 +8,16 @@ export default class View {
   static camera = { x: 0, y: 0, zoom: 1 };//World Coordinates.. update this to keep view on a particular thing/place otherwise mouse moves it around.
   static minimumZoom = 0.01;
   static mouse = { x: 0, y: 0 };
-  static screenCenter = null; // Initialize as null //screen coordinates of canvas center (size dependent)
+  static screenCenter = undefined;
   static zoomFactor = 10; //How much each zoom changes when the wheel is scrolled.
 
-  static initialize(backColor) {
+  static initialize() {
     View.canvas = document.createElement('canvas');
     View.canvas.style.margin = 0;
     View.canvas.style.padding = 0;
     View.canvas.id = 'canvas';
     View.context = View.canvas.getContext('2d');
     View.mouse.buttonDown = false;
-    View.bgColor = backColor;
     let body = document.getElementsByTagName('body')[0];
     body.appendChild(View.canvas);
     body.style.margin = 0;
@@ -60,22 +59,23 @@ export default class View {
   static clear() {
     View.context.fillStyle = View.bgColor;
     View.context.fillRect(0, 0, View.canvas.width, View.canvas.height);
+    console.log ('clearing '+Date.now());
   }
   static handleCameraDrag(mouseInteractedWithSomething) {//TODO: <<--look at how director provided this param..
     if (!mouseInteractedWithSomething) {
       if (View.bgPressed && View.mouse.buttonDown) {        //drag occuring..         
         let drag;
         if (View.bgPressCoord !== undefined) {
-          drag = { x: View.bgPressCoord.x, y: View.bgPressCoord.y } ;
+          drag = { x: View.bgPressCoord.x, y: View.bgPressCoord.y };
         } else {
-          drag = { x:View.mouse.x, y:View.mouse.y };
+          drag = { x: View.mouse.x, y: View.mouse.y };
         }
         let inverseMouse = Vec.scale(View.mouse, -1);
         drag = Vec.add(drag, inverseMouse);
         drag = Vec.scale(drag, 1 / View.camera.zoom);
         View.camera = Vec.add(View.camera, drag);
         View.#calcBounds();
-        View.bgPressCoord = { x:View.mouse.x, y:View.mouse.y };
+        View.bgPressCoord = { x: View.mouse.x, y: View.mouse.y };
       }
       else if (View.bgPressed && !View.mouse.buttonDown) {
         //drag ended.

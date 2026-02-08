@@ -2,20 +2,22 @@ import Vec from './vec.js';
 import View from './view.js';
 
 export default class Transform {
-  static gameObjectToWorld(obj, scale=1) {
-    obj.calculatedFaces.length = 0; 
-    for (let face of obj.faces) {//local rotation of own points.. (Game object won't have any of its own)
-      let rotatedPoints = [];
-      for (let p of face.points) {
-        rotatedPoints.push(Vec.rotate(Vec.scale(p, scale), obj.facing));
+  static gameObjectToWorld(obj) {
+    let scale = View.camera.zoom;
+    obj.calculatedFaces.length = 0;
+    if (obj.faces) {//Bodies don't have faces, only their parts do..
+      for (let face of obj.faces) {//local rotation of own points.. (Game object won't have any of its own)
+        let rotatedPoints = [];
+        for (let p of face.points) {
+          rotatedPoints.push(Vec.rotate(Vec.scale(p, scale), obj.facing));
+        }
+        obj.calculatedFaces.push({ color: face.color, points: rotatedPoints });
       }
-      obj.calculatedFaces.push({ color: face.color, points: rotatedPoints });
+      if (obj.parts.length === 0) return; // required to return from recursion..this is a this was a "leaf" node
     }
-    if (obj.parts.length === 0) return; // required to return from recursion..this is a this was a "leaf" node
-    
     for (let part of obj.parts) {//Process all the parts in the whole obj..
-      Transform.gameObjectToWorld(part,scale); //let children orientate themselves
-      let scaledPartPosition = Vec.scale(part.position, scale) 
+      Transform.gameObjectToWorld(part, scale); //let children orientate themselves
+      let scaledPartPosition = Vec.scale(part.position, scale)
       for (let cf of part.calculatedFaces) { //Now the part will offset them, and assert its rotation..
         for (let p of cf.points) {
           Vec.addInPlace(p, scaledPartPosition);//the parts position its its offset from its parent..
@@ -28,16 +30,13 @@ export default class Transform {
     //Now that parts have asserted themselves,  apply THIS Obj rotation and position to all the calculatedFaces..
     for (let cf of obj.calculatedFaces) {
       for (let p of cf.points) {
-        Vec.rotateInPlace(p, obj.facing);
-        Vec.addInPlace(p, obj.position);
+        Vec.rotateInPlace(p, obj.facing); //Are the changes made here visible outside of this scope..
+        Vec.addInPlace(p, obj.position);  //like, is 'p' local and not a reference to an object in an array?
       }
     }
   }
-  static worldToScreen (worldCoordinate){
-    const { x0, y0 } = View.bounds;
-    return {
-      x: (worldCoordinate.x - x0) * View.camera.zoom,
-      y: (worldCoordinate.y - y0) * View.camera.zoom
-    };
+  static worldToScreen(worldCoordinate) {
+    let screen = Vec.add(Vec.scale(Vec.sub(worldCoordinate, View.camera), View.camera.zoom), View.screenCenter);
+    return screen;
   }
 }

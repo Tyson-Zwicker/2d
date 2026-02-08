@@ -35,17 +35,19 @@ export default class Body {
   draw() {
     for (let face of this.calculatedFaces) {
       let points = [];
-      for (let p of face.points) points.push (Transform.worldToScreen (p));
-      console.log ('points ='+points.length);
+      for (let p of face.points) points.push(Transform.worldToScreen(p));
+      if (points.length < 3) {
+        console.warn ('A polygon with less than 3 parts wanted to be drawm');
+        continue;
+      }
       View.context.fillStyle = face.color;
       let path = new Path2D();
       path.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
         path.lineTo(points[i].x, points[i].y);
-        path.closePath();
-        View.context.fill(path);
       }
-      console.log (points[0].x,points[0].y, path, View.context.fillStyle);
+      path.closePath();
+      View.context.fill(path);
     }
   }
 }

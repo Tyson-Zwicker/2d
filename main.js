@@ -22,8 +22,7 @@ export default class Main {
     Main.time = Date.now();
     Main.delta = Main.time - Main.oldTime;
     if (Main.delta > Main.fpsMillis) console.log(`Main loop is taking to long: Delta: ${Main.delta} > ${Main.fpsMillis}`);
-    Main.oldTime = Main.time;
-    console.log(View);
+    Main.oldTime = Main.time;    
     Main.doWork();
     if (Main.continue) setTimeout(Main.loop, Main.fpsMillis);
     console.log('exited.');
@@ -31,11 +30,12 @@ export default class Main {
   static doWork() {
     View.clear();
     Main.draw();
-    Main.move();
+    console.log ('draw complete '+Date.now());
+    Main.move();    
   }
   static draw() {
     for (let gameObject of Game.gameObjects.values()) {
-      Transform.gameObjectToWorld(gameObject.body);
+      Transform.gameObjectToWorld(gameObject.body);      
       gameObject.body.draw();
     }
   }
