@@ -45,8 +45,8 @@ export default class Main {
     View.context.font = oldfont;
   }
   static draw() {
-    for (let gameObject of Game.gameObjects.values()) {
-      console.log('main.draw', gameObject.body);
+    for (let gameObject of Game.gameObjects.values()) {   
+      Transform.bodyPartsToLocal (gameObject.body);   
       let worldFaces = Transform.localToWorld(gameObject.body);
       for (let face of worldFaces) {
         let points = [];

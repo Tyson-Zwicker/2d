@@ -7,56 +7,39 @@ import BodyPart from './bodypart.js';
 
 View.initialize('#222');
 
-const body = new Body('ship');
+const body = new Body('shipBody');
 body.position = { x: 0, y: 0 };
 body.velocity = { x: 0, y: 0 };
 body.spin = 10;
+
 const leftRad = new BodyPart('leftRad', 0, 1, true);
 leftRad.faces = [
   {
     color: '#600',
-    points: [
-      { x: -10, y: -30 },
-      { x: 10, y: -30 },
-      { x: 10, y: 20 },
-      { x: 0, y: 30 },
-      { x: -10, y: 20 },
-      //{x: -10, y: -30 }
-    ]
+    points: [{ x: -10, y: -30 }, { x: 10, y: -30 }, { x: 10, y: 20 }, { x: 0, y: 30 }, { x: -10, y: 20 }]
   }
 ];
 body.partAdd(leftRad, { x: 0, y: -60 });
+
 const rightRad = new BodyPart('rightRad', 0, 1, true);
 rightRad.faces = [
   {
     color: '#f20',
-    points: [
-      { x: 0, y: -30 },
-      { x: 10, y: -20 },
-      { x: 10, y: 30 },
-      { x: -10, y: 30 },
-      { x: -10, y: -20 },
-      //{ x: 0, y: 0 }
-    ]
+    points: [{ x: 0, y: -30 }, { x: 10, y: -20 }, { x: 10, y: 30 }, { x: -10, y: 30 }, { x: -10, y: -20 }]
   }
 ];
 body.partAdd(rightRad, { x: 0, y: 60 });
 
-const hull = new BodyPart('hull', 0, 1, true);
+const hull = new BodyPart('hull', 0, 10, true);
 hull.faces = [
   {
     color: '#99F',
-    points: [
-      { x: -30, y: -30 },
-      { x: 30, y: - 30 },
-      { x: 30, y: 30 },
-      { x: -30, y: 30 }
-    ]
+    points: [{ x: -30, y: -30 }, { x: 30, y: - 30 }, { x: 30, y: 30 }, { x: -30, y: 30 }]
   }
 ];
 body.partAdd(hull, { x: 0, y: 0 });
 
-const engine = new BodyPart('engine', 0, 1, true);
+const engine = new BodyPart('engine', 0, 10, true);
 engine.faces = [
   {
     color: '#fd6',
@@ -72,12 +55,16 @@ body.partAdd(engine, { x: -40, y: 0 });
 
 const radar = new BodyPart('radar', 0, 1, true);
 radar.faces = [{
-  color: '#0f0', points: [
-    { x: -5, y: 0 }, { x: 5, y: -8 }, { x: 5, y: 8 }
-  ]
+  color: '#0f0',
+   points: [{ x: -5, y: 0 }, { x: 5, y: -8 }, { x: 5, y: 8 }]
 }];
 hull.partAdd(radar, { x: 25, y: 0 });
-radar.spin = 2;
+radar.spin = 10;
+
+console.log('moment of inertia:' + body.momentOfInertia);
+console.log('total mass:' + body.totalMass);
+console.log('center of mass: (' + body.centerOfMass.x + ',' + body.centerOfMass.y + ')');
+
 
 const ship = new GameObject('ship', body);
 Game.addGameObject(ship);

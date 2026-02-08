@@ -29,15 +29,15 @@ export default class Transform {
     }
   }
   static localToWorld(obj) {  
-    console.log ('localtoWord obj:',obj);              
     let world = [];
     for (let cf of obj.calculatedFaces) {
       let wf = {color:cf.color, points:[]}
       for (let p of cf.points) {
-        wf.points.push (Vec.add(Vec.rotation (p,obj.facing), obj.position));
+        wf.points.push (Vec.add(Vec.rotate (p,obj.facing), obj.position));
       }
       world.push (wf);
     }
+    
     return world;
   }
   static worldToScreen(worldCoordinate) {

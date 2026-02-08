@@ -129,21 +129,6 @@ export default class View {
     View.camera.y += ychange;
     View.camera.zoom = Math.max(View.minimumZoom, View.camera.zoom);
     View.#calcBounds();
-    /* console.log (View.camera);
-     let zoomChange = View.camera.zoom * -Math.sign(event.deltaY) / View.zoomFactor;
-     let oldZoom = View.camera.zoom;
-     View.camera.zoom = View.camera.zoom + zoomChange;
-     let canvasSize = { x: View.canvas.width, y: View.canvas.height };
-     let diff = Vec.sub(Vec.scale(canvasSize, 1 / oldZoom), Vec.scale(canvasSize, 1 / View.camera.zoom));
-     let xratio = (View.mouse.x - (View.canvas.width / 2)) / View.canvas.width;
-     let yratio = (View.mouse.y - (View.canvas.height / 2)) / View.canvas.height;
-     let change = { x: diff.x * xratio, y: diff.y * yratio };
- 
-     View.camera = Vec.add(View.camera, change);
-     View.camera.zoom = Math.max(View.minimumZoom, View.camera.zoom);
-     console.log (View.camera);
-     View.#calcBounds();
-     */
   }
   static resizeCanvas() {
     View.canvas.width = window.innerWidth;

@@ -47,15 +47,14 @@ export default class Body {
     }
     return cm;
   }
-  calcMomentOfInertia(part, i) {
-    console.log ('moment:',part,i);
+  calcMomentOfInertia(part, i) {    
     for (let p of part.parts){
       i+= this.calcMomentOfInertia (p, i);
     }
     if (this.mass){
       let del = Vec.sub (part.calculatedPosition, this.centerOfMass);
       let dsqr = Vec.distSqr (del);
-      console.log ('calcmoment',del,dsqr);
+      console.log ('calcmoment',del,dsqr); //TODO: <- never called?
       i += (part.mass * dsqr); 
     }
     return i;
@@ -81,6 +80,6 @@ export default class Body {
     for (let p of part.parts) {
       this.#spinPart(p);
     }
-    part.facing += part.spin;
+    part.facing += part.spin * Main.delta;
   }
 }
