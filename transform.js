@@ -19,9 +19,9 @@ export default class Transform {
       Transform.gameObjectToWorld(part, scale); //let children orientate themselves
       let scaledPartPosition = Vec.scale(part.position, scale)
       for (let cf of part.calculatedFaces) { //Now the part will offset them, and assert its rotation..
-        for (let p of cf.points) {
-          Vec.addInPlace(p, scaledPartPosition);//the parts position its its offset from its parent..
+        for (let p of cf.points) {          
           Vec.rotateInPlace(p, part.facing);
+          Vec.addInPlace(p, scaledPartPosition);//the parts position its its offset from its parent..
         }
       }
       part.calculatedPosition = scaledPartPosition;//Let this part know where it is (so it knows if it has been hit by anything)

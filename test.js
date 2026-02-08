@@ -70,6 +70,15 @@ engine.faces = [
 ];
 body.partAdd(engine, { x: -40, y: 0 });
 
+const radar = new BodyPart('radar', 0, 1, true);
+radar.faces = [{
+  color: '#0f0', points: [
+    { x: -5, y: 0 }, { x: 5, y: -8 }, { x: 5, y: 8 }
+  ]
+}];
+body.partAdd(radar, { x: 25, y: 0 });
+radar.spin = 2;
+
 const ship = new GameObject('ship', body);
 Game.addGameObject(ship);
 

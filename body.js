@@ -31,7 +31,17 @@ export default class Body {
   }
   move() {
     this.position = Vec.add(this.position, Vec.scale(this.velocity, Main.delta));
-    this.facing += this.spin * Main.delta;
+    this.facing += this.spin * Main.delta
+    //TODO: You have to spin your parts too!
+    for (let part of this.parts){
+      this.#spinPart (part);  
+    }
+  }
+  #spinPart (part){
+    for (let p of part.parts){
+      this.#spinPart (p);  
+    }
+    part.facing+=part.spin;
   }
   draw() {
     for (let face of this.calculatedFaces) {
