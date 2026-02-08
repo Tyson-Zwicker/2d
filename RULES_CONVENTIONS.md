@@ -18,6 +18,7 @@
 ## Error Handling
 - Throw `Error`/`TypeError` for invalid inputs.
 - Use `console.warn` for non-fatal issues.
+- Avoid over-use of input checking in hot paths.
 
 ## Comments & Docs
 - Keep comments concise and only for non-obvious logic.
