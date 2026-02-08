@@ -17,5 +17,19 @@ export default class BodyPart {
     this.spin = spin;
     this.collides = collides;
   }
+  partAdd(part, offset) {
+    part.position = offset;
+    this.parts.push(part);
+  }
+  partGet(name) {
+    for (let part of this.parts) {
+      if (part.name === name) return part;
+      for (let innerpart of part.parts) {
+        let p = innerpart.getPart(name);
+        if (p instanceof BodyPart) return p;
+      }
+    }
+    throw new Error(`body.partGet: part not found [${name}]`);
+  }
 }
 

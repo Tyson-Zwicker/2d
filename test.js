@@ -76,10 +76,10 @@ radar.faces = [{
     { x: -5, y: 0 }, { x: 5, y: -8 }, { x: 5, y: 8 }
   ]
 }];
-body.partAdd(radar, { x: 25, y: 0 });
+hull.partAdd(radar, { x: 25, y: 0 });
 radar.spin = 2;
 
 const ship = new GameObject('ship', body);
 Game.addGameObject(ship);
 
-Main.run(30);
+Main.run(60);

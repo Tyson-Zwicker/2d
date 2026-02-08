@@ -5,6 +5,7 @@ export default class Main {
   static delta = 0;
   static run(fps = 0) {
     let startTime = Date.now();
+    Main.loopTime = 0;
     if (fps === 0) {
       View.bgColor = '#302';
       Main.continue = false;
@@ -20,18 +21,20 @@ export default class Main {
   static loop(startTime) {
     if (startTime) Main.oldTime = startTime;
     Main.time = Date.now();
-    Main.delta = (Main.time - Main.oldTime)/1000;;
+    Main.delta = (Main.time - Main.oldTime) / 1000;;
     //if (Main.delta > Main.fpsMillis) console.warn(`Main loop is taking to long: Delta: ${Main.delta} > ${Main.fpsMillis}`);
     Main.oldTime = Main.time;
     Main.doWork();
     if (Main.continue) setTimeout(Main.loop, Main.fpsMillis);
   }
   static doWork() {
+    let t = Date.now();
     View.clear();
-    Main.draw();
+    Main.draw(); 
     Main.move();
     Main.checkMouse();
     Main.showDelta();
+    Main.loopTime = Date.now() - t;
   }
   static showDelta() {
     View.context.textBaseline = 'top';
@@ -39,7 +42,7 @@ export default class Main {
     View.context.strokeStyle = '#FFFFFF';
     let oldfont = View.context.font;
     View.context.font = "bold 16px Arial"
-    View.context.fillText('Δ' + (String(Math.trunc(Main.delta*1000)).padStart(4, '0')), 5, 5);
+    View.context.fillText('Δ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0') + ' : Σ' + String(Main.loopTime).padStart(4, '0'), 5, 5);
     View.context.font = oldfont;
   }
   static draw() {
