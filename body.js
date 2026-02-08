@@ -2,6 +2,7 @@ import Main from './main.js';
 import BodyPart from './bodypart.js';
 import View from './view.js';
 import Vec from './vec.js';
+import Transform from './transform.js';
 export default class Body {
   name = undefined;
   position = { x: 0, y: 0 };
@@ -10,7 +11,7 @@ export default class Body {
   spin = 0;
   parts = [];
   totalMasss = 0;
-  calculatedFaces = []]; //Applied by Transform..
+  calculatedFaces = []; //Applied by Transform..
   constructor(name) {
     this.name = name;
   }
@@ -26,21 +27,25 @@ export default class Body {
         if (p instanceof BodyPart) return p;
       }
     }
-    throw new Error (`body.partGet: part not found [${name}]`);
+    throw new Error(`body.partGet: part not found [${name}]`);
   }
   move() {
-    this.position = Vec.add (this.position, Vec.scale (this.velocity, Main.delta));
+    this.position = Vec.add(this.position, Vec.scale(this.velocity, Main.delta));
   }
   draw() {
     for (let face of this.calculatedFaces) {
+      let points = [];
+      for (let p of face.points) points.push (Transform.worldToScreen (p));
+      console.log ('points ='+points.length);
       View.context.fillStyle = face.color;
       let path = new Path2D();
-      path.moveTo(face.points[0].x,face.points[0].y);
-      for (let i = 1; i < face.points.length; i++) {        
-        path.lineTo(face.points[i].x,face.points[i].y);
+      path.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        path.lineTo(points[i].x, points[i].y);
         path.closePath();
         View.context.fill(path);
       }
+      console.log (points[0].x,points[0].y, path, View.context.fillStyle);
     }
   }
 }

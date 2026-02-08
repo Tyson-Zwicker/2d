@@ -1,17 +1,16 @@
 import View from './view.js';
 import Game from './game.js';
-
+import Transform from './transform.js';
 export default class Main {
   static delta = 0;
   static run(fps = 0) {
     let startTime = Date.now();
-    let fpsMillis;
     if (fps === 0) {
-      View.background = '#404';
+      View.bgColor = '#302';
       Main.continue = false;
-      Main.fpsMillis = 0.1;
+      Main.fpsMillis = 1 / 24;
     } else {
-      View.background = '#132';
+      View.bgColor = '#000';
       Main.continue = true;
       Main.fpsMillis = 1000 / fps;
     }
@@ -24,8 +23,10 @@ export default class Main {
     Main.delta = Main.time - Main.oldTime;
     if (Main.delta > Main.fpsMillis) console.log(`Main loop is taking to long: Delta: ${Main.delta} > ${Main.fpsMillis}`);
     Main.oldTime = Main.time;
+    console.log(View);
     Main.doWork();
     if (Main.continue) setTimeout(Main.loop, Main.fpsMillis);
+    console.log('exited.');
   }
   static doWork() {
     View.clear();
@@ -33,8 +34,9 @@ export default class Main {
     Main.move();
   }
   static draw() {
-    for (let gameobject of Game.gameObjects.values()) {
-      gameobject.body.draw();
+    for (let gameObject of Game.gameObjects.values()) {
+      Transform.gameObjectToWorld(gameObject.body);
+      gameObject.body.draw();
     }
   }
   static move() {
