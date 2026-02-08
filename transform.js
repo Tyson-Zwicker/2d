@@ -1,4 +1,5 @@
 import Vec from './vec.js';
+import View from './view.js';
 
 export default class Transform {
   static gameObjectToWorld(obj, scale=1) {
@@ -31,5 +32,12 @@ export default class Transform {
         Vec.addInPlace(p, obj.position);
       }
     }
+  }
+  static worldToScreen (worldCoordinate){
+    const { x0, y0 } = View.bounds;
+    return {
+      x: (worldCoordinate.x - x0) * View.camera.zoom,
+      y: (worldCoordinate.y - y0) * View.camera.zoom
+    };
   }
 }
