@@ -10,7 +10,7 @@ View.initialize('#222');
 const body = new Body('ship');
 body.position = { x: 0, y: 0 };
 body.velocity = { x: 0, y: 0 };
-body.spin = 1;
+body.spin = 10;
 const leftRad = new BodyPart('leftRad', 0, 1, true);
 leftRad.faces = [
   {
