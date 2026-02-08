@@ -10,6 +10,7 @@ View.initialize('#222');
 const body = new Body('ship');
 body.position = { x: 0, y: 0 };
 body.velocity = { x: 0, y: 0 };
+body.spin = 1;
 const leftRad = new BodyPart('leftRad', 0, 1, true);
 leftRad.faces = [
   {
@@ -72,4 +73,4 @@ body.partAdd(engine, { x: -40, y: 0 });
 const ship = new GameObject('ship', body);
 Game.addGameObject(ship);
 
-Main.run();
+Main.run(30);
