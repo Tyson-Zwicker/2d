@@ -8,61 +8,66 @@ import BodyPart from './bodypart.js';
 View.initialize('#222');
 
 const body = new Body('ship');
-body.faces = [
-	{
-		color: '#f4b',
-		points: [
-			{ x: -20, y: -10 },
-			{ x: 20, y: 0 },
-			{ x: -20, y: 10 }
-		]
-	}
+body.position = { x: 0, y: 0 };
+body.velocity = { x: 0, y: 0 };
+const leftRad = new BodyPart('leftRad', 0, 1, true);
+leftRad.faces = [
+  {
+    color: '#600',
+    points: [
+      { x: -10, y: -30 },
+      { x: 10, y: -30 },
+      { x: 10, y: 20 },
+      { x: 0, y: 30 },
+      { x: -10, y: 20 },
+      //{x: -10, y: -30 }
+    ]
+  }
 ];
-body.position = { x: View.screenCenter.x, y: View.screenCenter.y };
-body.velocity = { x: 0.03, y: 0.02 };
-
-const leftWing = new BodyPart('leftWing', 0, 1, true);
-leftWing.faces = [
-	{
-		color: '#7cf',
-		points: [
-			{ x: -30, y: -6 },
-			{ x: -8, y: -2 },
-			{ x: -8, y: 2 },
-			{ x: -30, y: 6 }
-		]
-	}
+body.partAdd(leftRad, { x: 0, y: -60 });
+const rightRad = new BodyPart('rightRad', 0, 1, true);
+rightRad.faces = [
+  {
+    color: '#f20',
+    points: [
+      { x: 0, y: -30 },
+      { x: 10, y: -20 },
+      { x: 10, y: 30 },
+      { x: -10, y: 30 },
+      { x: -10, y: -20 },
+      //{ x: 0, y: 0 }
+    ]
+  }
 ];
+body.partAdd(rightRad, { x: 0, y: 60 });
 
-const rightWing = new BodyPart('rightWing', 0, 1, true);
-rightWing.faces = [
-	{
-		color: '#7cf',
-		points: [
-			{ x: 8, y: -2 },
-			{ x: 30, y: -6 },
-			{ x: 30, y: 6 },
-			{ x: 8, y: 2 }
-		]
-	}
+const hull = new BodyPart('hull', 0, 1, true);
+hull.faces = [
+  {
+    color: '#99F',
+    points: [
+      { x: -30, y: -30 },
+      { x: 30, y: - 30 },
+      { x: 30, y: 30 },
+      { x: -30, y: 30 }
+    ]
+  }
 ];
+body.partAdd(hull, { x: 0, y: 0 });
 
-const engine = new BodyPart('engine', 0, 1, false);
+const engine = new BodyPart('engine', 0, 1, true);
 engine.faces = [
-	{
-		color: '#fd6',
-		points: [
-			{ x: -6, y: -8 },
-			{ x: 6, y: -8 },
-			{ x: 6, y: 8 },
-			{ x: -6, y: 8 }
-		]
-	}
+  {
+    color: '#fd6',
+    points: [
+      { x: -10, y: -20 },
+      { x: 10, y: -5 },
+      { x: 10, y: 5 },
+      { x: -10, y: 20 }
+    ]
+  }
 ];
-
-body.partAdd(leftWing, { x: -10, y: 0 });
-body.partAdd(rightWing, { x: 10, y: 0 });
-body.partAdd(engine, { x: -18, y: 0 });
+body.partAdd(engine, { x: -40, y: 0 });
 
 const ship = new GameObject('ship', body);
 Game.addGameObject(ship);
