@@ -1,4 +1,5 @@
 import Vec from './vec.js';
+import Main from './main.js';
 
 export default class View {
   static bgPressed = false;
@@ -24,6 +25,7 @@ export default class View {
     body.style.padding = 0;
     View.canvas.width = window.innerWidth;
     View.canvas.height = window.innerHeight;
+    View.canvas.style = 'display:block;';
     View.screenCenter = { x: View.canvas.width / 2, y: View.canvas.height / 2 };
     View.canvas.addEventListener('wheel', View.handleWheel, { passive: false });
     View.canvas.onmousemove = View.handleMouseMove;
@@ -59,9 +61,8 @@ export default class View {
   static clear() {
     View.context.fillStyle = View.bgColor;
     View.context.fillRect(0, 0, View.canvas.width, View.canvas.height);
-    console.log ('clearing '+Date.now());
   }
-  static handleCameraDrag(mouseInteractedWithSomething) {//TODO: <<--look at how director provided this param..
+  static handleCameraDrag(mouseInteractedWithSomething) {
     if (!mouseInteractedWithSomething) {
       if (View.bgPressed && View.mouse.buttonDown) {        //drag occuring..         
         let drag;
@@ -73,7 +74,7 @@ export default class View {
         let inverseMouse = Vec.scale(View.mouse, -1);
         drag = Vec.add(drag, inverseMouse);
         drag = Vec.scale(drag, 1 / View.camera.zoom);
-        View.camera = Vec.add(View.camera, drag);
+        Vec.addInPlace(View.camera, drag); //If you don't add in place it will give back a new Vec and it won't have zoom anymore!
         View.#calcBounds();
         View.bgPressCoord = { x: View.mouse.x, y: View.mouse.y };
       }
@@ -118,15 +119,31 @@ export default class View {
     let zoomChange = View.camera.zoom * -Math.sign(event.deltaY) / View.zoomFactor;
     let oldZoom = View.camera.zoom;
     View.camera.zoom = View.camera.zoom + zoomChange;
-    let canvas = { x: View.canvas.width, y: View.canvas.height };
-    let diff = Vec.sub(Vec.scale(canvas, 1 / oldZoom), Vec.scale(canvas, 1 / View.camera.zoom));
+    let xdiff = View.canvas.width / oldZoom - View.canvas.width / View.camera.zoom;
+    let ydiff = View.canvas.height / oldZoom - View.canvas.height / View.camera.zoom;
     let xratio = (View.mouse.x - (View.canvas.width / 2)) / View.canvas.width;
     let yratio = (View.mouse.y - (View.canvas.height / 2)) / View.canvas.height;
-    let change = { x: diff.x * xratio, y: diff.y * yratio };
-
-    View.camera = Vec.add(View.camera, change);
+    let xchange = xdiff * xratio;
+    let ychange = ydiff * yratio;
+    View.camera.x += xchange;
+    View.camera.y += ychange;
     View.camera.zoom = Math.max(View.minimumZoom, View.camera.zoom);
     View.#calcBounds();
+    /* console.log (View.camera);
+     let zoomChange = View.camera.zoom * -Math.sign(event.deltaY) / View.zoomFactor;
+     let oldZoom = View.camera.zoom;
+     View.camera.zoom = View.camera.zoom + zoomChange;
+     let canvasSize = { x: View.canvas.width, y: View.canvas.height };
+     let diff = Vec.sub(Vec.scale(canvasSize, 1 / oldZoom), Vec.scale(canvasSize, 1 / View.camera.zoom));
+     let xratio = (View.mouse.x - (View.canvas.width / 2)) / View.canvas.width;
+     let yratio = (View.mouse.y - (View.canvas.height / 2)) / View.canvas.height;
+     let change = { x: diff.x * xratio, y: diff.y * yratio };
+ 
+     View.camera = Vec.add(View.camera, change);
+     View.camera.zoom = Math.max(View.minimumZoom, View.camera.zoom);
+     console.log (View.camera);
+     View.#calcBounds();
+     */
   }
   static resizeCanvas() {
     View.canvas.width = window.innerWidth;
