@@ -22,7 +22,6 @@ export default class Main {
     if (startTime) Main.oldTime = startTime;
     Main.time = Date.now();
     Main.delta = (Main.time - Main.oldTime) / 1000;;
-    //if (Main.delta > Main.fpsMillis) console.warn(`Main loop is taking to long: Delta: ${Main.delta} > ${Main.fpsMillis}`);
     Main.oldTime = Main.time;
     Main.doWork();
     if (Main.continue) setTimeout(Main.loop, Main.fpsMillis);
@@ -30,7 +29,7 @@ export default class Main {
   static doWork() {
     let t = Date.now();
     View.clear();
-    Main.draw(); 
+    Main.draw();
     Main.move();
     Main.checkMouse();
     Main.showDelta();
@@ -47,8 +46,20 @@ export default class Main {
   }
   static draw() {
     for (let gameObject of Game.gameObjects.values()) {
-      Transform.gameObjectToWorld(gameObject.body);
-      gameObject.body.draw();
+      console.log('main.draw', gameObject.body);
+      let worldFaces = Transform.localToWorld(gameObject.body);
+      for (let face of worldFaces) {
+        let points = [];
+        for (let p of face.points) points.push(Transform.worldToScreen(p));
+        View.context.fillStyle = face.color;
+        let path = new Path2D();
+        path.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          path.lineTo(points[i].x, points[i].y);
+        }
+        path.closePath();
+        View.context.fill(path);
+      }
     }
   }
   static move() {
