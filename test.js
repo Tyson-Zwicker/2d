@@ -10,7 +10,7 @@ View.initialize('#222');
 const body = new Body('shipBody');
 body.position = { x: 0, y: 0 };
 body.velocity = { x: 0, y: 0 };
-body.spin = -5;
+body.spin = 0;
 
 const reactor = new BodyPart('reactor', 0, 20, true);
 reactor.faces = [{ color: '#99F', points: [{ x: -30, y: -30 }, { x: 30, y: - 30 }, { x: 30, y: 30 }, { x: -30, y: 30 }] }]; //60
@@ -70,15 +70,24 @@ greenArrow.faces = [{color:'#0f0', points: [
 ]}];
 const blueArrow = new BodyPart ('blue-arrow',0,1,false);
 blueArrow.faces = [{color:'#00f', points: [
-  {x:-25,y:-8},
-  {x: 10,y:-8},
-  {x:0,y:-30},
+  {x:-25,y:-5},
+  {x: 10,y:-5},
+  {x:0,y:-25},
   {x:25,y:0},
-  {x:0,y:30},
-  {x:10,y:8},
-  {x:-25,y:8}
+  {x:0,y:25},
+  {x:10,y:5},
+  {x:-25,y:5}
 ]}];
-
+const redArrow = new BodyPart ('red-arrow',0,1,false);
+redArrow.faces = [{color:'#f00', points: [
+  {x:-20,y:-3},
+  {x: 0,y:-3},
+  {x:0,y:-15},
+  {x:20,y:0},
+  {x:0,y:15},
+  {x:0,y:3},
+  {x:-20,y:3}
+]}];
 
 body.partAdd(hull, { x: 60, y: 0 });
 body.partAdd(bow, { x: 130, y: 0 });
@@ -90,6 +99,8 @@ body.partAdd(rightEngine, { x: -100, y: 12 });
 
 bow.partAdd(greenArrow,{x:0,y:0});
 greenArrow.partAdd (blueArrow, {x:75,y:0});
+blueArrow.partAdd (redArrow, {x:40,y:0});
+
 
 hull.partAdd(turret1, { x: -30, y: 0 });
 hull.partAdd(turret2, { x: 25, y: 0 });
@@ -111,5 +122,12 @@ console.log('center of mass: (' + body.centerOfMass.x + ',' + body.centerOfMass.
 
 const ship = new GameObject('ship', body);
 Game.addGameObject(ship);
-
-Main.run(60);
+Main.creatorsFunction = function (){
+  greenArrow.facing +=1;
+  blueArrow.facing +=0;
+  redArrow.facing -=1;
+  Main.tickMsg.push ('Green: '+greenArrow.facing);
+  Main.tickMsg.push ('Blue: '+greenArrow.facing);
+  Main.tickMsg.push ('Red: '+redArrow.facing);
+}
+Main.run(10);

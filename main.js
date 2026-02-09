@@ -3,6 +3,10 @@ import Game from './game.js';
 import Transform from './transform.js';
 export default class Main {
   static delta = 0;
+  static time = 0;
+  static oldTime = 0;
+  static creatorsFunction = undefined;  //A callback for the user to use once per loop.
+  static tickMsg = [];
   static run(fps = 0) {
     let startTime = Date.now();
     Main.loopTime = 0;
@@ -33,15 +37,23 @@ export default class Main {
     Main.move();
     Main.checkMouse();
     Main.showDelta();
+    if (Main.creatorsFunction) Main.creatorsFunction ();
     Main.loopTime = Date.now() - t;
   }
   static showDelta() {
+    let y=5;
     View.context.textBaseline = 'top';
     View.context.fillStyle = '#FFFFFF';
     View.context.strokeStyle = '#FFFFFF';
     let oldfont = View.context.font;
     View.context.font = "bold 16px Arial"
-    View.context.fillText('Δ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0') + ' : Σ' + String(Main.loopTime).padStart(4, '0'), 5, 5);
+    View.context.fillText('Δ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0') + ' : Σ' + String(Main.loopTime).padStart(4, '0'), 5, y);
+    
+    for (let msg of Main.tickMsg){
+      y+=20;
+      View.context.fillText('↳ ' + msg, 15, y);  
+    }
+    Main.tickMsg.length=0;
     View.context.font = oldfont;
   }
   static draw() {
