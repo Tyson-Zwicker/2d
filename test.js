@@ -58,14 +58,38 @@ lftAftThruster.faces = [{ color: '#909', points: [{ x: -3, y: -3 }, { x: 3, y: -
 const rgtAftThruster = new BodyPart('right-aft-thruster', 45, 5, true);
 rgtAftThruster.faces = [{ color: '#909', points: [{ x: -3, y: -3 }, { x: 3, y: -3 }, { x: 1, y: -1 }, { x: 1, y: 1 }, { x: 3, y: 3 }, { x: -3, y: 3 }, { x: -1, y: 1 }, { x: -1, y: -1 }] }];
 
+const greenArrow = new BodyPart ('green-arrow',0,1,false);
+greenArrow.faces = [{color:'#0f0', points: [
+  {x:-50,y:-8},
+  {x: 20,y:-8},
+  {x:0,y:-50},
+  {x:50,y:0},
+  {x:0,y:50},
+  {x:20,y:8},
+  {x:-50,y:8}
+]}];
+const blueArrow = new BodyPart ('blue-arrow',0,1,false);
+blueArrow.faces = [{color:'#00f', points: [
+  {x:-25,y:-8},
+  {x: 10,y:-8},
+  {x:0,y:-30},
+  {x:25,y:0},
+  {x:0,y:30},
+  {x:10,y:8},
+  {x:-25,y:8}
+]}];
 
-body.partAdd(bow, { x: 130, y: 0 });
+
 body.partAdd(hull, { x: 60, y: 0 });
+body.partAdd(bow, { x: 130, y: 0 });
 body.partAdd(reactor, { x: -40, y: 0 });
 body.partAdd(leftFuel, { x: -80, y: -12 });
 body.partAdd(rightFuel, { x: -80, y: 12 });
 body.partAdd(leftEngine, { x: -100, y: -12 });
 body.partAdd(rightEngine, { x: -100, y: 12 });
+
+bow.partAdd(greenArrow,{x:0,y:0});
+greenArrow.partAdd (blueArrow, {x:75,y:0});
 
 hull.partAdd(turret1, { x: -30, y: 0 });
 hull.partAdd(turret2, { x: 25, y: 0 });
