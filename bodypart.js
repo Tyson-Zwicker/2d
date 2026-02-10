@@ -3,7 +3,7 @@ export default class BodyPart {
   name = undefined;
   root = undefined;
   position = undefined; //offset from parent.
-  facing = 0;
+  rotation = 0;
   spin = 0;
   parts = [];
   mass = 0;
@@ -11,9 +11,9 @@ export default class BodyPart {
   collides = true;
   calculatedPosition = undefined; //World Coordinates. Transfor sets this.
   calculatedFaces = []; //World Coordinates.  Transfomer makes them.. 
-  constructor(name, facing, mass, collides, spin = 0) {
+  constructor(name, rotation, mass, collides, spin = 0) {
     this.name = name;
-    this.facing = facing;
+    this.rotation = rotation;
     this.mass = mass;
     this.spin = spin;
     this.collides = collides;
