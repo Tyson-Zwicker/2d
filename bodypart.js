@@ -22,7 +22,10 @@ export default class BodyPart {
     part.position = offset;
     this.parts.push(part);
     part.root = this.root;    
-    this.root.recalculateProperties();
+    this.root.recalculateProperties();//TODO:  THIS IS THE BUG.  YOU NEED TO SEPERATE THE TRANSFORM into two parts..
+    //One part should do the calculated position and rotation (call THAT from here..)
+    //The other part should do calculated Faces-> BUT NOT HERE ONLY IN DRAW.
+    //SEE ALSO: BODY
   }
   partGet(name) {
     for (let part of this.parts) {

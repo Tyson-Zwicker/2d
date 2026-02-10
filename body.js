@@ -19,9 +19,12 @@ export default class Body {
   }
   partAdd(part, offset) {
     part.position = offset
-    part.root = this;
+    part.root = this.name;
     this.parts.push(part);
-    this.recalculateProperties()
+    this.recalculateProperties()//TODO:  THIS IS THE BUG.  YOU NEED TO SEPERATE THE TRANSFORM into two parts..
+    //One part should do the calculated position and rotation (call THAT from here..)
+    //The other part should do calculated Faces-> BUT NOT HERE ONLY IN DRAW.
+    //SEE ALSO: BODYPART
   }
   recalculateProperties() {
     Transform.bodyPartsToLocal(this); //let all the parts know where they are
