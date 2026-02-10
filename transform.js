@@ -9,7 +9,7 @@ export default class Transform {
       for (let face of obj.faces) {//local rotation of own points.. (Game object won't have any of its own)
         let rotatedPoints = [];
         for (let p of face.points) {
-          rotatedPoints.push(Vec.rotate(Vec.scale(p, scale), obj.facing));
+          rotatedPoints.push(Vec.rotate(Vec.scale(p, scale), obj.rotation));
         }
         obj.calculatedFaces.push({ color: face.color, points: rotatedPoints });
       }
@@ -20,7 +20,7 @@ export default class Transform {
       let scaledPartPosition = Vec.scale(part.position, scale)
       for (let cf of part.calculatedFaces) {
         for (let p of cf.points) {
-          Vec.rotateInPlace(p, part.facing);
+          Vec.rotateInPlace(p, part.rotation);
           Vec.addInPlace(p, scaledPartPosition);
         }
       }
@@ -33,7 +33,7 @@ export default class Transform {
     for (let cf of obj.calculatedFaces) {
       let wf = {color:cf.color, points:[]}
       for (let p of cf.points) {
-        wf.points.push (Vec.add(Vec.rotate (p,obj.facing), obj.position));
+        wf.points.push (Vec.add(Vec.rotate (p,obj.rotation), obj.position));
       }
       world.push (wf);
     }
