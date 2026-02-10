@@ -63,7 +63,7 @@ export default class Body {
     for (let part of this.parts) {
       if (part.name === name) return part;
       for (let innerpart of part.parts) {
-        let p = innerpart.getPart(name);
+        let p = innerpart.partGet(name);
         if (p instanceof BodyPart) return p;
       }
     }
