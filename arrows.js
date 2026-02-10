@@ -53,8 +53,8 @@ Main.creatorsFunction = function (){
   greenArrow.rotation +=1;
   blueArrow.rotation +=0;
   redArrow.rotation -=1;
-  Main.tickMsg.push ({"text":'current Green rotation: '+greenArrow.rotation, "indent":0});
-  Main.tickMsg.push ({"text":'current Blue rotation: '+greenArrow.rotation, "indent":1});
-  Main.tickMsg.push ({"text":'current Red rotation: '+redArrow.rotation, "indent":-1});
+  //Main.tickMsg.push ({"text":'current Green rotation: '+greenArrow.rotation, "indent":0});
+  //Main.tickMsg.push ({"text":'current Blue rotation: '+greenArrow.rotation, "indent":1});
+  //Main.tickMsg.push ({"text":'current Red rotation: '+redArrow.rotation, "indent":1});
 }
-Main.run(10);
+Main.run();
