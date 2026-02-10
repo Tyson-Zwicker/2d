@@ -1,38 +1,112 @@
 
+import View from './view.js';
+import Vec from './vec.js';
 export default class BodyPart {
   name = undefined;
-  root = undefined;
-  position = undefined; //offset from parent.
-  rotation = 0;
-  spin = 0;
+  parent = undefined;
+  offsetPosition = undefined; //offset from parent (if it were unrotated)
+  localPosition = undefined;  //position in the body, gameobject is local (0,0) and the Center of Rotation.
+  worldPosition = undefined;
+  ownRotation = undefined;
+  localRotation = undefined;
+  worldRotation = undefined; //Same as local unless the world starts spinning..
+  spin = undefined;;
   parts = [];
-  mass = 0;
-  faces = [];
-  collides = true;
-  calculatedPosition = undefined; //World Coordinates. Transformer sets this.
-  calculatedFaces = []; //World Coordinates.  Transfomer makes them.. 
-  constructor(name, rotation, mass, collides, spin = 0) {
+  ownFaces = [];
+  localFaces = [];
+  worldFaces = [];
+  constructor(name, rotation, spin = 0) {
     this.name = name;
-    this.rotation = rotation;
-    this.mass = mass;
+    this.ownRotation = rotation;
     this.spin = spin;
     this.collides = collides;
   }
+
   partAdd(part, offset) {
-    part.position = offset;
+    part.offsetPosition = offset;
+    part.parent = this;
     this.parts.push(part);
-    part.root = this.root;    
-    this.root.recalculateProperties();//TODO:  THIS IS THE BUG.  YOU NEED TO SEPERATE THE TRANSFORM into two parts..
-    //One part should do the calculated position and rotation (call THAT from here..)
-    //The other part should do calculated Faces-> BUT NOT HERE ONLY IN DRAW.
-    //SEE ALSO: BODY
   }
+
+  update() {
+    this.#getLocalRotation();
+    this.#getLocalPosition();
+    this.#getLocalFaces();
+    this.#getWorldPosition();
+    this.#getWorldFaces();
+  }
+
+  #getLocalRotation() {
+    this.localRotation = this.parent.localRotation + this.ownRotation;
+    for (let part of this.parts) {
+      part.#getLocalRotation(); 
+    }
+  }
+
+  #getLocalPosition() {
+    this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.offsetPosition, this.localRotation));
+    for (let part of this.parts) {
+      part.#getLocalPosition();
+    }
+  }
+
+  #getLocalFaces() {
+    this.localFaces.length = 0;
+    for (let face of this.ownFaces) {
+      let localPoints = [];
+      for (let point of face.points) {
+        localPoints.push(Vec.add(this.localPosition, Vec.rotate(point, this.localRotation)));
+      }
+      this.localFaces.push({ "color": face.color, "points": localPoints });
+    }
+  }
+
+  #getWorldPosition() {
+    this.worldPosition = Vec.add(this.parent.worldPosition, this.localPosition);
+    for (let part of this.parts) {
+      part.#getWorldPosition();
+    }
+  }
+
+  #getWorldFaces() {
+    this.worldFaces.length = 0;
+    for (let face of this.ownFaces) {
+      let worldPoints = [];
+      for (let point of face.points) {
+        worldPoints.push(Vec.add(this.parent.worldPosition), this.localPosition);
+      }
+      this.worldFaces.push({ "color": face.color, "points": worldPoints });
+    }
+  }
+
+  draw() {
+    let points = [];
+    for (let face of this.worldFaces) {
+      points.length = 0;
+      for (let p of face.points) {
+        points.push(Vec.add(Vec.scale(Vec.sub(worldCoordinate, View.camera), View.camera.zoom), View.screenCenter));
+      }
+      View.context.fillStyle = face.color;
+      let path = new Path2D();
+      path.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        path.lineTo(points[i].x, points[i].y);
+      }
+      path.closePath();
+      View.context.fill(path);
+      //draw  dot in the middle of the object.. for debugging
+      let pos = { "x": this.worldPosition.x, "y": this.worldPosition.y };
+      pos = Transform.worldToScreen(pos);
+      View.context.fillStyle = '#fff';
+      View.context.fillRect(pos.x - 1, pos.y - 1, 3, 3);
+    }
+  }
+
   partGet(name) {
     for (let part of this.parts) {
       if (part.name === name) return part;
       for (let innerpart of part.parts) {
-        let p = innerpart.partGet(name);
-        if (p instanceof BodyPart) return p;
+        innerpart.partGet(name);
       }
     }
     throw new Error(`body.partGet: part not found [${name}]`);

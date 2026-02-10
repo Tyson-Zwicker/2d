@@ -44,12 +44,19 @@ export default class Main {
   static doWork() {
     let t = Date.now();
     View.clear();
-    Main.draw();
-    Main.move();
+    for (gameObject of Game.gameObjects) {
+      gameObject.move();
+      gameObject.body.update();
+      gameObject.body.draw();
+    }
     Main.checkMouse();
     Main.showDelta();
     if (Main.creatorsFunction) Main.creatorsFunction();
     Main.loopTime = Date.now() - t;
+  }
+  static checkMouse() {
+    let interactionOccured = false;
+    View.handleCameraDrag(interactionOccured);
   }
   static showDelta() {
     let y = 5;
@@ -59,8 +66,7 @@ export default class Main {
     let oldfont = View.context.font;
     View.context.font = "bold 16px Arial"
     View.context.fillText(String(Main.currentFrame).padStart(6, '0') + ' Δ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0') + ' : Σ' + String(Main.loopTime).padStart(4, '0'), 5, y);
-    let debugIndent=0;
-    
+    let debugIndent = 0;
     for (let msg of Main.tickMsg) {
       debugIndent += msg.indent;
       y += 20;
@@ -70,37 +76,5 @@ export default class Main {
     }
     Main.tickMsg.length = 0;
     View.context.font = oldfont;
-  } 
-  static draw() {
-    for (let gameObject of Game.gameObjects.values()) {
-      Transform.bodyPartsToLocal(gameObject.body);
-      let worldFaces = Transform.localToWorld(gameObject.body);
-      for (let face of worldFaces) {
-        let points = [];
-        for (let p of face.points) points.push(Transform.worldToScreen(p));
-        View.context.fillStyle = face.color;
-        let path = new Path2D();
-        path.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-          path.lineTo(points[i].x, points[i].y);
-        }
-        path.closePath();
-        View.context.fill(path);
-        //debug stuff
-        let pos = {"x": face.part.calculatedPosition.x, "y": face.part.calculatedPosition.y};
-        pos = Transform.worldToScreen (pos); 
-        View.context.fillStyle = '#fff';
-        View.context.fillRect (pos.x-1, pos.y-1, 3, 3);
-      }
-    }
-  }
-  static move() {
-    for (let gameobject of Game.gameObjects.values()) {
-      gameobject.body.move();
-    }
-  }
-  static checkMouse() {
-    let interactionOccured = false;  //TODO: add buttons and make body parts clickable..
-    View.handleCameraDrag(interactionOccured);
   }
 }
