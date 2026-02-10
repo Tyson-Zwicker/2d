@@ -123,11 +123,11 @@ console.log('center of mass: (' + body.centerOfMass.x + ',' + body.centerOfMass.
 const ship = new GameObject('ship', body);
 Game.addGameObject(ship);
 Main.creatorsFunction = function (){
-  greenArrow.facing +=1;
-  blueArrow.facing +=0;
-  redArrow.facing -=1;
-  Main.tickMsg.push ('Green: '+greenArrow.facing);
-  Main.tickMsg.push ('Blue: '+greenArrow.facing);
-  Main.tickMsg.push ('Red: '+redArrow.facing);
+  greenArrow.rotation +=1;
+  blueArrow.rotation +=0;
+  redArrow.rotation -=1;
+  Main.tickMsg.push ('Green: '+greenArrow.rotation);
+  Main.tickMsg.push ('Blue: '+greenArrow.rotation);
+  Main.tickMsg.push ('Red: '+redArrow.rotation);
 }
 Main.run(10);
