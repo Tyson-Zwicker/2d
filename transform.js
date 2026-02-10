@@ -1,45 +1,54 @@
 import Vec from './vec.js';
 import View from './view.js';
-
+import Main from './main.js';
 export default class Transform {
   static bodyPartsToLocal(obj) {
+    console.log('Tranform.bodyPartsToLocal: ' + obj.name + ' (' + obj.parts.length + ') parts.');
+    console.log(obj);
     let scale = View.camera.zoom;
     obj.calculatedFaces.length = 0;
-   
-    for (let part of obj.parts) {//Process all the parts in the whole obj..
-      Transform.bodyPartsToLocal(part, scale); //let children orientate themselves
-      let scaledPartPosition = Vec.scale(part.position, scale)
-      for (let cf of part.calculatedFaces) {
-        for (let p of cf.points) {
-          Vec.rotateInPlace(p, part.rotation);
-          Vec.addInPlace(p, scaledPartPosition);
+    //if (obj.parts.length > 0) {
+      for (let innerPart of obj.parts) {//Process all the parts in the whole obj..      
+        console.log('  has part: ' + innerPart.name + ' with ' + innerPart.parts.length + ' parts');
+        console.log(innerPart.parts);
+        //TODO: PROBLEM IS RIGHT HERE. 
+        //innerPart.partss.length says 0 but yet, it IS NOT zero, its got shit in it.
+        //And then called in recursion, sure  enought the fucking parts are back.. except not IT'S innerparts...
+        //WTF!?
+        Transform.bodyPartsToLocal(innerPart, scale); //let children orientate themselves
+        let scaledPartPosition = Vec.scale(innerPart.position, scale)
+        for (let cf of innerPart.calculatedFaces) {
+          for (let p of cf.points) {
+            Vec.rotateInPlace(p, innerPart.rotation);
+            Vec.addInPlace(p, scaledPartPosition);
+          }
+        }
+        innerPart.calculatedPosition = scaledPartPosition;
+        obj.calculatedFaces.push(...innerPart.calculatedFaces);
+      }
+    //} else {
+      if (obj.faces) {//Bodies don't have faces, only their parts do..
+        console.log('  doing own (' + obj.name + ') faces.');
+        for (let face of obj.faces) {//local rotation of own points.. (Game object won't have any of its own)
+          let rotatedPoints = [];
+          for (let p of face.points) {
+            rotatedPoints.push(Vec.rotate(Vec.scale(p, scale), obj.rotation));
+          }
+          obj.calculatedFaces.push({ "color": face.color, "points": rotatedPoints, "part": obj });
         }
       }
-      part.calculatedPosition = scaledPartPosition;
-      obj.calculatedFaces.push(...part.calculatedFaces);
-    }
-    if (obj.faces) {//Bodies don't have faces, only their parts do..
-      for (let face of obj.faces) {//local rotation of own points.. (Game object won't have any of its own)
-        let rotatedPoints = [];
-        for (let p of face.points) {
-          rotatedPoints.push(Vec.rotate(Vec.scale(p, scale), obj.rotation));
-        }        
-        obj.calculatedFaces.push({ "color": face.color, "points": rotatedPoints, "part": obj});
-      }
-      if (obj.parts.length === 0) return; // required to return from recursion..this is a this was a "leaf" node
-    }
+    //}
   }
-  static localToWorld(obj) {  
+  static localToWorld(obj) {
     let world = [];
     for (let cf of obj.calculatedFaces) {
-      let wf = {color:cf.color, points:[]}
-      wf.part = cf.part;
+      let wf = { "color": cf.color, "part": cf.part, "points": [] }
       for (let p of cf.points) {
-        wf.points.push (Vec.add(Vec.rotate (p,obj.rotation), obj.position));
+        wf.points.push(Vec.add(Vec.rotate(p, obj.rotation), obj.position));
       }
-      world.push (wf);
+      world.push(wf);
     }
-    
+
     return world;
   }
   static worldToScreen(worldCoordinate) {

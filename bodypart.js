@@ -9,7 +9,7 @@ export default class BodyPart {
   mass = 0;
   faces = [];
   collides = true;
-  calculatedPosition = undefined; //World Coordinates. Transfor sets this.
+  calculatedPosition = undefined; //World Coordinates. Transformer sets this.
   calculatedFaces = []; //World Coordinates.  Transfomer makes them.. 
   constructor(name, rotation, mass, collides, spin = 0) {
     this.name = name;

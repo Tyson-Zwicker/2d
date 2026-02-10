@@ -60,6 +60,7 @@ export default class Main {
     View.context.font = "bold 16px Arial"
     View.context.fillText(String(Main.currentFrame).padStart(6, '0') + ' Δ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0') + ' : Σ' + String(Main.loopTime).padStart(4, '0'), 5, y);
     let debugIndent=0;
+    
     for (let msg of Main.tickMsg) {
       debugIndent += msg.indent;
       y += 20;
@@ -69,7 +70,7 @@ export default class Main {
     }
     Main.tickMsg.length = 0;
     View.context.font = oldfont;
-  }
+  } 
   static draw() {
     for (let gameObject of Game.gameObjects.values()) {
       Transform.bodyPartsToLocal(gameObject.body);
