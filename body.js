@@ -7,7 +7,7 @@ export default class Body {
   name = undefined;
   position = { x: 0, y: 0 };
   velocity = { x: 0, y: 0 };
-  facing = 0;
+  rotation = 0;
   spin = 0;
   parts = [];
   totalMass = 0;          //Done in recalculate(), after part addition
@@ -71,7 +71,8 @@ export default class Body {
   }
   move() {
     this.position = Vec.add(this.position, Vec.scale(this.velocity, Main.delta));
-    this.facing += this.spin * Main.delta
+    this.rotation += this.spin * Main.delta;
+    this.rotation = this.rotation % 360;
     for (let part of this.parts) {
       this.#spinPart(part);
     }
@@ -79,7 +80,8 @@ export default class Body {
   #spinPart(part) {
     for (let p of part.parts) {
       this.#spinPart(p);
+      this.rotation = this.rotation % 360;
     }
-    part.facing += part.spin * Main.delta;
+    part.rotation += part.spin * Main.delta;
   }
 }
