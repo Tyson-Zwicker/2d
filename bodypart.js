@@ -15,16 +15,15 @@ export default class BodyPart {
   ownFaces = [];
   localFaces = [];
   worldFaces = [];
-  constructor(name, rotation, spin = 0) {
-    this.name = name;
-    this.ownRotation = rotation;
-    this.spin = spin;
-    this.collides = collides;
+  constructor(name) {
+    this.name = name;    
   }
 
-  partAdd(part, offset) {
+  partAdd(part, offset, rotation=0) {
     part.offsetPosition = offset;
     part.parent = this;
+    part.rotation = rotation;
+    part.spin =0;
     this.parts.push(part);
   }
 
@@ -43,7 +42,7 @@ export default class BodyPart {
     }
   }
 
-  #getLocalPosition() {
+  #getLocalPosition() {    
     this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.offsetPosition, this.localRotation));
     for (let part of this.parts) {
       part.#getLocalPosition();
@@ -73,6 +72,7 @@ export default class BodyPart {
     for (let face of this.ownFaces) {
       let worldPoints = [];
       for (let point of face.points) {
+        console.log (this.localPosition);
         worldPoints.push(Vec.add(this.parent.worldPosition), this.localPosition);
       }
       this.worldFaces.push({ "color": face.color, "points": worldPoints });

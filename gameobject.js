@@ -1,3 +1,5 @@
+import Main from './main.js';
+import Vec from './vec.js';
 export default class GameObject {
   static #localPosition = { "x": 0, "y": 0 };
   static #localRotation = 0;
@@ -19,10 +21,11 @@ export default class GameObject {
     this.body = bodyPart;
     this.body.parent = this;
     this.position = position;
+    this.velocity = { "x": 0, "y": 0 };
   }
-  move(delta) {
-    Vec.AddInPlace(this.position, Vec.scale(this.velocity, delta));
-    this.rotation += (this.spin * delta);
+  move() {
+    Vec.addInPlace(this.position, Vec.scale(this.velocity, Main.delta));
+    this.rotation += (this.spin * Main.delta);
     this.rotation = this.rotation % 360;
   }
 }

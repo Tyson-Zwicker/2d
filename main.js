@@ -1,6 +1,5 @@
 import View from './view.js';
 import Game from './game.js';
-import Transform from './transform.js';
 export default class Main {
   static delta = 0;
   static time = 0;
@@ -44,7 +43,7 @@ export default class Main {
   static doWork() {
     let t = Date.now();
     View.clear();
-    for (gameObject of Game.gameObjects) {
+    for (let gameObject of Game.gameObjects.values()) {
       gameObject.move();
       gameObject.body.update();
       gameObject.body.draw();
