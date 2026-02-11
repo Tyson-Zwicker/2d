@@ -9,15 +9,19 @@ export default class GameObject {
   body = undefined;
   velocity = undefined;
   spin = 0;
-  constructor(name, bodyPart, position = { "x": 0, "y": 0 }) {
+  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0) {
     this.name = name;
     this.body = bodyPart;
     this.body.parent = this;
     this.worldPosition = position;
     this.velocity = { "x": 0, "y": 0 };
+    this.localRotation = rotation;
+    this.body.offsetPosition = { "x": 0, "y": 0 };
+    this.body.ownRotation = 0;
   }
   move() {
     Vec.addInPlace(this.worldPosition, Vec.scale(this.velocity, Main.delta));
-    this.localRotation = (this.localRotation + (this.spin * Main.delta))%360;        
+    this.localRotation = (this.localRotation + (this.spin * Main.delta)) % 360;
+    this.body.applySpin();
   }
 }

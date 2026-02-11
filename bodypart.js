@@ -1,6 +1,7 @@
 
 import View from './view.js';
 import Vec from './vec.js';
+import Main from './main.js';
 export default class BodyPart {
   name = undefined;
   parent = undefined;
@@ -29,7 +30,10 @@ export default class BodyPart {
     part.spin = 0;
     this.parts.push(part);
   }
-
+  applySpin (){
+    this.ownRotation +=this.spin*Main.delta;
+    for (let part of this.parts) part.applySpin();
+  }
   update() {
     this.#getLocalRotation();
     this.#getLocalPosition();

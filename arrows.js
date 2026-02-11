@@ -47,4 +47,4 @@ Main.creatorsFunction = function () {
   redArrow.ownRotation +=-.3;
 }
 
-Main.run(30);
+Main.run(100);
