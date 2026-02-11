@@ -16,14 +16,14 @@ export default class BodyPart {
   localFaces = [];
   worldFaces = [];
   constructor(name) {
-    this.name = name;    
+    this.name = name;
   }
 
-  partAdd(part, offset, rotation=0) {
+  partAdd(part, offset, rotation = 0) {
     part.offsetPosition = offset;
     part.parent = this;
     part.rotation = rotation;
-    part.spin =0;
+    part.spin = 0;
     this.parts.push(part);
   }
 
@@ -38,11 +38,11 @@ export default class BodyPart {
   #getLocalRotation() {
     this.localRotation = this.parent.localRotation + this.ownRotation;
     for (let part of this.parts) {
-      part.#getLocalRotation(); 
+      part.#getLocalRotation();
     }
   }
 
-  #getLocalPosition() {    
+  #getLocalPosition() {
     this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.offsetPosition, this.localRotation));
     for (let part of this.parts) {
       part.#getLocalPosition();
@@ -72,8 +72,7 @@ export default class BodyPart {
     for (let face of this.ownFaces) {
       let worldPoints = [];
       for (let point of face.points) {
-        console.log (this.localPosition);
-        worldPoints.push(Vec.add(this.parent.worldPosition), this.localPosition);
+        worldPoints.push(Vec.add(this.worldPosition, Vec.rotate(point, this.localRotation)));
       }
       this.worldFaces.push({ "color": face.color, "points": worldPoints });
     }
@@ -84,7 +83,7 @@ export default class BodyPart {
     for (let face of this.worldFaces) {
       points.length = 0;
       for (let p of face.points) {
-        points.push(Vec.add(Vec.scale(Vec.sub(worldCoordinate, View.camera), View.camera.zoom), View.screenCenter));
+        points.push(Vec.add(Vec.scale(Vec.sub(p, View.camera), View.camera.zoom), View.screenCenter));
       }
       View.context.fillStyle = face.color;
       let path = new Path2D();
@@ -96,7 +95,7 @@ export default class BodyPart {
       View.context.fill(path);
       //draw  dot in the middle of the object.. for debugging
       let pos = { "x": this.worldPosition.x, "y": this.worldPosition.y };
-      pos = Transform.worldToScreen(pos);
+      pos = Vec.add(Vec.scale(Vec.sub(pos, View.camera), View.camera.zoom), View.screenCenter)
       View.context.fillStyle = '#fff';
       View.context.fillRect(pos.x - 1, pos.y - 1, 3, 3);
     }

@@ -16,7 +16,7 @@ let arrow = [
   { x: l, y: 0 },
   { x: 0, y: w * 2 },
   { x: 0, y: w },
-  { x: l, y: w }
+  { x: -l, y: w }
 ];
 
 const greenArrow = new BodyPart('green-arrow');
@@ -56,12 +56,7 @@ const ship = new GameObject('ship', greenArrow);
 Game.addGameObject(ship);
 
 Main.creatorsFunction = function () {
-  greenArrow.rotation += 1;
-  blueArrow.rotation += 0;
-  redArrow.rotation -= 1;
-  //Main.tickMsg.push ({"text":'current Green rotation: '+greenArrow.rotation, "indent":0});
-  //Main.tickMsg.push ({"text":'current Blue rotation: '+greenArrow.rotation, "indent":0});
-  //Main.tickMsg.push ({"text":'current Red rotation: '+redArrow.rotation, "indent":0});
+  greenArrow.ownRotation += 1;
 }
 
-Main.run();
+Main.run(50);
