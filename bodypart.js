@@ -10,19 +10,22 @@ export default class BodyPart {
   ownRotation = undefined;
   localRotation = undefined;
   worldRotation = undefined; //Same as local unless the world starts spinning..
-  spin = undefined;;
-  parts = [];
   ownFaces = [];
   localFaces = [];
   worldFaces = [];
-  constructor(name) {
+  spin = undefined;
+  parts = [];
+  constructor(name, faces) {
     this.name = name;
+    this.ownFaces = faces;
+    this.spin = 0;
+    this.localPosition = { "x": 0, "y": 0 };
   }
 
   partAdd(part, offset, rotation = 0) {
     part.offsetPosition = offset;
     part.parent = this;
-    part.rotation = rotation;
+    part.ownRotation = rotation;
     part.spin = 0;
     this.parts.push(part);
   }
@@ -31,6 +34,7 @@ export default class BodyPart {
     this.#getLocalRotation();
     this.#getLocalPosition();
     this.#getLocalFaces();
+    this.#getWorldRotation();
     this.#getWorldPosition();
     this.#getWorldFaces();
   }
@@ -42,8 +46,8 @@ export default class BodyPart {
     }
   }
 
-  #getLocalPosition() {
-    this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.offsetPosition, this.localRotation));
+  #getLocalPosition() {    
+    this.localPosition = Vec.rotate (this.offsetPosition, this.parent.localRotation);
     for (let part of this.parts) {
       part.#getLocalPosition();
     }
@@ -58,8 +62,17 @@ export default class BodyPart {
       }
       this.localFaces.push({ "color": face.color, "points": localPoints });
     }
+    for (let part of this.parts) {
+      part.#getLocalFaces();
+    }
   }
 
+  #getWorldRotation() {
+    this.worldRotation = this.localRotation;
+    for (let part of this.parts) {
+      part.#getWorldRotation();
+    }
+  }
   #getWorldPosition() {
     this.worldPosition = Vec.add(this.parent.worldPosition, this.localPosition);
     for (let part of this.parts) {
@@ -75,6 +88,9 @@ export default class BodyPart {
         worldPoints.push(Vec.add(this.worldPosition, Vec.rotate(point, this.localRotation)));
       }
       this.worldFaces.push({ "color": face.color, "points": worldPoints });
+    }
+    for (let part of this.parts) {
+      part.#getWorldFaces();
     }
   }
 
@@ -98,6 +114,9 @@ export default class BodyPart {
       pos = Vec.add(Vec.scale(Vec.sub(pos, View.camera), View.camera.zoom), View.screenCenter)
       View.context.fillStyle = '#fff';
       View.context.fillRect(pos.x - 1, pos.y - 1, 3, 3);
+    }
+    for (let part of this.parts) {
+      part.draw();
     }
   }
 
