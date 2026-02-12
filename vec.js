@@ -12,11 +12,14 @@ export default class Vec {
   static subInPlace(p0, p1) {
     p0.x -= p1.x; p0.y -= p1.y;
   }
+  static magnitude(p) {
+    return Math.sqrt(p.x * 2 + p.y ** 2);
+  }
   static dist(p0, p1) {
     return Math.sqrt((p0.x - p1.x) ** 2 + (p0.y - p1.y) ** 2);
   }
   static distSqr(p) {
-    return p.x ** 2+ p.y ** 2;
+    return p.x ** 2 + p.y ** 2;
   }
   static scale(p, s) {
     return { "x": p.x * s, "y": p.y * s };
@@ -44,8 +47,19 @@ export default class Vec {
   static equal(p0, p1) {
     return (p0.x.toFixed() === p1.x.toFixed() && p0.y.toFixed() === p1.y.toFixed());
   }
-  static fromPolar(θ, magnitude) {
+  static fromAngleandMagnitude(θ, magnitude) {
     return { "x": Math.cos(θ * Vec.radians) * magnitude, "y": Math.sin(θ * Vec.radians) * magnitude };
+  }
+  static fromPolar(polar) {
+    return fromAngleAndMagnitude(polar.angle, polar, magnitude);
+  }
+  static toPolar(p) {
+    let a = Math.atan2(p.y, p.x)*180/Math.PI;
+    if (p.x >= 0 && p.y >= 0) a = a;
+    else if (p.x < 0 && py >= 0) a = a;
+    else if (p.x < 0 && py < 0) a = 360 + a;
+    else if (p.x >= 0 && py < 0) a = 360 + a;
+    return { a: 0, l: 0 }
   }
   static norm(v) {
     const length = Math.sqrt(v.x ** 2 + v.y ** 2);
