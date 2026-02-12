@@ -55,7 +55,7 @@ reactor.partAdd(radar, { x: 20, y: 0 },0);
 radar.spin = 360;
 
 const ship = new GameObject('ship',body, {"x":0,"y":0},0);
-Game.addGameObject(ship);
+Game.add(ship);
 
 Main.creatorsFunction =()=>{
   ship.localRotation += -4*Main.delta;

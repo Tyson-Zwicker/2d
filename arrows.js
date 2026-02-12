@@ -37,7 +37,7 @@ greenArrow.partAdd(blueArrow, { x: l, y: 0 }, 0);
 blueArrow.partAdd(redArrow, { x: l*2, y: 0 }, 0);
 
 const ship = new GameObject('ship', greenArrow);
-Game.addGameObject(ship);
+Game.add(ship);
 
 Main.creatorsFunction = function () {
   greenArrow.ownRotation += .1;

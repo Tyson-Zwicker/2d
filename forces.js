@@ -37,12 +37,17 @@ greenArrow.offsetPosition = { "x": 0, "y": 0 };
 //blueArrow.partAdd(redArrow, { x: l*2, y: 0 }, 0);
 
 const testObj = new GameObject('test', greenArrow, { "x":0, "y":0});
-Game.addGameObject(testObj);
-Keyboard.setKeyFunction(" ", () => {
+Game.add(testObj);
+// event = { "key": e.key, "when": Date.now(), "duration": duration, "action": 'release' };
+Keyboard.setKeyFunction(" ", (event) => {
   //Apply a force of 1 newton to its center.
-  console.log ('space.');
-  let result = testObj.applyPointForce(1,test.obj.localPosition);
-  console.log (result);
+  if (event.action==='release'){
+    console.log ('applying force...');
+    let test = Game.get ('test');
+    let result = test.applyPointForce(1,test.localPosition);
+    console.log (result.linear);    
+    console.log (result.angular);    
+  };
 });
 //Main.creatorsFunction = function () {}
 
