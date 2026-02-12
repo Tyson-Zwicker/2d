@@ -10,7 +10,7 @@ export default class GameObject {
   velocity = undefined;
   spin = 0;
   mass = 1;
-  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0, mass=1) {
+  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0, mass = 1) {
     this.name = name;
     this.body = bodyPart;
     this.body.parent = this;
@@ -26,19 +26,19 @@ export default class GameObject {
     this.localRotation = (this.localRotation + (this.spin * Main.delta)) % 360;
     this.body.applySpin();
   }
- update(){
+  update() {
     this.body.update();
   }
-  draw(){
+  draw() {
     this.body.draw();
   }
-  getTotalMass (){
-    return this.body.getTotalMass();    
+  getTotalMass() {
+    return this.body.getTotalMass();
   }
-  getCenterOfMass (){
+  getCenterOfMass() {
     return this.body.getCenterOfMass();
   }
-  getMomentOfIntertia(){
+  getMomentOfIntertia() {
     return this.body.getMomentOfInertia();
   }
 }

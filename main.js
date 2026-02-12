@@ -46,8 +46,7 @@ export default class Main {
     for (let gameObject of Game.gameObjects.values()) {      
       gameObject.move();
       gameObject.update();
-      gameObject.draw();
-      gameObject.
+      gameObject.draw();      
     }
     Main.checkMouse();
     Main.showDelta();

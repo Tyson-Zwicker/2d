@@ -3,6 +3,7 @@ import Main from './main.js';
 import Game from './game.js';
 import GameObject from './gameobject.js';
 import BodyPart from './bodypart.js';
+import Keyboard from './keyboard.js';
 
 View.initialize('#222');
 
@@ -27,6 +28,15 @@ let arrow2 = [ //rotates around base.
   { x: l, y: w },
   { x: 0, y: w }
 ];
+let forceStrength = 0;
+Keyboard.setKeyFunction ("7",()=>{forceStrength=1});
+Keyboard.setKeyFunction ("4",()=>{forceStrength=1});
+Keyboard.setKeyFunction ("1",()=>{forceStrength=1});
+Keyboard.setKeyFunction ("9",()=>{forceStrength=1});
+Keyboard.setKeyFunction ("6",()=>{forceStrength=1});
+Keyboard.setKeyFunction ("3",()=>{forceStrength=1});
+Keyboard.setKeyFunction ('9',()=>{;});
+Keyboard.setKeyFunction ('2',()=>{;});
 
 const greenArrow = new BodyPart('green-arrow', [{ "color": '#0f0', "points": arrow }]);
 greenArrow.ownRotation = 0;
@@ -37,6 +47,7 @@ greenArrow.offsetPosition = { "x": 0, "y": 0 };
 
 //greenArrow.partAdd(blueArrow, { x: l, y: 0 }, 0);
 //blueArrow.partAdd(redArrow, { x: l*2, y: 0 }, 0);
+
 
 const ship = new GameObject('ship', greenArrow);
 Game.addGameObject(ship);

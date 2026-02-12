@@ -16,10 +16,10 @@ export default class BodyPart {
   worldFaces = [];              //calculated..
   spin = undefined;
   parts = [];
-  mass = 1;
-  radius = undefined;           //calculated (roughly) from points..
+  mass = 1;                     //Mass of this..
+  #radius = undefined;           //calculated (roughly) from points..
   totalMass = undefined;        //calculated..
-  centerOfMass = undefined;     //calculated..
+  centerOfMass = undefined;     //calculated.. mass of this and all its children.
 
   constructor(name, faces, mass = 1, spin = 0) {
     this.name = name;
@@ -28,16 +28,18 @@ export default class BodyPart {
     this.localPosition = { "x": 0, "y": 0 };
     this.mass = mass;
     this.spin = spin;
-    this.radius = calcRadius();
+    this.#radius = this.getRadius();
   }
   getRadius() {
-    if (!this.radius) {
-      for (f of this.ownFaces) {
-        for (p of f.points) {
+    if (!this.#radius) {
+      for (let f of this.ownFaces) {
+        for (let p of f.points) {
           let m = Vec.magnitude(p);
           if (m > this.radius) this.radius = m;
         }
       }
+    }else{
+      return this.#radius;
     }
   }
 
@@ -57,7 +59,7 @@ export default class BodyPart {
   }
 
   getTotalMass() {
-    if (this.totalMass) return totalMass;
+    if (this.totalMass) return this.totalMass;
     let sum = this.mass;
     for (let part of this.parts) sum += part.getTotalMass();
     this.totalMass = sum;
@@ -65,13 +67,13 @@ export default class BodyPart {
   }
   getCenterOfMass() {
     let cm = Vec.scale(this.localPosition, this.getTotalMass());
-    for (let part of this.parts) cm = Vec.add(part.getCenterOfMass());
+    for (let part of this.parts) cm = Vec.add(cm,part.getCenterOfMass());
     this.centerOfMass = cm;
     return cm;
   }
   getMomentOfInertia() { //Aka "Resistance to rotation"..
     let I = 0;
-    for (part of this.parts) I += part.getMomentOfInertia();
+    for (let part of this.parts) I += part.getMomentOfInertia();
     let dist = Vec.dot(this.localPosition, this.localPosition);
     if (dist < 1) {
       return I + (2 / 5) * this.mass * this.getRadius() ** 2;//<-treate the thing in middle as an ideal sphere..
