@@ -1,5 +1,6 @@
 import View from './view.js';
 import Game from './game.js';
+import Keyboard from './keyboard.js';
 export default class Main {
   static delta = 0;
   static time = 0;
@@ -46,9 +47,10 @@ export default class Main {
     for (let gameObject of Game.gameObjects.values()) {      
       gameObject.move();
       gameObject.update();
-      gameObject.draw();      
+      gameObject.draw();            
     }
     Main.checkMouse();
+    Keyboard.processKeyEvents(Main.delta);
     Main.showDelta();
     if (Main.creatorsFunction) Main.creatorsFunction();
     Main.loopTime = Date.now() - t;

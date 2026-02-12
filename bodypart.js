@@ -44,11 +44,17 @@ export default class BodyPart {
   }
 
   applyPointForce(force, position) {
+    console.log ('bodyPart.applyPointForce: (polar, r, torq, invMass)');
     let polar = Vec.toPolar(force);
+    console.log (polar);
     let r = Vec.dist(position, this.getCenterOfMass());
-    let torq = Vec.scale(r, polar.l);
-    let invMass = 1 / getTotalMass();
-    let angularAcceleration = Vec.scale(Vec.scale(torq, Math.sin(polar.a)), invMass);
+    console.log (r);
+    let torq = r* polar.l;
+    console.log (torq);
+    let invMass = 1 / this.getTotalMass();
+    console.log (invMass);
+    //TODO: //check this part... are angular and linear scalar because they're orthogonal?
+    let angularAcceleration = tow *invMass; Vec.scale(Vec.scale(torq, Math.sin(polar.a)), invMass);
     let linearAcceleration = Vec.scale(Vec.scale(force, Math.cos(polar.a)), invMass);
     return { "linear": linearAcceleration, "angular": angularAcceleration };
   }

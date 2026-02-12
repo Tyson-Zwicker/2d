@@ -3,11 +3,8 @@ export default class Keyboard {
   static events = new Map();
 
   static {
-    //bind events
-    console.log ('initializing keyboard.');
     window.addEventListener('keydown', Keyboard.#keyDown);
     window.addEventListener('keyup', Keyboard.#keyUp);
-    console.log ('initialized keyboard.');
   }
 
   static setKeyFunction(key, fn) {
@@ -18,7 +15,8 @@ export default class Keyboard {
   static processKeyEvents(delta) {    
     for (let key of Keyboard.events.keys()) {      
       if (Keyboard.functions.has(key)) {
-        Keyboard.functions.get(key)(Keyboard.events.get(key), delta);
+        let fn = Keyboard.functions.get(key);
+        fn (Keyboard.events.get(key));
       }
       if (Keyboard.events.get(key).action === 'release') {
         Keyboard.events.delete(key);
@@ -26,8 +24,7 @@ export default class Keyboard {
     }
   }
 
-  static #keyDown(e) {
-    console.log ('key down' + e);
+  static #keyDown(e) {    
     let eventInfo;
     let lastEvent = Keyboard.events.get(e.key);
     if (Keyboard.events.has(e.key)) {

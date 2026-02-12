@@ -25,8 +25,8 @@ export default class GameObject {
     this.body.applySpin();
   }
   applyPointForce(force, position) {
-    let result = this.body.applyForce(force, position); //get accelerations.
-    Vec. add (this.velocity,result.linear);
+    let result = this.body.applyPointForce(force, position); //get accelerations.
+    Vec.add (this.velocity,result.linear);
     this.spin +=result.angular;
     return result;
   }
