@@ -4,8 +4,6 @@ import Game from './game.js';
 import GameObject from './gameobject.js';
 import BodyPart from './bodypart.js';
 
-View.initialize('#222');
-
 let l = 100;
 let w = 20;
 

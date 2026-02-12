@@ -4,10 +4,6 @@ import Game from './game.js';
 import GameObject from './gameobject.js';
 import BodyPart from './bodypart.js';
 
-View.initialize('#222');
-
-
-
 const body = new BodyPart ('body',[{"color":'#000', "points":[{"x":0,"y":0}]}]);
 const reactor = new BodyPart('reactor', [{ color: '#99F', points: [{ x: -30, y: -30 }, { x: 30, y: - 30 }, { x: 30, y: 30 }, { x: -30, y: 30 }] }]); 
 const leftRad = new BodyPart('left-rad',[{ color: '#ffb', points: [{ x: -10, y: -30 }, { x: 10, y: -30 }, { x: 5, y: 20 }, { x: 0, y: 30 }, { x: -5, y: 20 }] }]);

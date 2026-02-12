@@ -12,7 +12,7 @@ export default class View {
   static screenCenter = undefined;
   static zoomFactor = 10; //How much each zoom changes when the wheel is scrolled.
 
-  static initialize() {
+  static {
     View.canvas = document.createElement('canvas');
     View.canvas.style.margin = 0;
     View.canvas.style.padding = 0;
