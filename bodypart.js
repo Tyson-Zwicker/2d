@@ -5,33 +5,75 @@ import Main from './main.js';
 export default class BodyPart {
   name = undefined;
   parent = undefined;
-  offsetPosition = undefined; //offset from parent (if it were unrotated)
-  localPosition = undefined;  //position in the body, gameobject is local (0,0) and the Center of Rotation.
-  worldPosition = undefined;
-  ownRotation = undefined;
-  localRotation = undefined;
-  worldRotation = undefined; //Same as local unless the world starts spinning..
+  offsetPosition = undefined;   //offset from parent (if it were unrotated) -Assigned by partAdd()
+  localPosition = undefined;    //position in the body, gameobject is local (0,0) and the Center of Rotation.
+  worldPosition = undefined;    //calculated..
+  ownRotation = undefined;      //calculated..
+  localRotation = undefined;    //calculated..
+  worldRotation = undefined;    //Same as local unless the world starts spinning..
   ownFaces = [];
-  localFaces = [];
-  worldFaces = [];
+  localFaces = [];              //calculated..
+  worldFaces = [];              //calculated..
   spin = undefined;
   parts = [];
-  constructor(name, faces) {
+  mass = 1;
+  radius = undefined;           //calculated (roughly) from points..
+  totalMass = undefined;        //calculated..
+  centerOfMass = undefined;     //calculated..
+
+  constructor(name, faces, mass = 1, spin = 0) {
     this.name = name;
     this.ownFaces = faces;
     this.spin = 0;
     this.localPosition = { "x": 0, "y": 0 };
+    this.mass = mass;
+    this.spin = spin;
+  }
+  getRadius() {
+    return 0; //TODO: calc from points..
+  }
+  applyPointForce(force, position) {
+    let polar = Vec.toPolar(force);
+    let r = Vec.dist(position, this.getCenterOfMass());
+    let torq = Vec.scale(r, polar.l);
+    let invMass = 1/getTotalMass();
+    let angularAcceleration = Vec.scale(Vec.scale(torq, Math.sin(polar.a)), invMass);
+    let linearAcceleration = Vec.scale (Vec.scale(force, Math.cos(polar.a)),invMass);
+    return { "linear": linearAcceleration, "angular": angularAcceleration };
+  }
+  applyDistrubutedForce(force) {
+    //apply the force to the center of mass
+    let polar = Vec.toPolar(force);
+    return {"linear": polar.l/ this.getTotalMass(), "angular":0}
   }
 
-  partAdd(part, offset, rotation = 0) {
-    part.offsetPosition = offset;
-    part.parent = this;
-    part.ownRotation = rotation;
-    part.spin = 0;
-    this.parts.push(part);
+  getTotalMass() {
+    if (this.totalMass) return totalMass;
+    let sum = this.mass;
+    for (let part of this.parts) sum += part.getTotalMass();
+    this.totalMass = sum;
+    return sum;
   }
-  applySpin (){
-    this.ownRotation +=this.spin*Main.delta;
+  getCenterOfMass() {
+    let cm = Vec.scale(this.localPosition, this.getTotalMass());
+    for (let part of this.parts) cm = Vec.add(part.getCenterOfMass());
+    this.centerOfMass = cm;
+    return cm;
+  }
+  getMomentOfInertia() { //Aka "Resistance to rotation"..
+    let I = 0;
+    for (part of this.parts) I += part.getMomentOfInertia();
+    let dist = Vec.dot(this.localPosition, this.localPosition);
+    if (dist < 1) {
+      return I + (2 / 5) * this.mass * this.getRadius() ** 2;//<-treate the thing in middle as an ideal sphere..
+    } else {
+      return I + this.mass * dist ** 2; //<- "distributes axis theorem"
+    }
+  }
+
+
+  applySpin() {
+    this.ownRotation += this.spin * Main.delta;
     for (let part of this.parts) part.applySpin();
   }
   update() {
@@ -50,8 +92,8 @@ export default class BodyPart {
     }
   }
 
-  #getLocalPosition() {    
-    this.localPosition = Vec.rotate (this.offsetPosition, this.parent.localRotation);
+  #getLocalPosition() {
+    this.localPosition = Vec.rotate(this.offsetPosition, this.parent.localRotation);
     for (let part of this.parts) {
       part.#getLocalPosition();
     }
@@ -122,6 +164,13 @@ export default class BodyPart {
     for (let part of this.parts) {
       part.draw();
     }
+  }
+
+  partAdd(part, offset, rotation = 0) {
+    part.offsetPosition = offset;
+    part.parent = this;
+    part.ownRotation = rotation;
+    this.parts.push(part);
   }
 
   partGet(name) {
