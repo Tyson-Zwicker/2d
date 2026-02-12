@@ -43,10 +43,11 @@ export default class Main {
   static doWork() {
     let t = Date.now();
     View.clear();
-    for (let gameObject of Game.gameObjects.values()) {
+    for (let gameObject of Game.gameObjects.values()) {      
       gameObject.move();
-      gameObject.body.update();
-      gameObject.body.draw();
+      gameObject.update();
+      gameObject.draw();
+      gameObject.
     }
     Main.checkMouse();
     Main.showDelta();

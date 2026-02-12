@@ -26,6 +26,12 @@ export default class GameObject {
     this.localRotation = (this.localRotation + (this.spin * Main.delta)) % 360;
     this.body.applySpin();
   }
+ update(){
+    this.body.update();
+  }
+  draw(){
+    this.body.draw();
+  }
   getTotalMass (){
     return this.body.getTotalMass();    
   }
