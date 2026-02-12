@@ -47,7 +47,7 @@ export default class Vec {
   static equal(p0, p1) {
     return (p0.x.toFixed() === p1.x.toFixed() && p0.y.toFixed() === p1.y.toFixed());
   }
-  static fromAngleandMagnitude(θ, magnitude) {
+  static fromAngleAndMagnitude(θ, magnitude) {
     return { "x": Math.cos(θ * Vec.radians) * magnitude, "y": Math.sin(θ * Vec.radians) * magnitude };
   }
   static fromPolar(polar) {
