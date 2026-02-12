@@ -28,23 +28,32 @@ export default class BodyPart {
     this.localPosition = { "x": 0, "y": 0 };
     this.mass = mass;
     this.spin = spin;
+    this.radius = calcRadius();
   }
   getRadius() {
-    return 0; //TODO: calc from points..
+    if (!this.radius) {
+      for (f of this.ownFaces) {
+        for (p of f.points) {
+          let m = Vec.magnitude(p);
+          if (m > this.radius) this.radius = m;
+        }
+      }
+    }
   }
+
   applyPointForce(force, position) {
     let polar = Vec.toPolar(force);
     let r = Vec.dist(position, this.getCenterOfMass());
     let torq = Vec.scale(r, polar.l);
-    let invMass = 1/getTotalMass();
+    let invMass = 1 / getTotalMass();
     let angularAcceleration = Vec.scale(Vec.scale(torq, Math.sin(polar.a)), invMass);
-    let linearAcceleration = Vec.scale (Vec.scale(force, Math.cos(polar.a)),invMass);
+    let linearAcceleration = Vec.scale(Vec.scale(force, Math.cos(polar.a)), invMass);
     return { "linear": linearAcceleration, "angular": angularAcceleration };
   }
   applyDistrubutedForce(force) {
     //apply the force to the center of mass
     let polar = Vec.toPolar(force);
-    return {"linear": polar.l/ this.getTotalMass(), "angular":0}
+    return { "linear": polar.l / this.getTotalMass(), "angular": 0 }
   }
 
   getTotalMass() {
@@ -71,7 +80,6 @@ export default class BodyPart {
     }
   }
 
-
   applySpin() {
     this.ownRotation += this.spin * Main.delta;
     for (let part of this.parts) part.applySpin();
@@ -83,6 +91,9 @@ export default class BodyPart {
     this.#getWorldRotation();
     this.#getWorldPosition();
     this.#getWorldFaces();
+    this.getTotalMass();
+    this.getCenterOfMass();
+    this.getMomentOfInertia();
   }
 
   #getLocalRotation() {
