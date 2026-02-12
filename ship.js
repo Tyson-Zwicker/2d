@@ -58,16 +58,11 @@ reactor.partAdd(leftRad2, { x: 15, y: -60 },0);
 reactor.partAdd(radar, { x: 20, y: 0 },0);
 radar.spin = 360;
 
-//console.log('moment of inertia:' + body.momentOfInertia);
-//console.log('total mass:' + body.totalMass);
-//console.log('center of mass: (' + body.centerOfMass.x + ',' + body.centerOfMass.y + ')');
-
 const ship = new GameObject('ship',body, {"x":0,"y":0},0);
 Game.addGameObject(ship);
 
 Main.creatorsFunction =()=>{
   ship.localRotation += -4*Main.delta;
-
 }
 
 Main.run(100);
