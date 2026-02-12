@@ -9,7 +9,8 @@ export default class GameObject {
   body = undefined;
   velocity = undefined;
   spin = 0;
-  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0) {
+  mass = 1;
+  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0, mass=1) {
     this.name = name;
     this.body = bodyPart;
     this.body.parent = this;
@@ -18,10 +19,20 @@ export default class GameObject {
     this.localRotation = rotation;
     this.body.offsetPosition = { "x": 0, "y": 0 };
     this.body.ownRotation = 0;
+    this.mass = this.getTotalMass();
   }
   move() {
     Vec.addInPlace(this.worldPosition, Vec.scale(this.velocity, Main.delta));
     this.localRotation = (this.localRotation + (this.spin * Main.delta)) % 360;
     this.body.applySpin();
+  }
+  getTotalMass (){
+    return this.body.getTotalMass();    
+  }
+  getCenterOfMass (){
+    return this.body.getCenterOfMass();
+  }
+  getMomentOfIntertia(){
+    return this.body.getMomentOfInertia();
   }
 }
