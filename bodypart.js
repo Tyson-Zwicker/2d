@@ -17,10 +17,9 @@ export default class BodyPart {
   spin = undefined;
   parts = [];
   mass = 1;                     //Mass of this..
-  #radius = undefined;           //calculated (roughly) from points..
   totalMass = undefined;        //calculated..
   centerOfMass = undefined;     //calculated.. mass of this and all its children.
-
+  #radius = undefined;          //calculated..
   constructor(name, faces, mass = 1, spin = 0) {
     this.name = name;
     this.ownFaces = faces;
@@ -28,31 +27,33 @@ export default class BodyPart {
     this.localPosition = { "x": 0, "y": 0 };
     this.mass = mass;
     this.spin = spin;
-    this.#radius = this.getRadius();
   }
   getRadius() {
     if (!this.#radius) {
+      let r =0;
       for (let f of this.ownFaces) {
-        for (let p of f.points) {
+        for (let p of f.points) {          
           let m = Vec.magnitude(p);
-          if (m > this.radius) this.radius = m;
+          if (m > r) r = m;
         }
       }
-    }else{
+      this.#radius = r;
+      return r;
+    } else {
       return this.#radius;
     }
   }
 
-  applyPointForce(force, position, angle) {//position will be in World Coordinates..
-    let localPos = Vec.sub (position, this.worldPosition);
-    let r = Vec.distance (this.getCenterOfMass(),localPos);
-    let t = r * Math.sin(angle) * f;
-    let f = Math.cos(angle) * f;
-    let angularAcceleration = t/this.getMomentOfInertia ();
-    let linearAcceleration = f/this.getTotalMass();
+  applyPointForce(force, directionVector, localPos, angle) {
+    let r = Vec.dist(this.getCenterOfMass(), localPos);
+    let t = r * Math.sin(angle * Vec.radians) * force;
+    let f = Math.cos(angle * Vec.radians) * force;    
+    let la = f / this.getTotalMass();
+    let linearAcceleration = Vec.scale (directionVector,la);
+    let angularAcceleration = t / this.getMomentOfInertia();
     return { "linear": linearAcceleration, "angular": angularAcceleration };
   }
-  
+
   getTotalMass() {
     if (this.totalMass) return this.totalMass;
     let sum = this.mass;
@@ -62,18 +63,18 @@ export default class BodyPart {
   }
   getCenterOfMass() {
     let cm = Vec.scale(this.localPosition, this.getTotalMass());
-    for (let part of this.parts) cm = Vec.add(cm,part.getCenterOfMass());
+    for (let part of this.parts) cm = Vec.add(cm, part.getCenterOfMass());
     this.centerOfMass = cm;
     return cm;
   }
   getMomentOfInertia() { //Aka "Resistance to rotation"..
     let I = 0;
     for (let part of this.parts) I += part.getMomentOfInertia();
-    let dist = Vec.dot(this.localPosition, this.localPosition);
-    if (dist < 1) {
+    let dist = Vec.magnitude(this.localPosition);
+    if (dist < 1) {    
       return I + (2 / 5) * this.mass * this.getRadius() ** 2;//<-treate the thing in middle as an ideal sphere..
     } else {
-      return I + this.mass * dist ** 2; //<- "distributes axis theorem"
+      return I + this.mass * dist ** 2; //<- "distributed axis theorem"
     }
   }
 
