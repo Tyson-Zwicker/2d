@@ -1,24 +1,33 @@
 import Main from './main.js';
 import Vec from './vec.js';
+import View from './view.js';
 export default class GameObject {
   rotatedOffset = { "x": 0, "y": 0 }; //Leave as own center.
-  bodyPosition = {"x":0,"y":0};       //Leave as own center.
+  bodyPosition = { "x": 0, "y": 0 };  //Leave as own center.
+  worldRotation = 0;                  //This is calculated elsewhere.
+  root = this;
+
   bodyRotation = 0;                  //You CAN change this!!!
   worldPosition = { "x": 0, "y": 0 }; //You CAN changes!!!
-  worldRotation = 0;                  //This is calculated elsewhere.
-  name = undefined;
-  body = undefined;
-  velocity = undefined;
-  spin = 0;
-  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0) {
+
+  name = undefined;                   //constructor..
+  body = undefined;                   //constructor..
+  velocity = undefined;               //constructor..
+  spin = undefined;                   //constructor..
+  isGameObject = true;                //constructor..
+
+  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0, spin = 0) {
     this.name = name;
     this.body = bodyPart;
     this.body.parent = this;
+    this.body.root = this;
     this.worldPosition = position;
     this.velocity = { "x": 0, "y": 0 };
     this.localRotation = rotation;
     this.body.offsetPosition = { "x": 0, "y": 0 };
     this.body.ownRotation = 0;
+    this.spin = spin;
+    console.log ('body.root:',this.body.root);
   }
   move() {
     Vec.addInPlace(this.worldPosition, Vec.scale(this.velocity, Main.delta));
@@ -26,9 +35,9 @@ export default class GameObject {
     this.body.applySpin();
   }
   applyPointForce(force, directionVector, position, angle) {
-    let result = this.body.applyPointForce(force, directionVector, position,angle);
-    this.velocity = Vec.add (this.velocity,result.linear);
-    this.spin +=result.angular;
+    let result = this.body.applyPointForce(force, directionVector, position, angle);
+    this.velocity = Vec.add(this.velocity, result.linear);
+    this.spin += result.angular;
     return result;
   }
   update() {
@@ -36,6 +45,7 @@ export default class GameObject {
   }
   draw() {
     this.body.draw();
+
   }
   getTotalMass() {
     return this.body.getTotalMass();
@@ -46,4 +56,5 @@ export default class GameObject {
   getMomentOfIntertia() {
     return this.body.getMomentOfInertia();
   }
+
 }

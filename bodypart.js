@@ -2,9 +2,11 @@
 import View from './view.js';
 import Vec from './vec.js';
 import Main from './main.js';
+import GameObject from './gameobject.js';
 export default class BodyPart {
   name = undefined;
   parent = undefined;
+  root = undefined;
   offsetPosition = undefined;   //offset from parent (if it were unrotated) -Assigned by partAdd()
   rotatedOffset = undefined;    //position in the the offset from parent accountng for rotation of all ancestors.
   bodyPosition = undefined;     //position of offset translated by all ancestor positions.
@@ -64,7 +66,7 @@ export default class BodyPart {
     return sum;
   }
   getCenterOfMass() {
-    let cm = Vec.scale(this.rotatedOffset, this.getTotalMass());
+    let cm = Vec.scale(this.bodyPosition, this.mass / this.root.getTotalMass());//TODO: changed to: this.mass/root.TotalMass..
     for (let part of this.parts) cm = Vec.add(cm, part.getCenterOfMass());
     this.centerOfMass = cm;
     return cm;
@@ -72,11 +74,11 @@ export default class BodyPart {
   getMomentOfInertia() { //Aka "Resistance to rotation"..
     let I = 0;
     for (let part of this.parts) I += part.getMomentOfInertia();
-    let dist = Vec.magnitude(this.rotatedOffset);
+    let dist = Vec.magnitude(this.bodyPosition);
     if (dist < 1) {
       return I + (2 / 5) * this.mass * this.getRadius() ** 2;//<-treate the thing in middle as an ideal sphere..
     } else {
-      return I + this.mass * dist ** 2; //<- "distributed axis theorem"
+      return I + this.mass * dist ** 2;
     }
   }
 
@@ -93,7 +95,7 @@ export default class BodyPart {
     this.#getWorldPosition();
     this.#getWorldFaces();
     this.getTotalMass();
-    this.getCenterOfMass();
+    //this.getCenterOfMass();
     this.getMomentOfInertia();
   }
 
@@ -132,9 +134,9 @@ export default class BodyPart {
     }
   }
   #getBodyPosition() {
-    this.bodyPosition = Vec.add (this.parent.bodyPosition, this.rotatedOffset);
-    for (let part of this.parts){
-      part.#getBodyPosition ();
+    this.bodyPosition = Vec.add(this.parent.bodyPosition, this.rotatedOffset);
+    for (let part of this.parts) {
+      part.#getBodyPosition();
     }
   }
   #getWorldPosition() {
@@ -173,20 +175,47 @@ export default class BodyPart {
       }
       path.closePath();
       View.context.fill(path);
-      //draw  dot in the middle of the object.. for debugging
-      let pos = { "x": this.worldPosition.x, "y": this.worldPosition.y };
-      pos = Vec.add(Vec.scale(Vec.sub(pos, View.camera), View.camera.zoom), View.screenCenter)
-      View.context.fillStyle = '#fff';
-      View.context.fillRect(pos.x - 1, pos.y - 1, 3, 3);
+      
     }
     for (let part of this.parts) {
       part.draw();
     }
+  
+    //Draw debugging shit where kids won't draw over it...
+      let pos = { "x": this.worldPosition.x, "y": this.worldPosition.y };
+      pos = Vec.add(Vec.scale(Vec.sub(pos, View.camera), View.camera.zoom), View.screenCenter)
+      View.context.fillStyle = '#fff';
+      View.context.fillRect(pos.x - 1, pos.y - 1, 3, 3);
+    
+    this.#drawCenterOfGravity();
   }
-
+  #drawCenterOfGravity() {
+    let oldStyle = View.context.strokeStyle;
+    let oldWidth = View.context.lineWidth;
+    let cm = this.getCenterOfMass();
+    cm = Vec.add(cm, this.worldPosition);
+    let pos = Vec.add(Vec.scale(Vec.sub(cm, View.camera), View.camera.zoom), View.screenCenter)
+    if (this.parent.isGameObject) {
+      View.context.strokeStyle = '#fff';
+      View.context.lineWidth = 3;
+    } else {
+      View.context.strokeStyle = '#888';
+      View.context.lineWidth = 1;
+    }
+    View.context.beginPath();
+    View.context.moveTo(pos.x, pos.y - 10);
+    View.context.lineTo(pos.x, pos.y + 10);
+    View.context.moveTo(pos.x - 10, pos.y);
+    View.context.lineTo(pos.x + 10, pos.y);
+    View.context.stroke();
+    View.context.lineWidth = oldWidth;
+    View.context.strokeStyle = oldStyle;
+  }
   partAdd(part, offset, rotation = 0) {
     part.offsetPosition = offset;
     part.parent = this;
+    if (this.root === undefined) console.log('UNDEFINED ROOT:' + this.name);
+    part.root = this.root; //always points back to GameObject that owns the part..
     part.ownRotation = rotation;
     this.parts.push(part);
   }
