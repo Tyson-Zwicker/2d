@@ -106,7 +106,6 @@ export default class View {
     View.mouse.y = event.clientY;
   };
   static handleMouseDown = function (event) {
-    console.log ('mouse down');
     if (event.button === 0) {
       View.mouse.buttonDown = true;
     } else if (event.button === 2) {
