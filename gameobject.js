@@ -24,9 +24,14 @@ export default class GameObject {
     this.localRotation = (this.localRotation + (this.spin * Main.delta)) % 360;
     this.body.applySpin();
   }
-  applyPointForce(force, position) {
-    let result = this.body.applyPointForce(force, position); //get accelerations.
-    Vec.add (this.velocity,result.linear);
+  applyPointForce(force, directionVector, position, angle) {
+    let result = this.body.applyPointForce(force, directionVector, position,angle);
+    //console.log ('v:');
+    //console.log (JSON.stringify (this.velocity));
+       
+    this.velocity = Vec.add (this.velocity,result.linear);
+   
+    //console.log (JSON.stringify (this.velocity));
     this.spin +=result.angular;
     return result;
   }
