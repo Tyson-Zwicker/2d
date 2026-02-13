@@ -43,27 +43,16 @@ export default class BodyPart {
     }
   }
 
-  applyPointForce(force, position) {
-    console.log ('bodyPart.applyPointForce: (polar, r, torq, invMass)');
-    let polar = Vec.toPolar(force);
-    console.log (polar);
-    let r = Vec.dist(position, this.getCenterOfMass());
-    console.log (r);
-    let torq = r* polar.l;
-    console.log (torq);
-    let invMass = 1 / this.getTotalMass();
-    console.log (invMass);
-    //TODO: //check this part... are angular and linear scalar because they're orthogonal?
-    let angularAcceleration = tow *invMass; Vec.scale(Vec.scale(torq, Math.sin(polar.a)), invMass);
-    let linearAcceleration = Vec.scale(Vec.scale(force, Math.cos(polar.a)), invMass);
+  applyPointForce(force, position, angle) {//position will be in World Coordinates..
+    let localPos = Vec.sub (position, this.worldPosition);
+    let r = Vec.distance (this.getCenterOfMass(),localPos);
+    let t = r * Math.sin(angle) * f;
+    let f = Math.cos(angle) * f;
+    let angularAcceleration = t/this.getMomentOfInertia ();
+    let linearAcceleration = f/this.getTotalMass();
     return { "linear": linearAcceleration, "angular": angularAcceleration };
   }
-  applyDistrubutedForce(force) {
-    //apply the force to the center of mass
-    let polar = Vec.toPolar(force);
-    return { "linear": polar.l / this.getTotalMass(), "angular": 0 }
-  }
-
+  
   getTotalMass() {
     if (this.totalMass) return this.totalMass;
     let sum = this.mass;
