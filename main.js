@@ -10,6 +10,7 @@ export default class Main {
   static maxFrames = 0;
   static currentFrame = 0;
   static run(fps = 0) {
+    View.initialize();
     let startTime = Date.now();
     Main.loopTime = 0;
     if (fps === 0) {
@@ -24,12 +25,6 @@ export default class Main {
       Main.maxFrames = Number.MAX_VALUE;
     }
     Main.loop(startTime)
-  }
-  static runFrames(numFrames) {
-    View.bgColor = '#302';
-    Main.continue = false;
-    Main.maxFrames = numFrames;
-    Main.fpsMillis = 1 / 24;
   }
   static loop(startTime) {
     if (startTime) Main.oldTime = startTime;

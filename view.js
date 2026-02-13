@@ -1,5 +1,4 @@
 import Vec from './vec.js';
-import Main from './main.js';
 
 export default class View {
   static bgPressed = false;
@@ -12,7 +11,7 @@ export default class View {
   static screenCenter = undefined;
   static zoomFactor = 10; //How much each zoom changes when the wheel is scrolled.
 
-  static {
+  static initialize(){
     View.canvas = document.createElement('canvas');
     View.canvas.style.margin = 0;
     View.canvas.style.padding = 0;
@@ -34,6 +33,7 @@ export default class View {
     View.canvas.oncontextmenu = View.handleContextMenu;
     window.addEventListener('resize', View.resizeCanvas);
     View.#calcBounds();
+    console.log ('View Initialized.');
   }
   static canSee(point, radius) {
     let { x0, y0, x1, y1 } = View.bounds;
@@ -63,6 +63,7 @@ export default class View {
     View.context.fillRect(0, 0, View.canvas.width, View.canvas.height);
   }
   static handleCameraDrag(mouseInteractedWithSomething) {
+    
     if (!mouseInteractedWithSomething) {
       if (View.bgPressed && View.mouse.buttonDown) {        //drag occuring..         
         let drag;
@@ -105,6 +106,7 @@ export default class View {
     View.mouse.y = event.clientY;
   };
   static handleMouseDown = function (event) {
+    console.log ('mouse down');
     if (event.button === 0) {
       View.mouse.buttonDown = true;
     } else if (event.button === 2) {
