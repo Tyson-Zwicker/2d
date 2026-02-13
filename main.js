@@ -8,6 +8,8 @@ export default class Main {
   static creatorsFunction = undefined;  //A callback for the user to use once per loop.
   static tickMsg = [];
   static currentFrame = 0;
+  static lastKeyCheck =0;
+  static keyCheckInterval = 100;
   static run(fps = 0) {
     View.initialize();
     let startTime = Date.now();
@@ -44,7 +46,7 @@ export default class Main {
       gameObject.draw();            
     }
     Main.checkMouse();
-    Keyboard.processKeyEvents(Main.delta);
+    if (Main.time - Main.lastKeyCheck> Main.keyCheckInterval) Keyboard.processKeyEvents(Main.delta);
     Main.showDelta();
     if (Main.creatorsFunction) Main.creatorsFunction();
     Main.loopTime = Date.now() - t;
