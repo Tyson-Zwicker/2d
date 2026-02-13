@@ -30,9 +30,9 @@ export default class BodyPart {
   }
   getRadius() {
     if (!this.#radius) {
-      let r =0;
+      let r = 0;
       for (let f of this.ownFaces) {
-        for (let p of f.points) {          
+        for (let p of f.points) {
           let m = Vec.magnitude(p);
           if (m > r) r = m;
         }
@@ -45,11 +45,11 @@ export default class BodyPart {
   }
 
   applyPointForce(force, directionVector, localPos, angle) {
-    let r = Vec.dist(this.getCenterOfMass(), localPos);
+    let r = Vec.dist(this.getCenterOfMass(), this.localPosition);
     let t = r * Math.sin(angle * Vec.radians) * force;
-    let f = Math.cos(angle * Vec.radians) * force;    
+    let f = Math.cos(angle * Vec.radians) * force;
     let la = f / this.getTotalMass();
-    let linearAcceleration = Vec.scale (directionVector,la);
+    let linearAcceleration = Vec.scale(directionVector, la);
     let angularAcceleration = t / this.getMomentOfInertia();
     return { "linear": linearAcceleration, "angular": angularAcceleration };
   }
@@ -71,7 +71,7 @@ export default class BodyPart {
     let I = 0;
     for (let part of this.parts) I += part.getMomentOfInertia();
     let dist = Vec.magnitude(this.localPosition);
-    if (dist < 1) {    
+    if (dist < 1) {
       return I + (2 / 5) * this.mass * this.getRadius() ** 2;//<-treate the thing in middle as an ideal sphere..
     } else {
       return I + this.mass * dist ** 2; //<- "distributed axis theorem"
@@ -183,13 +183,13 @@ export default class BodyPart {
   }
 
   partGet(name) {
-    for (let part of this.parts) {
-      if (part.name === name) return part;
-      for (let innerpart of part.parts) {
-        innerpart.partGet(name);
-      }
+    if (this.name == name) {
+      return this;
     }
-    throw new Error(`body.partGet: part not found [${name}]`);
+    for (let part of this.parts) {
+      let result = part.partGet(name);
+      if (result) return result;
+    }
   }
 }
 
