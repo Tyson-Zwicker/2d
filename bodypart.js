@@ -6,10 +6,12 @@ export default class BodyPart {
   name = undefined;
   parent = undefined;
   offsetPosition = undefined;   //offset from parent (if it were unrotated) -Assigned by partAdd()
-  localPosition = undefined;    //position in the body, gameobject is local (0,0) and the Center of Rotation.
+  rotatedOffset = undefined;    //position in the the offset from parent accountng for rotation of all ancestors.
+  bodyPosition = undefined;     //position of offset translated by all ancestor positions.
   worldPosition = undefined;    //calculated..
   ownRotation = undefined;      //calculated..
-  localRotation = undefined;    //calculated..
+  bodyRotation = undefined;     //calculated..
+  bodyPosition = undefined;     //calculated..
   worldRotation = undefined;    //Same as local unless the world starts spinning..
   ownFaces = [];
   localFaces = [];              //calculated..
@@ -24,7 +26,7 @@ export default class BodyPart {
     this.name = name;
     this.ownFaces = faces;
     this.spin = 0;
-    this.localPosition = { "x": 0, "y": 0 };
+    this.rotatedOffset = { "x": 0, "y": 0 };
     this.mass = mass;
     this.spin = spin;
   }
@@ -45,7 +47,7 @@ export default class BodyPart {
   }
 
   applyPointForce(force, directionVector, localPos, angle) {
-    let r = Vec.dist(this.getCenterOfMass(), this.localPosition);
+    let r = Vec.dist(this.getCenterOfMass(), this.rotatedOffset);
     let t = r * Math.sin(angle * Vec.radians) * force;
     let f = Math.cos(angle * Vec.radians) * force;
     let la = f / this.getTotalMass();
@@ -62,7 +64,7 @@ export default class BodyPart {
     return sum;
   }
   getCenterOfMass() {
-    let cm = Vec.scale(this.localPosition, this.getTotalMass());
+    let cm = Vec.scale(this.rotatedOffset, this.getTotalMass());
     for (let part of this.parts) cm = Vec.add(cm, part.getCenterOfMass());
     this.centerOfMass = cm;
     return cm;
@@ -70,7 +72,7 @@ export default class BodyPart {
   getMomentOfInertia() { //Aka "Resistance to rotation"..
     let I = 0;
     for (let part of this.parts) I += part.getMomentOfInertia();
-    let dist = Vec.magnitude(this.localPosition);
+    let dist = Vec.magnitude(this.rotatedOffset);
     if (dist < 1) {
       return I + (2 / 5) * this.mass * this.getRadius() ** 2;//<-treate the thing in middle as an ideal sphere..
     } else {
@@ -83,9 +85,10 @@ export default class BodyPart {
     for (let part of this.parts) part.applySpin();
   }
   update() {
-    this.#getLocalRotation();
-    this.#getLocalPosition();
+    this.#getBodyRotation();
+    this.#getRotatedOffset();
     this.#getLocalFaces();
+    this.#getBodyPosition();
     this.#getWorldRotation();
     this.#getWorldPosition();
     this.#getWorldFaces();
@@ -94,17 +97,17 @@ export default class BodyPart {
     this.getMomentOfInertia();
   }
 
-  #getLocalRotation() {
-    this.localRotation = this.parent.localRotation + this.ownRotation;
+  #getBodyRotation() {
+    this.bodyRotation = this.parent.bodyRotation + this.ownRotation;
     for (let part of this.parts) {
-      part.#getLocalRotation();
+      part.#getBodyRotation();
     }
   }
 
-  #getLocalPosition() {
-    this.localPosition = Vec.rotate(this.offsetPosition, this.parent.localRotation);
+  #getRotatedOffset() {
+    this.rotatedOffset = Vec.rotate(this.offsetPosition, this.parent.bodyRotation);
     for (let part of this.parts) {
-      part.#getLocalPosition();
+      part.#getRotatedOffset();
     }
   }
 
@@ -113,7 +116,7 @@ export default class BodyPart {
     for (let face of this.ownFaces) {
       let localPoints = [];
       for (let point of face.points) {
-        localPoints.push(Vec.add(this.localPosition, Vec.rotate(point, this.localRotation)));
+        localPoints.push(Vec.add(this.rotatedOffset, Vec.rotate(point, this.bodyRotation)));
       }
       this.localFaces.push({ "color": face.color, "points": localPoints });
     }
@@ -123,13 +126,19 @@ export default class BodyPart {
   }
 
   #getWorldRotation() {
-    this.worldRotation = this.localRotation;
+    this.worldRotation = this.bodyRotation;
     for (let part of this.parts) {
       part.#getWorldRotation();
     }
   }
+  #getBodyPosition() {
+    this.bodyPosition = Vec.add (this.parent.bodyPosition, this.rotatedOffset);
+    for (let part of this.parts){
+      part.#getBodyPosition ();
+    }
+  }
   #getWorldPosition() {
-    this.worldPosition = Vec.add(this.parent.worldPosition, this.localPosition);
+    this.worldPosition = Vec.add(this.parent.worldPosition, this.rotatedOffset);
     for (let part of this.parts) {
       part.#getWorldPosition();
     }
@@ -140,7 +149,7 @@ export default class BodyPart {
     for (let face of this.ownFaces) {
       let worldPoints = [];
       for (let point of face.points) {
-        worldPoints.push(Vec.add(this.worldPosition, Vec.rotate(point, this.localRotation)));
+        worldPoints.push(Vec.add(this.worldPosition, Vec.rotate(point, this.bodyRotation)));
       }
       this.worldFaces.push({ "color": face.color, "points": worldPoints });
     }

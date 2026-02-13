@@ -2,8 +2,9 @@ import Main from './main.js';
 import Vec from './vec.js';
 export default class GameObject {
   localPosition = { "x": 0, "y": 0 }; //Leave as own center.
-  localRotation = 0;                  //This changes.
-  worldPosition = { "x": 0, "y": 0 }; //This changes
+  bodyPosition = {"x":0,"y":0};       //Leave as own center.
+  bodyRotation = 0;                  //You CAN change this!!!
+  worldPosition = { "x": 0, "y": 0 }; //You CAN changes!!!
   worldRotation = 0;                  //This is calculated elsewhere.
   name = undefined;
   body = undefined;
@@ -21,22 +22,18 @@ export default class GameObject {
   }
   move() {
     Vec.addInPlace(this.worldPosition, Vec.scale(this.velocity, Main.delta));
-    this.localRotation = (this.localRotation + (this.spin * Main.delta)) % 360;
+    this.localRotation = (this.bodyRotation + (this.spin * Main.delta)) % 360;
     this.body.applySpin();
   }
   applyPointForce(force, directionVector, position, angle) {
     let result = this.body.applyPointForce(force, directionVector, position,angle);
-    //console.log ('v:');
-    //console.log (JSON.stringify (this.velocity));
-       
     this.velocity = Vec.add (this.velocity,result.linear);
-   
-    //console.log (JSON.stringify (this.velocity));
     this.spin +=result.angular;
     return result;
   }
   update() {
     this.body.update();
+    console.log (this.body);
   }
   draw() {
     this.body.draw();
