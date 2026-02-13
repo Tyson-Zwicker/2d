@@ -27,6 +27,11 @@ export default class Vec {
   static scaleInPlace(p, s) {
     p.x *= s; p.y *= s;
   }
+  static norm(v) {
+    const length = Math.sqrt(v.x ** 2 + v.y ** 2);
+    if (length === 0) throw new Error(`Point.normalize: zero-length vector`);
+    return { "x": v.x / length, "y": v.y / length };
+  }
   static rotate(p, θ) {
     let cos = Math.cos(θ * Vec.radians); let sin = Math.sin(θ * Vec.radians);
     return { "x": p.x * cos - p.y * sin, "y": p.x * sin + p.y * cos };
@@ -44,6 +49,12 @@ export default class Vec {
   static cross(p0, p1) {
     return p0.x * p1.y - p0.y * p1.x;
   }
+  static pointOfIntersection(l1,l2){
+     //TODO: for collisions...leter.
+  }
+  static angleOfIntersection(l1,l2){
+    //TODO: for collisions..later.
+  }
   static equal(p0, p1) {
     return (p0.x.toFixed() === p1.x.toFixed() && p0.y.toFixed() === p1.y.toFixed());
   }
@@ -60,11 +71,6 @@ export default class Vec {
     else if (p.x < 0 && py < 0) a = 360 + a;
     else if (p.x >= 0 && py < 0) a = 360 + a;
     return { a: 0, l: 0 }
-  }
-  static norm(v) {
-    const length = Math.sqrt(v.x ** 2 + v.y ** 2);
-    if (length === 0) throw new Error(`Point.normalize: zero-length vector`);
-    return { "x": v.x / length, "y": v.y / length };
   }
   static trueBearingFromTo(p0, p1) {
     let x = p1.x - p0.x;
