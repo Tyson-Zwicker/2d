@@ -7,7 +7,6 @@ export default class Main {
   static oldTime = 0;
   static creatorsFunction = undefined;  //A callback for the user to use once per loop.
   static tickMsg = [];
-  static maxFrames = 0;
   static currentFrame = 0;
   static run(fps = 0) {
     View.initialize();
@@ -32,12 +31,13 @@ export default class Main {
     Main.delta = (Main.time - Main.oldTime) / 1000;;
     Main.oldTime = Main.time;
     Main.doWork();
-    Main.currentFrame++;
-    if (Main.currentFrame > Main.maxFrames) Main.continue = false;
+    Main.currentFrame++;    
     if (Main.continue) setTimeout(Main.loop, Main.fpsMillis);
   }
   static doWork() {
+    
     let t = Date.now();
+    try{
     View.clear();
     for (let gameObject of Game.gameObjects.values()) {      
       gameObject.move();
@@ -49,6 +49,10 @@ export default class Main {
     Main.showDelta();
     if (Main.creatorsFunction) Main.creatorsFunction();
     Main.loopTime = Date.now() - t;
+  }catch (error){
+    Main.continue = false;
+    throw error;
+  }
   }
   static checkMouse() {
     let interactionOccured = false;
