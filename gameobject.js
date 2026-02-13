@@ -1,7 +1,7 @@
 import Main from './main.js';
 import Vec from './vec.js';
 export default class GameObject {
-  localPosition = { "x": 0, "y": 0 }; //Leave as own center.
+  rotatedOffset = { "x": 0, "y": 0 }; //Leave as own center.
   bodyPosition = {"x":0,"y":0};       //Leave as own center.
   bodyRotation = 0;                  //You CAN change this!!!
   worldPosition = { "x": 0, "y": 0 }; //You CAN changes!!!
@@ -33,7 +33,6 @@ export default class GameObject {
   }
   update() {
     this.body.update();
-    console.log (this.body);
   }
   draw() {
     this.body.draw();
