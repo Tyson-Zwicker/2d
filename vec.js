@@ -27,6 +27,9 @@ export default class Vec {
   static scaleInPlace(p, s) {
     p.x *= s; p.y *= s;
   }
+  static perp(p) {
+    return { "x": -p.y, "y": p.x };
+  }
   static norm(v) {
     const length = Math.sqrt(v.x ** 2 + v.y ** 2);
     if (length === 0) throw new Error(`Point.normalize: zero-length vector`);
@@ -49,10 +52,10 @@ export default class Vec {
   static cross(p0, p1) {
     return p0.x * p1.y - p0.y * p1.x;
   }
-  static pointOfIntersection(l1,l2){
-     //TODO: for collisions...leter.
+  static pointOfIntersection(l1, l2) {
+    //TODO: for collisions...later.
   }
-  static angleOfIntersection(l1,l2){
+  static angleOfIntersection(l1, l2) {
     //TODO: for collisions..later.
   }
   static equal(p0, p1) {
@@ -65,7 +68,7 @@ export default class Vec {
     return fromAngleAndMagnitude(polar.angle, polar, magnitude);
   }
   static toPolar(p) {
-    let a = Math.atan2(p.y, p.x)*180/Math.PI;
+    let a = Math.atan2(p.y, p.x) * 180 / Math.PI;
     if (p.x >= 0 && p.y >= 0) a = a;
     else if (p.x < 0 && py >= 0) a = a;
     else if (p.x < 0 && py < 0) a = 360 + a;

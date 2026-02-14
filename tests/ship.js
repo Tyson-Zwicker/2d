@@ -35,68 +35,80 @@ const rgtBowThruster = new BodyPart('right-bow-thruster', thruster);
 const lftAftThruster = new BodyPart('left-aft-thruster', thruster);
 const rgtAftThruster = new BodyPart('right-aft-thruster', thruster);
 
+const ship = new GameObject('ship',body, {"x":0,"y":0},0);
 body.partAdd(hull, { x: 60, y: 0 },0);
-body.partAdd(bow, { x: 130, y: 0 },0);
-body.partAdd(reactor, { x: -40, y: 0 },0);
-body.partAdd(leftFuel, { x: -80, y: -12 },0);
-body.partAdd(rightFuel, { x: -80, y: 12 },0);
-body.partAdd(leftEngine, { x: -100, y: -12 },0);
-body.partAdd(rightEngine, { x: -100, y: 12 },0);
 hull.partAdd(turret1, { x: -30, y: 0 },45);
 hull.partAdd(turret2, { x: 25, y: 0 },-45);
+
+body.partAdd(bow, { x: 130, y: 0 },0);
 bow.partAdd(lftBowThruster, { x: 0, y: -20 },0);
 bow.partAdd(rgtBowThruster, { x: 0, y: 20 },0);
-leftFuel.partAdd(lftAftThruster, { x: 0, y: -12 },0);
-rightFuel.partAdd(rgtAftThruster, { x: 0, y: 12 },0);
+
+body.partAdd(reactor, { x: -40, y: 0 },0);
 reactor.partAdd(rightRad, { x: -15, y: 60 },0);
 reactor.partAdd(leftRad, { x: -15, y: -60 },0);
 reactor.partAdd(rightRad2, { x: 15, y: 60 },0);
 reactor.partAdd(leftRad2, { x: 15, y: -60 },0);
 reactor.partAdd(radar, { x: 20, y: 0 },0);
+
+body.partAdd(leftFuel, { x: -80, y: -12 },0);
+leftFuel.partAdd(lftAftThruster, { x: 0, y: -12 },0);
+
+body.partAdd(rightFuel, { x: -80, y: 12 },0);
+rightFuel.partAdd(rgtAftThruster, { x: 0, y: 12 },0);
+
+body.partAdd(leftEngine, { x: -100, y: -12 },0);
+body.partAdd(rightEngine, { x: -100, y: 12 },0);
 radar.spin = 360;
 
-const ship = new GameObject('ship',body, {"x":0,"y":0},0);
 Game.add(ship);
 //1,3,7,9 are for the thrusters in each corner..
 //2 = Main Engines...
 
 Keyboard.setKeyFunction("7", (event) => { //Fire left bow thruster.
-  if (event.action === 'release') {
-    let test = Game.get('ship');
-    console.log('body part:');
-    let thruster = test.body.partGet ('left-bow-thruster');
-    console.log (thruster);
-    let thrusterPosition = thruster.position;
-    let result = test.applyPointForce(10,{"x":0,"y":1}, thrusterPosition, 90);
+  let f = 1;
+  try{
+  console.log (event.action);
+  }
+  catch {
+    console.log (event);
+  }
+  if (event.action === 'press' || event.action==='hold') {
+    let ship = Game.get('ship');    
+    let thruster = ship.body.partGet ('left-bow-thruster');    
+    let thrusterPosition = thruster.bodyPosition;
+    let result = ship.applyPointForce(10,{"x":0,"y":1}, thrusterPosition, 90);
     console.log(result.linear, result.angular);
-  };
+  }else{
+    console.log ('Key released.');
+  } 
+  ;
 });
 Keyboard.setKeyFunction("9", (event) => {
   if (event.action === 'release') {
-    let test = Game.get('ship');
-    let thrusterPosition = test.body.partGet ('right-bow-thruster').localPosition;    
-    let result = test.applyPointForce(10,{"x":0,"y":-1}, thrusterPosition, 90);
+    let ship = Game.get('ship');
+    let thrusterPosition = ship.body.partGet ('right-bow-thruster').bodyPosition;    
+    let result = ship.applyPointForce(10,{"x":0,"y":-1}, thrusterPosition, 90);
     console.log(result.linear, result.angular);
   };
 });
 Keyboard.setKeyFunction("1", (event) => {
   if (event.action === 'release') {
     let test = Game.get('ship');
-    let thrusterPosition = test.body.partGet ('left-aft-thruster').localPosition;    
+    let thrusterPosition = test.body.partGet ('left-aft-thruster').bodyPosition;    
     let result = test.applyPointForce(10,{"x":0,"y":1}, thrusterPosition, 90);
     console.log(result.linear, result.angular);
   };
 });
 Keyboard.setKeyFunction("3", (event) => {
   if (event.action === 'release') {
-    let test = Game.get('ship');
-    let thrusterPosition = test.body.partGet ('right-aft-thruster').localPosition;    
-    let result = test.applyPointForce(10,{"x":0,"y":-1}, thrusterPosition, 90);
+    let ship = Game.get('ship');
+    let thrusterPosition = ship.body.partGet ('right-aft-thruster').bodyPosition;    
+    let result = ship.applyPointForce(10,{"x":0,"y":-1}, thrusterPosition, 90);
     console.log(result.linear, result.angular);
   };
 });
 Main.creatorsFunction =()=>{
-  ship.localRotation += -4*Main.delta;
+  ship.bodyRotation += -4*Main.delta;
 }
-
-Main.run(100);
+Main.run(60);

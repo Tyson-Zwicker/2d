@@ -27,6 +27,35 @@ redBlock.partAdd(cyanBlock, { x: 2*l, y: 0 }, 0);
 cyanBlock.partAdd(orangeBlock, { x: 2*l, y: 0 }, 0);
 Game.add(bar);
 
+Keyboard.setKeyFunction("7", (event) => { //Fire left bow thruster.
+  let f = 1;
+  if (event.action === 'press' || event.action==='hold') {
+    let bar = Game.get('Bar Of Blocks');
+    let orangeBlk = bar.body.partGet ('orange');    
+    let force  = Vec.scale (Vec.perp (Vec.norm (orangeBlk.bodyPosition)),f);
+    bar.applyPointForce (force, orangeBlk);
+    let result = bar.applyPointForce(force);
+    console.log(result.linear, result.angular);
+  }
+});
+Keyboard.setKeyFunction("9", (event) => {
+  let f = 1;
+  if (event.action === 'press' || event.action==='hold') {
+    let bar = Game.get('Bar Of Blocks');
+    let greenBlk = bar.body.partGet ('green');    
+    let force  = Vec.scale (Vec.perp (Vec.norm (greenBlk.bodyPosition)),f);
+    bar.applyPointForce (force, orangeBlk);
+    let result = bar.applyPointForce(force);
+    console.log(result.linear, result.angular);
+  }
+});
+Keyboard.setKeyFunction("1", (event) => {
+  
+});
+Keyboard.setKeyFunction("3", (event) => {
+  
+});
+
 Main.creatorsFunction = function () {
   bar.bodyRotation +=1;
   
