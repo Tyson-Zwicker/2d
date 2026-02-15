@@ -32,8 +32,12 @@ export default class Main {
     Main.oldTime = Main.time;
     Main.doWork();
     Main.currentFrame++; 
-       
-    if (Main.continue) setTimeout(Main.loop, Main.fpsMillis);
+  
+    if (Main.continue) {
+      setTimeout(Main.loop, Main.fpsMillis);
+    }else{
+      console.log ('stopping..');
+    }
   }
   static doWork() {
     
