@@ -1,6 +1,7 @@
 
 import View from './view.js';
 import Vec from './vec.js';
+import Line from './line.js';
 import Main from './main.js';
 import GameObject from './gameobject.js';
 export default class BodyPart {
@@ -32,6 +33,9 @@ export default class BodyPart {
     this.mass = mass;
     this.spin = spin;
   }
+  clone() {
+    return new BodyPart(this.name, structuredClone(this.ownFaces), this.mass, this.spin);
+  }
   getRadius() {
     if (!this.#radius) {
       let r = 0;
@@ -47,15 +51,31 @@ export default class BodyPart {
       return this.#radius;
     }
   }
+  applyForce(forceVector) {
+    /*
+    SINCE we're calling this from GameObject (for now):
+    The applied force is considered to be applied to the center of this object
+    the angle is between the forceVector and the vector between this objects
+    center and the center of root object (GameObject).
+    
+    *** IF you want to treat it like its own thing, then the vector would be the basis vector of this.bodyPosition          
 
-  applyPointForce(force, directionVector, localPos, angle) {
-    let r = Vec.dist(this.getCenterOfMass(), this.rotatedOffset);
-    let t = r * Math.sin(angle * Vec.radians) * force;
-    let f = Math.cos(angle * Vec.radians) * force;
-    let la = f / this.getTotalMass();
-    let linearAcceleration = Vec.scale(directionVector, la);
-    let angularAcceleration = t / this.getMomentOfInertia();
-    return { "linear": linearAcceleration, "angular": angularAcceleration };
+  */
+    let torqArm = Vec.magnitude(this.bodyPosition);
+    let force = Vec.magnitude(forceVector);
+    let angle = Vec.dot(forceVector, this.bodyPosition) / (torqArm * force);
+    console.log('forceVector', forceVector);
+    console.log('torqueArm', torqArm);
+    console.log('force', force);
+    console.log('angle', angle);
+    let torq = torqArm * force * Math.sin(angle);
+    let linearAcc = force * Math.cos(angle) / this.root.getTotalMass();
+
+    linearAcc = Vec.scale(Vec.norm(forceVector), linearAcc);
+    let angularAcc = torq / this.root.body.getMomentOfInertia();
+    let result = { "linear": linearAcc, "angular": angularAcc };
+    console.log('result', result);
+    return result;
   }
 
   getTotalMass() {
@@ -175,18 +195,18 @@ export default class BodyPart {
       }
       path.closePath();
       View.context.fill(path);
-      
+
     }
     for (let part of this.parts) {
       part.draw();
     }
-  
+
     //Draw debugging shit where kids won't draw over it...
-      let pos = { "x": this.worldPosition.x, "y": this.worldPosition.y };
-      pos = Vec.add(Vec.scale(Vec.sub(pos, View.camera), View.camera.zoom), View.screenCenter)
-      View.context.fillStyle = '#fff';
-      View.context.fillRect(pos.x - 1, pos.y - 1, 3, 3);
-    
+    let pos = { "x": this.worldPosition.x, "y": this.worldPosition.y };
+    pos = Vec.add(Vec.scale(Vec.sub(pos, View.camera), View.camera.zoom), View.screenCenter)
+    View.context.fillStyle = '#fff';
+    View.context.fillRect(pos.x - 1, pos.y - 1, 3, 3);
+
     this.#drawCenterOfGravity();
   }
   #drawCenterOfGravity() {
