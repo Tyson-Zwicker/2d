@@ -27,23 +27,25 @@ export default class GameObject {
     this.body.offsetPosition = { "x": 0, "y": 0 };
     this.body.ownRotation = 0;
     this.spin = spin;
-    
-    console.log('body.root:', this.body.root);
   }
   move() {
+    if (isNaN(this.worldPosition.x)) {
+      console.log ('WorldPosition NaN');
+      Main.continue =false;
+    }
+    //console.log ('world before'+this.worldPosition.x+','+this.worldPosition.y);
     Vec.addInPlace(this.worldPosition, Vec.scale(this.velocity, Main.delta));
+    
+    
     this.localRotation = (this.bodyRotation + (this.spin * Main.delta)) % 360;
     this.body.applySpin();
   }
-  applyPointForce(forceVector, bodyPart) {
-    let result = bodyPart.applyPointForce(forceVector);
-    this.velocity = Vec.add(
-      this.velocity,
-      Vec.scale(
-        Vec.toPolar({ "a": this.localRotation, "l": 1 }), //basis vector for (rotation)
-        result.linear)
-    );
+  applyForce(forceVector, bodyPart) {
+    let result = bodyPart.applyForce(forceVector);
+    //console.log ('before:'+this.velocity.x+','+ this.velocity.y+' :'+this.spin);
+    this.velocity = Vec.add(this.velocity, result.linear);
     this.spin += result.angular;
+    //console.log ('after:'+this.velocity.x+','+ this.velocity.y+' :'+this.spin);
     return result;
   }
   update() {
