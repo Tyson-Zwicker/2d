@@ -18,9 +18,7 @@ export default class Vec {
   static dist(p0, p1) {
     return Math.sqrt((p0.x - p1.x) ** 2 + (p0.y - p1.y) ** 2);
   }
-  static distSqr(p) {
-    return p.x ** 2 + p.y ** 2;
-  }
+
   static scale(p, s) {
     return { "x": p.x * s, "y": p.y * s };
   }
@@ -52,12 +50,7 @@ export default class Vec {
   static cross(p0, p1) {
     return p0.x * p1.y - p0.y * p1.x;
   }
-  static pointOfIntersection(l1, l2) {
-    //TODO: for collisions...later.
-  }
-  static angleOfIntersection(l1, l2) {
-    //TODO: for collisions..later.
-  }
+
   static equal(p0, p1) {
     return (p0.x.toFixed() === p1.x.toFixed() && p0.y.toFixed() === p1.y.toFixed());
   }
