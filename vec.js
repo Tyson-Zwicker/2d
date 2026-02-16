@@ -50,7 +50,6 @@ export default class Vec {
   static cross(p0, p1) {
     return p0.x * p1.y - p0.y * p1.x;
   }
-
   static equal(p0, p1) {
     return (p0.x.toFixed() === p1.x.toFixed() && p0.y.toFixed() === p1.y.toFixed());
   }
