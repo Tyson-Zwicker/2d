@@ -57,15 +57,15 @@ export default class Vec {
     return { "x": Math.cos(θ * Vec.radians) * magnitude, "y": Math.sin(θ * Vec.radians) * magnitude };
   }
   static fromPolar(polar) {
-    return fromAngleAndMagnitude(polar.angle, polar, magnitude);
+    return Vec.fromAngleAndMagnitude(polar.a, polar.l);
   }
   static toPolar(p) {
     let a = Math.atan2(p.y, p.x) * 180 / Math.PI;
     if (p.x >= 0 && p.y >= 0) a = a;
-    else if (p.x < 0 && py >= 0) a = a;
-    else if (p.x < 0 && py < 0) a = 360 + a;
-    else if (p.x >= 0 && py < 0) a = 360 + a;
-    return { a: 0, l: 0 }
+    else if (p.x < 0 && p.y >= 0) a = a;
+    else if (p.x < 0 && p.y < 0) a = 360 + a;
+    else if (p.x >= 0 && p.y < 0) a = 360 + a;
+    return { "a": a, "l": Vec.magnitude (p)};
   }
   static trueBearingFromTo(p0, p1) {
     let x = p1.x - p0.x;
