@@ -1,68 +1,47 @@
-import Main from './main.js';
-import Vec from './vec.js';
-import View from './view.js';
-export default class GameObject {
-  rotatedOffset = { "x": 0, "y": 0 }; //Leave as own center.
-  bodyPosition = { "x": 0, "y": 0 };  //Leave as own center.
-  worldRotation = 0;                  //This is calculated elsewhere.
-  root = this;
+export default class GameObject {    
+  #localPosition = {x:0,y:0};   //READ ONLY
+  get localPosition (){
+    return this.#localPosition;
+  }
+  #localRotation = 0;           //READ ONLY
+  get localRotation(){
+    return this.#localRotation;   
+  }
+  #centerOfMass = {x:0,y:0};
+  worldPosition = undefined;    //assigned when added to Game.
+  worldRotation = undefined;    //assigned when added to Game.
+  velocity = {x:0,y:0};         //Is changed by application of linear acceleration.
+  spin = 0;                     //Is changed by application of angular acceleration.
+  name = undefined;             //assigned by constructor  
+  body = undefined;             //assigned by constructor
+  spinningParts = [];           //collected during "finalize" step..
 
-  bodyRotation = 0;                  //You CAN change this!!!
-  worldPosition = { "x": 0, "y": 0 }; //You CAN changes!!!
-
-  name = undefined;                   //constructor..
-  body = undefined;                   //constructor..
-  velocity = undefined;               //constructor..
-  spin = undefined;                   //constructor..
-  isGameObject = true;                //constructor..
-
-  constructor(name, bodyPart, position = { "x": 0, "y": 0 }, rotation = 0, spin = 0) {
+  constructor (name, body){
     this.name = name;
-    this.body = bodyPart;
-    this.body.parent = this;
-    this.body.root = this;
-    this.worldPosition = position;
-    this.velocity = { "x": 0, "y": 0 };
-    this.localRotation = rotation;
-    this.body.offsetPosition = { "x": 0, "y": 0 };
-    this.body.ownRotation = 0;
-    this.spin = spin;
+    this.body = body;
   }
-  move() {
-    if (isNaN(this.worldPosition.x)) {
-      console.log ('WorldPosition NaN');
-      Main.continue =false;
+  finalize (){                  //Once after all the parts have been added.
+    this.centerOfMass = this.#calcCenterOfMass();
+    this.momentOfInertia = this.#calcMomentOfInertia;
+    this.spinningParts = this.#getSpinningParts();
+  }
+  #getSpinningParts (){
+    let spinningParts = [];
+    for (let part of this.body.parts){
+      if (part.parts.length===0 && part.spin!==0){
+        spinningParts.push (part);
+      }
     }
-    //console.log ('world before'+this.worldPosition.x+','+this.worldPosition.y);
-    Vec.addInPlace(this.worldPosition, Vec.scale(this.velocity, Main.delta));
+    return spinningParts;
+  }
+  #calcCenterOfMass(){
     
-    
-    this.localRotation = (this.bodyRotation + (this.spin * Main.delta)) % 360;
-    this.body.applySpin();
   }
-  applyForce(forceVector, bodyPart) {
-    let result = bodyPart.applyForce(forceVector);
-    //console.log ('before:'+this.velocity.x+','+ this.velocity.y+' :'+this.spin);
-    this.velocity = Vec.add(this.velocity, result.linear);
-    this.spin += result.angular;
-    //console.log ('after:'+this.velocity.x+','+ this.velocity.y+' :'+this.spin);
-    return result;
-  }
-  update() {
-    this.body.update();
-  }
-  draw() {
-    this.body.draw();
+  #calcMomentOfInertia(){
 
   }
-  getTotalMass() {
-    return this.body.getTotalMass();
+  move(){
+    this.centerOfMass = Vec.add (this.centerOfMass, this.velocity);
+    this.worldRotation = this.worldRotation + this.spin;
   }
-  getCenterOfMass() {
-    return this.body.getCenterOfMass();
-  }
-  getMomentOfIntertia() {
-    return this.body.getMomentOfInertia();
-  }
-
 }
