@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Line Intersection Angle</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Vector line sketcher</p>
+          <h1>Angle at intersection</h1>
+          <p class="subhead">Click two points for each line. Drag endpoints to adjust.</p>
+        </div>
+        <div class="controls">
+          <button id="toggleLine1" class="toggle" data-line="1">Remove red line</button>
+          <button id="toggleLine2" class="toggle" data-line="2">Remove teal line</button>
+          <div class="active-controls">
+            <span>Active line</span>
+            <button id="setActiveLine1" class="toggle">Red</button>
+            <button id="setActiveLine2" class="toggle">Teal</button>
+          </div>
+        </div>
+      </header>
+      <main class="stage">
+        <canvas id="drawSurface" width="980" height="600"></canvas>
+        <div class="hud">
+          <span>Angle</span>
+          <strong id="angleValue">--</strong>
+        </div>
+        <div class="hint" id="hint">Click to set endpoints for the active line.</div>
+      </main>
+      <footer class="legend">
+        <div class="chip red"></div>
+        <span>Line 1</span>
+        <div class="chip teal"></div>
+        <span>Line 2</span>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

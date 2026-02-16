@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Moment of Inertia Mass Placer</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #0f2027;
+        --bg-2: #203a43;
+        --bg-3: #2c5364;
+        --panel: rgba(255, 255, 255, 0.9);
+        --accent: #f9d648;
+        --accent-2: #ff7f50;
+        --ink: #14213d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05), transparent 60%),
+          linear-gradient(120deg, var(--bg), var(--bg-2) 50%, var(--bg-3));
+        display: grid;
+        grid-template-columns: minmax(220px, 28%) 1fr;
+        gap: 0;
+      }
+
+      aside {
+        padding: 24px;
+        background: var(--panel);
+        backdrop-filter: blur(8px);
+        border-right: 2px solid rgba(0, 0, 0, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+        margin: 0;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 18px 28px rgba(0, 0, 0, 0.12);
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 8px 0;
+        gap: 8px;
+      }
+
+      .row input {
+        width: 92px;
+      }
+
+      button {
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--ink);
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button.secondary {
+        background: var(--accent-2);
+        color: #fff;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+      }
+
+      main {
+        position: relative;
+        overflow: hidden;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .legend {
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .legend span {
+        font-weight: 700;
+      }
+
+      .footer {
+        font-size: 0.8rem;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      @media (max-width: 900px) {
+        body {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr;
+        }
+
+        aside {
+          border-right: none;
+          border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <h1>Mass Field</h1>
+      <div class="card">
+        <div class="row">
+          <label for="massInput">Mass</label>
+          <input id="massInput" type="number" value="5" min="0.1" step="0.1" />
+        </div>
+        <div class="row">
+          <label for="axisSelect">Axis</label>
+          <select id="axisSelect">
+            <option value="center" selected>Center of mass</option>
+            <option value="origin">Canvas origin</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="showCom">Show COM</label>
+          <input id="showCom" type="checkbox" checked />
+        </div>
+        <div class="row">
+          <button id="clearButton" class="secondary">Clear</button>
+          <button id="randomButton">Random</button>
+        </div>
+      </div>
+      <div class="card legend">
+        <div class="row"><span>Total mass:</span><span id="totalMass">0</span></div>
+        <div class="row"><span>Moment of inertia:</span><span id="momentValue">0</span></div>
+        <div class="row"><span>COM (x, y):</span><span id="comCoords">0, 0</span></div>
+        <div class="row"><span>Mass count:</span><span id="massCount">0</span></div>
+        <p class="footer">
+          Click to place masses. Drag to move. Double-click a mass to delete.
+        </p>
+      </div>
+    </aside>
+    <main>
+      <canvas id="scene"></canvas>
+    </main>
+
+    <script>
+      const canvas = document.getElementById("scene");
+      const ctx = canvas.getContext("2d");
+      const massInput = document.getElementById("massInput");
+      const axisSelect = document.getElementById("axisSelect");
+      const showCom = document.getElementById("showCom");
+      const totalMassEl = document.getElementById("totalMass");
+      const momentValueEl = document.getElementById("momentValue");
+      const comCoordsEl = document.getElementById("comCoords");
+      const massCountEl = document.getElementById("massCount");
+      const clearButton = document.getElementById("clearButton");
+      const randomButton = document.getElementById("randomButton");
+
+      const masses = [];
+      const dragState = {
+        active: false,
+        index: -1,
+        offsetX: 0,
+        offsetY: 0,
+      };
+
+      function resizeCanvas() {
+        const { width, height } = canvas.getBoundingClientRect();
+        canvas.width = Math.floor(width * window.devicePixelRatio);
+        canvas.height = Math.floor(height * window.devicePixelRatio);
+        ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+      }
+
+      function getCanvasPoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        return {
+          x: event.clientX - rect.left - centerX,
+          y: event.clientY - rect.top - centerY,
+        };
+      }
+
+      function toScreen(point) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: point.x + rect.width / 2,
+          y: point.y + rect.height / 2,
+        };
+      }
+
+      function distance(a, b) {
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      function computeCenterOfMass() {
+        let totalMass = 0;
+        let weightedX = 0;
+        let weightedY = 0;
+        for (const mass of masses) {
+          totalMass += mass.value;
+          weightedX += mass.x * mass.value;
+          weightedY += mass.y * mass.value;
+        }
+        if (totalMass === 0) {
+          return { x: 0, y: 0, totalMass: 0 };
+        }
+        return {
+          x: weightedX / totalMass,
+          y: weightedY / totalMass,
+          totalMass,
+        };
+      }
+
+      function computeMomentOfInertia(axis) {
+        if (masses.length === 0) {
+          return 0;
+        }
+        let origin = { x: 0, y: 0 };
+        if (axis === "center") {
+          origin = computeCenterOfMass();
+        }
+        let moment = 0;
+        for (const mass of masses) {
+          const dx = mass.x - origin.x;
+          const dy = mass.y - origin.y;
+          moment += mass.value * (dx * dx + dy * dy);
+        }
+        return moment;
+      }
+
+      function drawMass(mass) {
+        const screen = toScreen(mass);
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+        ctx.strokeStyle = "rgba(20, 33, 61, 0.9)";
+        ctx.lineWidth = 2;
+        const radius = 8 + Math.sqrt(mass.value) * 2.2;
+        ctx.arc(screen.x, screen.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(20, 33, 61, 0.9)";
+        ctx.font = "12px 'Trebuchet MS', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(mass.value.toFixed(1), screen.x, screen.y - radius - 6);
+      }
+
+      function drawCenterOfMass(com) {
+        const screen = toScreen(com);
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(249, 214, 72, 0.9)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 6]);
+        ctx.arc(screen.x, screen.y, 14, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(249, 214, 72, 0.9)";
+        ctx.moveTo(screen.x - 14, screen.y);
+        ctx.lineTo(screen.x + 14, screen.y);
+        ctx.moveTo(screen.x, screen.y - 14);
+        ctx.lineTo(screen.x, screen.y + 14);
+        ctx.stroke();
+      }
+
+      function drawAxes() {
+        const rect = canvas.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(0, centerY);
+        ctx.lineTo(rect.width, centerY);
+        ctx.moveTo(centerX, 0);
+        ctx.lineTo(centerX, rect.height);
+        ctx.stroke();
+      }
+
+      function render() {
+        const rect = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.07)";
+        ctx.fillRect(0, 0, rect.width, rect.height);
+
+        drawAxes();
+
+        for (const mass of masses) {
+          drawMass(mass);
+        }
+
+        if (showCom.checked && masses.length > 0) {
+          const com = computeCenterOfMass();
+          drawCenterOfMass(com);
+        }
+
+        updateMetrics();
+        requestAnimationFrame(render);
+      }
+
+      function updateMetrics() {
+        const com = computeCenterOfMass();
+        const moment = computeMomentOfInertia(axisSelect.value);
+        totalMassEl.textContent = com.totalMass.toFixed(2);
+        momentValueEl.textContent = moment.toFixed(2);
+        comCoordsEl.textContent = `${com.x.toFixed(1)}, ${com.y.toFixed(1)}`;
+        massCountEl.textContent = masses.length;
+      }
+
+      function hitTest(point) {
+        for (let i = masses.length - 1; i >= 0; i -= 1) {
+          const mass = masses[i];
+          const radius = 8 + Math.sqrt(mass.value) * 2.2;
+          if (distance(point, mass) <= radius + 4) {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      canvas.addEventListener("mousedown", (event) => {
+        const point = getCanvasPoint(event);
+        const index = hitTest(point);
+        if (index >= 0) {
+          dragState.active = true;
+          dragState.index = index;
+          dragState.offsetX = point.x - masses[index].x;
+          dragState.offsetY = point.y - masses[index].y;
+          return;
+        }
+        const value = Math.max(0.1, Number.parseFloat(massInput.value) || 1);
+        masses.push({ x: point.x, y: point.y, value });
+      });
+
+      canvas.addEventListener("mousemove", (event) => {
+        if (!dragState.active) {
+          return;
+        }
+        const point = getCanvasPoint(event);
+        const mass = masses[dragState.index];
+        mass.x = point.x - dragState.offsetX;
+        mass.y = point.y - dragState.offsetY;
+      });
+
+      canvas.addEventListener("mouseup", () => {
+        dragState.active = false;
+        dragState.index = -1;
+      });
+
+      canvas.addEventListener("mouseleave", () => {
+        dragState.active = false;
+        dragState.index = -1;
+      });
+
+      canvas.addEventListener("dblclick", (event) => {
+        const point = getCanvasPoint(event);
+        const index = hitTest(point);
+        if (index >= 0) {
+          masses.splice(index, 1);
+        }
+      });
+
+      clearButton.addEventListener("click", () => {
+        masses.length = 0;
+      });
+
+      randomButton.addEventListener("click", () => {
+        const rect = canvas.getBoundingClientRect();
+        const value = Math.max(0.1, Number.parseFloat(massInput.value) || 1);
+        for (let i = 0; i < 5; i += 1) {
+          masses.push({
+            x: (Math.random() - 0.5) * rect.width * 0.9,
+            y: (Math.random() - 0.5) * rect.height * 0.9,
+            value,
+          });
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+      });
+
+      resizeCanvas();
+      requestAnimationFrame(render);
+    </script>
+  </body>
+</html>

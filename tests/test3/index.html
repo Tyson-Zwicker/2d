@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Floating Bar Line Snap</title>
+    <style>
+      :root {
+        --bg-top: #f6f0e6;
+        --bg-bottom: #d7e1d6;
+        --ink: #1e1b16;
+        --accent: #3f6b58;
+        --bar: #8a5c3b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Garamond", "Georgia", serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, var(--bg-top), var(--bg-bottom));
+        display: flex;
+        align-items: stretch;
+        justify-content: stretch;
+      }
+
+      main {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      header {
+        padding: 16px 24px 8px;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.03em;
+      }
+
+      header p {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.75;
+      }
+
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      footer {
+        padding: 8px 24px 18px;
+        font-size: 13px;
+        opacity: 0.75;
+      }
+
+      .frame {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .frame::before {
+        content: "";
+        position: absolute;
+        inset: 20px 24px 16px;
+        border: 2px solid rgba(30, 27, 22, 0.2);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Free Floating Bar</h1>
+        <p>Drag anywhere to draw a line. The line snaps to the bar if it misses.</p>
+      </header>
+      <div class="frame">
+        <canvas id="scene"></canvas>
+      </div>
+      <footer>Click or drag to draw a line. Release to set it.</footer>
+    </main>
+
+    <script>
+      const canvas = document.getElementById("scene");
+      const ctx = canvas.getContext("2d");
+
+      const state = {
+        bar: {
+          center: { x: 0, y: 0 },
+          length: 280,
+          thickness: 18,
+          angle: Math.PI * 0.15,
+          mass: 1,
+          inertia: (1 * 280 * 280) / 12,
+          velocity: { x: 0, y: 0 },
+          angularVelocity: 0,
+        },
+        line: null,
+        drawing: null,
+        lastTime: 0,
+      };
+
+      const resize = () => {
+        const { width, height } = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (state.bar.center.x === 0 && state.bar.center.y === 0) {
+          state.bar.center.x = width * 0.5;
+          state.bar.center.y = height * 0.5;
+        }
+      };
+
+      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+      const rotatePoint = (point, angle) => {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+          x: point.x * cos - point.y * sin,
+          y: point.x * sin + point.y * cos,
+        };
+      };
+
+      const closestPointOnBar = (point) => {
+        const half = state.bar.length / 2;
+        const local = rotatePoint(
+          { x: point.x - state.bar.center.x, y: point.y - state.bar.center.y },
+          -state.bar.angle
+        );
+        const clampedX = clamp(local.x, -half, half);
+        const clampedY = clamp(local.y, -state.bar.thickness / 2, state.bar.thickness / 2);
+        const world = rotatePoint({ x: clampedX, y: clampedY }, state.bar.angle);
+        return {
+          x: world.x + state.bar.center.x,
+          y: world.y + state.bar.center.y,
+        };
+      };
+
+      const intersectsBar = (start, end) => {
+        const samples = 24;
+        for (let i = 0; i <= samples; i += 1) {
+          const t = i / samples;
+          const probe = {
+            x: start.x + (end.x - start.x) * t,
+            y: start.y + (end.y - start.y) * t,
+          };
+          const closest = closestPointOnBar(probe);
+          const dx = closest.x - probe.x;
+          const dy = closest.y - probe.y;
+          if (dx * dx + dy * dy < 1) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      const extendLineToBar = (start, end) => {
+        if (intersectsBar(start, end)) {
+          return { start, end };
+        }
+        const closest = closestPointOnBar(end);
+        return { start, end: closest };
+      };
+
+      const applyForceFromLine = (line) => {
+        const forceScale = 0.035;
+        const force = {
+          x: line.end.x - line.start.x,
+          y: line.end.y - line.start.y,
+        };
+        const impulse = {
+          x: force.x * forceScale,
+          y: force.y * forceScale,
+        };
+        state.bar.velocity.x += impulse.x / state.bar.mass;
+        state.bar.velocity.y += impulse.y / state.bar.mass;
+
+        const arm = {
+          x: line.end.x - state.bar.center.x,
+          y: line.end.y - state.bar.center.y,
+        };
+        const torque = arm.x * impulse.y - arm.y * impulse.x;
+        state.bar.angularVelocity += torque / state.bar.inertia;
+      };
+
+      const drawBar = () => {
+        ctx.save();
+        ctx.translate(state.bar.center.x, state.bar.center.y);
+        ctx.rotate(state.bar.angle);
+        ctx.fillStyle = "#8a5c3b";
+        ctx.strokeStyle = "rgba(30, 27, 22, 0.45)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(
+          -state.bar.length / 2,
+          -state.bar.thickness / 2,
+          state.bar.length,
+          state.bar.thickness,
+          8
+        );
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      const drawLine = (line, color) => {
+        if (!line) {
+          return;
+        }
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(line.start.x, line.start.y);
+        ctx.lineTo(line.end.x, line.end.y);
+        ctx.stroke();
+      };
+
+      const drawScene = () => {
+        const { width, height } = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.fillRect(0, 0, width, height);
+        drawBar();
+        if (state.line) {
+          drawLine(state.line, "rgba(30, 27, 22, 0.6)");
+        }
+        if (state.drawing) {
+          drawLine(state.drawing, "#3f6b58");
+        }
+      };
+
+      const update = (timestamp) => {
+        const delta = Math.min(0.05, (timestamp - state.lastTime) / 1000) || 0;
+        state.lastTime = timestamp;
+        const { width, height } = canvas.getBoundingClientRect();
+
+        state.bar.center.x += state.bar.velocity.x * delta;
+        state.bar.center.y += state.bar.velocity.y * delta;
+        state.bar.angle += state.bar.angularVelocity * delta;
+
+        const half = state.bar.length / 2;
+        const boundsX = half + 40;
+        const boundsY = half * 0.3 + 40;
+
+        if (state.bar.center.x < boundsX || state.bar.center.x > width - boundsX) {
+          state.bar.velocity.x *= -1;
+        }
+        if (state.bar.center.y < boundsY || state.bar.center.y > height - boundsY) {
+          state.bar.velocity.y *= -1;
+        }
+
+        drawScene();
+        window.requestAnimationFrame(update);
+      };
+
+      const getPointer = (event) => {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top,
+        };
+      };
+
+      const onPointerDown = (event) => {
+        const start = getPointer(event);
+        state.drawing = { start, end: start };
+      };
+
+      const onPointerMove = (event) => {
+        if (!state.drawing) {
+          return;
+        }
+        const end = getPointer(event);
+        state.drawing = { ...state.drawing, end };
+      };
+
+      const onPointerUp = () => {
+        if (!state.drawing) {
+          return;
+        }
+        state.line = extendLineToBar(state.drawing.start, state.drawing.end);
+        applyForceFromLine(state.line);
+        state.drawing = null;
+      };
+
+      canvas.addEventListener("pointerdown", onPointerDown);
+      canvas.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("resize", resize);
+
+      resize();
+      window.requestAnimationFrame(update);
+    </script>
+  </body>
+</html>
