@@ -4,11 +4,12 @@ export default class Game {
   static add(obj, position ,rotation) {
     if (!obj || !position || isNaN(rotation)) throw new Error ('Bad or missing parameter(s)');
     if (obj instanceof GameObject){
+      if (!obj.finalized) throw new Error (`Game Object not finalized: ${obj.name}`);
        Game.gameObjects.set(obj.name, obj);
        obj.worldPosition = position;       
        obj.worldRotation = rotation;
     }
-    else throw new Error ('unknown object type');
+    else throw new Error ('Only Game Objects can be added to the Game.');
   };
   static get (name){
     if (Game.gameObjects.has (name)) return Game.gameObjects.get (name);
