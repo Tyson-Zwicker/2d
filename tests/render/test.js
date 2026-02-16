@@ -13,5 +13,5 @@ blueBlock.addTo(redBlock, { x: 20, y: 0 }, 45);
 greenBlock.addTo(redBlock, { x: -20, y: 0 }, 0);
 gameObject.finalize();
 Game.add(gameObject, { x: 0, y: 0 }, 0);
-Main.run(2);
+Main.run();
 
