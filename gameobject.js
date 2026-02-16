@@ -1,47 +1,111 @@
-export default class GameObject {    
-  #localPosition = {x:0,y:0};   //READ ONLY
-  get localPosition (){
+import Vec from '/.vec.js';
+import Part from './part.js';
+
+export default class GameObject {
+  #localPosition = { x: 0, y: 0 };   //READ ONLY
+  get localPosition() {
     return this.#localPosition;
   }
   #localRotation = 0;           //READ ONLY
-  get localRotation(){
-    return this.#localRotation;   
+  get localRotation() {
+    return this.#localRotation;
   }
-  #centerOfMass = {x:0,y:0};
+  #centerOfMass = { x: 0, y: 0 };
   worldPosition = undefined;    //assigned when added to Game.
   worldRotation = undefined;    //assigned when added to Game.
-  velocity = {x:0,y:0};         //Is changed by application of linear acceleration.
+  velocity = { x: 0, y: 0 };         //Is changed by application of linear acceleration.
   spin = 0;                     //Is changed by application of angular acceleration.
   name = undefined;             //assigned by constructor  
   body = undefined;             //assigned by constructor
   spinningParts = [];           //collected during "finalize" step..
-
-  constructor (name, body){
+  allParts = [];                 //collected during "finalize" step..
+  constructor(name, body) {
     this.name = name;
     this.body = body;
   }
-  finalize (){                  //Once after all the parts have been added.
-    this.centerOfMass = this.#calcCenterOfMass();
+  finalize() {                  //Once after all the parts have been added.
+    this.allParts = this.#getAllParts();
+    let mass = this.#calcMass();
+    this.centerOfMass = mass.center;
+    this.totalMass = mass.total;
     this.momentOfInertia = this.#calcMomentOfInertia;
     this.spinningParts = this.#getSpinningParts();
   }
-  #getSpinningParts (){
+  #getAllParts() {
+    let allParts = [];
+    for (let part of this.body.parts) {
+      if (part.parts.length === 0 && part.spin !== 0) {
+        allParts.push(part);
+      }
+    }
+    return allParts;
+  }
+  #getSpinningParts() {
     let spinningParts = [];
-    for (let part of this.body.parts){
-      if (part.parts.length===0 && part.spin!==0){
-        spinningParts.push (part);
+    for (let part of this.allParts) {
+      if (part.parts.length === 0 && part.spin !== 0) {
+        spinningParts.push(part);
       }
     }
     return spinningParts;
   }
-  #calcCenterOfMass(){
-    
+  #calcMass() {
+    let totalMass = 0;
+    let centerOfMass = { "x": 0, "y": 0 };
+    for (let part of this.allParts) {
+      totalMass += part.mass;
+      centerOfMass = Vec.add(centerOfMass, Vec.scale(part.localPosition, part.mass));
+    }
+    if (totalMass === 0) {
+      return { "total": 0, "center": { "x": 0, "y": 0 } };
+    } else {
+      centerOfMass = Vec.scale(centerOfMass, 1 / totalMass);
+      return { "total": totalMass, "center": centerOfMass };
+    }
   }
-  #calcMomentOfInertia(){
-
+  #calcMomentOfInertia() {
+    let origin = { "x": 0, "y": 0 };
+    let moment = 0;
+    for (let part of this.allParts) {
+      moment += part.mass * (part.localPosition.x ** 2 + part.localPosition.y ** 2);
+    }
+    return moment;
   }
-  move(){
-    this.centerOfMass = Vec.add (this.centerOfMass, this.velocity);
+  move() {
+    this.centerOfMass = Vec.add(this.centerOfMass, this.velocity);
     this.worldRotation = this.worldRotation + this.spin;
+  }
+  render() {
+    for (let part of this.allParts) {
+      let faces = part.getWorldFaces();
+      for (let face of faces) {
+        View.context.fillStyle = faces.color;
+        let path = new Path2D();
+        path.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          path.lineTo(points[i].x, points[i].y);
+        }
+        path.closePath();
+        View.context.fill(path);
+      }
+    }
+    this.#drawCenterOfMass();
+  }
+  #drawCenterOfMass() {
+    let oldStyle = View.context.strokeStyle;
+    let oldWidth = View.context.lineWidth;
+    let cm = this.getCenterOfMass();
+    cm = Vec.add(this.centerOfMass, this.worldPosition);
+    let pos = Vec.add(Vec.scale(Vec.sub(this.centerOfMass, View.camera), View.camera.zoom), View.screenCenter)
+    View.context.strokeStyle = '#fff';
+    View.context.lineWidth = 3;
+    View.context.beginPath();
+    View.context.moveTo(pos.x, pos.y - 10);
+    View.context.lineTo(pos.x, pos.y + 10);
+    View.context.moveTo(pos.x - 10, pos.y);
+    View.context.lineTo(pos.x + 10, pos.y);
+    View.context.stroke();
+    View.context.lineWidth = oldWidth;
+    View.context.strokeStyle = oldStyle;
   }
 }
