@@ -13,7 +13,7 @@ export default class Vec {
     p0.x -= p1.x; p0.y -= p1.y;
   }
   static magnitude(p) {
-    return Math.sqrt(p.x * 2 + p.y ** 2);
+    return Math.sqrt(p.x ** 2 + p.y ** 2);
   }
   static dist(p0, p1) {
     return Math.sqrt((p0.x - p1.x) ** 2 + (p0.y - p1.y) ** 2);
