@@ -22,11 +22,12 @@ export default class GameObject {
   totalMass = undefined;              //Calculated in "finalize" step.
   centerOfMass = undefined;           //Calculated in "finalize" step.
   momentOfInertia = undefined;        //Calculated in "finalize" step.
-
+  finalized = false;
   constructor(name) {
     this.name = name;
   }
   finalize() {                  //Once after all the parts have been added.
+    
     if (this.body === undefined) throw new Error(`GameObject [${this.name}] has no body.`);
     this.allParts = this.#getAllParts(this.body);
     let mass = this.#calcMass();
@@ -34,6 +35,7 @@ export default class GameObject {
     this.totalMass = mass.total;
     this.momentOfInertia = this.#calcMomentOfInertia();
     this.spinningParts = this.#getSpinningParts();
+    this.finalized = true;
   }
   #getAllParts(part, found = []) {
     for (let innerPart of part.parts) {

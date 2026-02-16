@@ -13,9 +13,11 @@ export default class Part {
   name = undefined;             //assigned by constructor
   parts = [];                   //added to by addPart();
   faces = [];                   //assigned by constructor
-
-  constructor(name, faces) {
+  mass = undefined;             //assigned by constructor.
+  constructor(name, faces, mass) {
+    if (!name || !faces || !mass) throw Error('Missing parameter');
     this.name = name;
+    this.mass = mass;
     this.faces.push(...faces);
   }
   get worldPosition() {
@@ -33,22 +35,26 @@ export default class Part {
     this.localRotation = (this.ownRotation + this.parent.localRotation) % 360;
     this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.ownPosition, this.parent.localRotation));
   }
-  addTo(parent, offset, rotation) {  
+  addTo(parent, offset, rotation) {
+    if (!parent) throw new Error('Missing parameter (parent):' + this.name);
+    if (!offset) throw new Error('Missing parameter (offset):' + this.name);
+    if (isNaN(rotation)) throw new Error('Missing parameter (parent):' + this.name);
     /*
     A part can have as many parts added to it as you want, but if your adding this to a GameObject 
     it will overwrite the existing (if any) body.  Because GameObjects can only have one part as 
     their "body".
     */
-    if (parent instanceof GameObject)  {
+    if (parent instanceof GameObject) {
       this.root = parent;
       parent.body = this;
-    }else{
+    } else {
+      if (parent.root === undefined) throw new Error('Cannot attach to an unattached object. Attach objjectss in parent first order.');
       this.root = parent.root;
-      parent.parts.push (this);
+      parent.parts.push(this);
     }
-    this.parent = parent;    
+    this.parent = parent;
     this.ownPosition = offset;
-    this.ownRotation = rotation;        
+    this.ownRotation = rotation;
     this.calculateLocals();
   }
   get(name) {
@@ -67,14 +73,14 @@ export default class Part {
       let worldFace = { color: face.color, points: [] };
       for (let point of face.points) {
         let p = structuredClone(point);
-        
+
         p = Vec.rotate(p, this.localRotation);
         p = Vec.add(p, this.localPosition);
         p = Vec.rotate(p, this.root.worldRotation);
         p = Vec.add(p, this.root.worldPosition);
         p = Vec.sub(p, View.camera);  //Camera can be a Vec because it has an x and y.
         p = Vec.scale(p, View.camera.zoom);
-        p = Vec.add(p,View.screenCenter);
+        p = Vec.add(p, View.screenCenter);
         worldFace.points.push(p);
       }
       worldFaces.push(worldFace);

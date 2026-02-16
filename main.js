@@ -8,7 +8,7 @@ export default class Main {
   static creatorsFunction = undefined;  //A callback for the user to use once per loop.
   static tickMsg = [];
   static currentFrame = 0;
-  static lastKeyCheck =0;
+  static lastKeyCheck = 0;
   static keyCheckInterval = 100;
   static run(fps = 0) {
     View.initialize();
@@ -16,12 +16,12 @@ export default class Main {
     Main.loopTime = 0;
     if (fps === 0) {
       View.bgColor = '#302';
-      Main.continue = false;      
+      Main.continue = false;
       Main.fpsMillis = 1 / 24;
     } else {
       View.bgColor = '#000';
       Main.continue = true;
-      Main.fpsMillis = 1000 / fps;      
+      Main.fpsMillis = 1000 / fps;
     }
     Main.loop(startTime)
   }
@@ -31,33 +31,31 @@ export default class Main {
     Main.delta = (Main.time - Main.oldTime) / 1000;;
     Main.oldTime = Main.time;
     Main.doWork();
-    Main.currentFrame++; 
-  
+    Main.currentFrame++;
+
     if (Main.continue) {
       setTimeout(Main.loop, Main.fpsMillis);
-    }else{
-      console.log ('stopping..');
+    } else {
+      console.log('stopping..');
     }
   }
   static doWork() {
-    
     let t = Date.now();
-    try{
-    View.clear();
-    for (let gameObject of Game.gameObjects.values()) {      
-      gameObject.move();
-      gameObject.update();
-      gameObject.draw();            
+    try {
+      View.clear();
+      for (let gameObject of Game.gameObjects.values()) {
+        gameObject.move();
+        gameObject.render();
+      }
+      Main.checkMouse();
+      if (Main.time - Main.lastKeyCheck > Main.keyCheckInterval) Keyboard.processKeyEvents(Main.delta);
+      Main.showDelta();
+      if (Main.creatorsFunction) Main.creatorsFunction();
+      Main.loopTime = Date.now() - t;
+    } catch (error) {
+      Main.continue = false;
+      throw error;
     }
-    Main.checkMouse();
-    if (Main.time - Main.lastKeyCheck> Main.keyCheckInterval) Keyboard.processKeyEvents(Main.delta);
-    Main.showDelta();
-    if (Main.creatorsFunction) Main.creatorsFunction();
-    Main.loopTime = Date.now() - t;
-  }catch (error){
-    Main.continue = false;
-    throw error;
-  }
   }
   static checkMouse() {
     let interactionOccured = false;
