@@ -72,8 +72,7 @@ export default class Part {
     for (let face of this.faces) {
       let worldFace = { color: face.color, points: [] };
       for (let point of face.points) {
-        let p = structuredClone(point);
-
+        let p = structuredClone(point);        
         p = Vec.rotate(p, this.localRotation);
         p = Vec.add(p, this.localPosition);
         p = Vec.rotate(p, this.root.worldRotation);

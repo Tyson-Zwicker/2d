@@ -44,7 +44,7 @@ export default class Main {
     try {
       View.clear();
       for (let gameObject of Game.gameObjects.values()) {
-        gameObject.move();
+        //gameObject.move();
         gameObject.render();
       }
       Main.checkMouse();

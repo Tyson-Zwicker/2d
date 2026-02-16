@@ -84,7 +84,7 @@ export default class GameObject {
       throw new Error ('No Parts found to render.  GameObject has not body, or it is has not been finalized.');
     }
     for (let part of this.allParts) {
-      let faces = part.getWorldFaces();
+      let faces = part.getWorldFaces();      
       for (let face of faces) {
         View.context.fillStyle = face.color;
         let path = new Path2D();
@@ -92,7 +92,7 @@ export default class GameObject {
         if (points.length === 0) continue;
         path.moveTo(points[0].x, points[0].y);
         for (let i = 1; i < points.length; i++) {
-          path.lineTo(points[i].x, points[i].y);
+          path.lineTo(points[i].x, points[i].y);          
         }
         path.closePath();
         View.context.fill(path);
