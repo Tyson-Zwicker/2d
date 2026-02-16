@@ -36,16 +36,22 @@ export default class Part {
     this.localPosition = Vec.add(parent.localPosition, Vec.rotate(offset, parent.localRotation));
   }
   addTo(parent, offset, rotation) {  
+    /*
+    A part can have as many parts added to it as you want, but if your adding this to a GameObject 
+    it will overwrite the existing (if any) body.  Because GameObjects can only have one part as 
+    their "body".
+    */
     if (typeof parent === GameObject)  {
       this.root = parent;
+      parent.body = this;
     }else{
       this.root = parent.root;
+      this.parent.parts.push (this);
     }
     this.parent = parent;    
     this.ownPosition = offset;
     this.ownRotation = rotation;        
     this.calculateLocals();
-    this.parent.parts.push (this);
   }
   get(name) {
     if (this.name == name) {
