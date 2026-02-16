@@ -1,4 +1,4 @@
-import GameObject from './gameobject_old.js';
+import GameObject from './gameobject.js';
 export default class Game {
   static gameObjects = new Map();
   static add(obj, position ,rotation) {
@@ -14,7 +14,7 @@ export default class Game {
     throw new Error (`unknown object [${name}]`);
   }
   static remove(name) {
-    if (obj instanceof GameObject) Game.gameObjects.delete(name);
+    if (Game.gameObjects.has (name)) Game.gameObjects.delete (name);
     else throw new Error ('unknown object type');
   }
 }

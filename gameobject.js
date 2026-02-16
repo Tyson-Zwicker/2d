@@ -1,4 +1,5 @@
-import Vec from '/.vec.js';
+import Vec from './vec.js';
+import View from './view.js';
 
 export default class GameObject {
   #localPosition = { x: 0, y: 0 };    //READ ONLY
@@ -9,7 +10,7 @@ export default class GameObject {
   get localRotation() {
     return this.#localRotation;
   }
-  
+
   worldPosition = undefined;          //assigned when added to Game.
   worldRotation = undefined;          //assigned when added to Game.
   velocity = { x: 0, y: 0 };          //Is changed by application of linear acceleration.
@@ -18,6 +19,7 @@ export default class GameObject {
   body = undefined;                   //assigned by when object adds itself to this.
   allParts = [];                      //collected during "finalize" step..
   spinningParts = [];                 //collected during "finalize" step..
+  totalMass = undefined;              //Calculated in "finalize" step.
   centerOfMass = undefined;           //Calculated in "finalize" step.
   momentOfInertia = undefined;        //Calculated in "finalize" step.
 
@@ -26,22 +28,19 @@ export default class GameObject {
   }
   finalize() {                  //Once after all the parts have been added.
     if (this.body === undefined) throw new Error(`GameObject [${this.name}] has no body.`);
-    this.allParts = this.#getAllParts();
+    this.allParts = this.#getAllParts(this.body);
     let mass = this.#calcMass();
     this.centerOfMass = mass.center;
     this.totalMass = mass.total;
     this.momentOfInertia = this.#calcMomentOfInertia();
     this.spinningParts = this.#getSpinningParts();
   }
-  #getAllParts() {
-    let allParts = [];
-    for (let part of this.body.parts) {
-      if (part.parts.length === 0 && part.spin !== 0) {
-        allParts.push(part);
-      }
+  #getAllParts(part, found = []) {
+    for (let innerPart of part.parts) {
+      found.push(...this.#getAllParts(innerPart));
     }
-    allParts.add (this.body);
-    return allParts;
+    found.push(part);
+    return found;
   }
   #getSpinningParts() {
     let spinningParts = [];
@@ -75,11 +74,12 @@ export default class GameObject {
   }
   move() {
     this.centerOfMass = Vec.add(this.centerOfMass, this.velocity);
+    this.worldPosition = Vec.add (this.centerOfMass, this.velocity);
     this.worldRotation = this.worldRotation + this.spin;
   }
   render() {
-    if (!this.allParts.length && this.body) {
-      this.allParts = this.#getAllParts();
+    if (this.allParts.length===0){
+      throw new Error ('No Parts found to render.  GameObject has not body, or it is has not been finalized.');
     }
     for (let part of this.allParts) {
       let faces = part.getWorldFaces();
@@ -101,9 +101,9 @@ export default class GameObject {
   #drawCenterOfMass() {
     let oldStyle = View.context.strokeStyle;
     let oldWidth = View.context.lineWidth;
-    let cm = this.getCenterOfMass();
+    let cm = this.centerOfMass;
     cm = Vec.add(cm, this.worldPosition);
-    let pos = Vec.add(Vec.scale(Vec.sub(cm, View.camera), View.camera.zoom), View.screenCenter)
+    let pos = Vec.add(Vec.scale(Vec.sub(cm, View.camera), View.camera.zoom), View.screenCenter) //Camera can be used as a vector. It has x and y.
     View.context.strokeStyle = '#fff';
     View.context.lineWidth = 3;
     View.context.beginPath();

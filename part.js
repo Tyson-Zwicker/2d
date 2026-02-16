@@ -10,17 +10,15 @@ export default class Part {
   localPosition = undefined;    //calculated when added
   localRotation = undefined;    //calculated when added
   spin = 0;                     //should by 0 for anything but a leaf node or Root.
-  worldPosition = undefined;    //calculated when needed by getter. (Root assigned when adde to Game)
-  worldRotation = undefined;    //ONLY assigned to root when added to Game
   name = undefined;             //assigned by constructor
   parts = [];                   //added to by addPart();
   faces = [];                   //assigned by constructor
 
   constructor(name, faces) {
     this.name = name;
-    this.polygon.push(faces);
+    this.faces.push(...faces);
   }
-  get worldPosiion() {
+  get worldPosition() {
     return Vec.add(this.root.worldPosition, this.localPosition)
   }
   get worldRotation() {
@@ -32,8 +30,8 @@ export default class Part {
     If this is called on anything except a leaf node,  the all the children must also be re-calculated
     and Root must recalculate its Center of Mass and Moment of Inertia.  So basically: don't call it.
     */
-    this.localRotation = (rotation + parent.localRotation) % 360;
-    this.localPosition = Vec.add(parent.localPosition, Vec.rotate(offset, parent.localRotation));
+    this.localRotation = (this.ownRotation + this.parent.localRotation) % 360;
+    this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.ownPosition, this.parent.localRotation));
   }
   addTo(parent, offset, rotation) {  
     /*
@@ -41,12 +39,12 @@ export default class Part {
     it will overwrite the existing (if any) body.  Because GameObjects can only have one part as 
     their "body".
     */
-    if (typeof parent === GameObject)  {
+    if (parent instanceof GameObject)  {
       this.root = parent;
       parent.body = this;
     }else{
       this.root = parent.root;
-      this.parent.parts.push (this);
+      parent.parts.push (this);
     }
     this.parent = parent;    
     this.ownPosition = offset;
@@ -58,23 +56,25 @@ export default class Part {
       return this;
     }
     for (let part of this.parts) {
-      let result = part.partGet(name);
+      let result = part.get(name);
       if (result) return result;
     }
+    throw new Error(`Part [${name}] not found.`);
   }
   getWorldFaces() {                                     //The "rendering pipeline"
     let worldFaces = [];
-    for (let face in this.faces) {
+    for (let face of this.faces) {
       let worldFace = { color: face.color, points: [] };
-      for (let point in this.faces.points) {
+      for (let point of face.points) {
         let p = structuredClone(point);
-        p = Vec.scale(p, View.camera.zoom);
+        
         p = Vec.rotate(p, this.localRotation);
         p = Vec.add(p, this.localPosition);
         p = Vec.rotate(p, this.root.worldRotation);
         p = Vec.add(p, this.root.worldPosition);
-        p = Vec.sub(p, View.camera);
-        p = p.add(View.screenCenter);
+        p = Vec.sub(p, View.camera);  //Camera can be a Vec because it has an x and y.
+        p = Vec.scale(p, View.camera.zoom);
+        p = Vec.add(p,View.screenCenter);
         worldFace.points.push(p);
       }
       worldFaces.push(worldFace);
