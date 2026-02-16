@@ -1,5 +1,4 @@
 import Vec from '/.vec.js';
-import Part from './part.js';
 
 export default class GameObject {
   #localPosition = { x: 0, y: 0 };    //READ ONLY
@@ -26,12 +25,12 @@ export default class GameObject {
     this.name = name;
   }
   finalize() {                  //Once after all the parts have been added.
-    if (this.body===undefined) throw new Error (`GameObject [${this.name}] has no body.`);
+    if (this.body === undefined) throw new Error(`GameObject [${this.name}] has no body.`);
     this.allParts = this.#getAllParts();
     let mass = this.#calcMass();
     this.centerOfMass = mass.center;
     this.totalMass = mass.total;
-    this.momentOfInertia = this.#calcMomentOfInertia;
+    this.momentOfInertia = this.#calcMomentOfInertia();
     this.spinningParts = this.#getSpinningParts();
   }
   #getAllParts() {
@@ -41,6 +40,7 @@ export default class GameObject {
         allParts.push(part);
       }
     }
+    allParts.add (this.body);
     return allParts;
   }
   #getSpinningParts() {
@@ -78,11 +78,16 @@ export default class GameObject {
     this.worldRotation = this.worldRotation + this.spin;
   }
   render() {
+    if (!this.allParts.length && this.body) {
+      this.allParts = this.#getAllParts();
+    }
     for (let part of this.allParts) {
       let faces = part.getWorldFaces();
       for (let face of faces) {
-        View.context.fillStyle = faces.color;
+        View.context.fillStyle = face.color;
         let path = new Path2D();
+        let points = face.points;
+        if (points.length === 0) continue;
         path.moveTo(points[0].x, points[0].y);
         for (let i = 1; i < points.length; i++) {
           path.lineTo(points[i].x, points[i].y);
@@ -97,8 +102,8 @@ export default class GameObject {
     let oldStyle = View.context.strokeStyle;
     let oldWidth = View.context.lineWidth;
     let cm = this.getCenterOfMass();
-    cm = Vec.add(this.centerOfMass, this.worldPosition);
-    let pos = Vec.add(Vec.scale(Vec.sub(this.centerOfMass, View.camera), View.camera.zoom), View.screenCenter)
+    cm = Vec.add(cm, this.worldPosition);
+    let pos = Vec.add(Vec.scale(Vec.sub(cm, View.camera), View.camera.zoom), View.screenCenter)
     View.context.strokeStyle = '#fff';
     View.context.lineWidth = 3;
     View.context.beginPath();
