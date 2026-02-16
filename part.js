@@ -1,5 +1,6 @@
-import Vec from 'vec.js';
-import View from 'view.js';
+import Vec from './vec.js';
+import View from './view.js';
+import GameObject from './gameobject.js';
 
 export default class Part {
   root = undefined;             //assigned when added (refers to a GameObject)
@@ -27,16 +28,20 @@ export default class Part {
   };
   calculateLocals() {
     /*
-    Only called on nodes that have had their rotation changed.
+    Only called on nodes that have had their rotation changed *OR* when they are first added to parent.
     If this is called on anything except a leaf node,  the all the children must also be re-calculated
-    and Root must recalculate its Center of Mass and Moment of Inertia.  So basically: don't.
+    and Root must recalculate its Center of Mass and Moment of Inertia.  So basically: don't call it.
     */
     this.localRotation = (rotation + parent.localRotation) % 360;
     this.localPosition = Vec.add(parent.localPosition, Vec.rotate(offset, parent.localRotation));
   }
-  addTo(parent, offset, rotation) {    
-    this.parent = parent;
-    this.root = parent.root;
+  addTo(parent, offset, rotation) {  
+    if (typeof parent === GameObject)  {
+      this.root = parent;
+    }else{
+      this.root = parent.root;
+    }
+    this.parent = parent;    
     this.ownPosition = offset;
     this.ownRotation = rotation;        
     this.calculateLocals();

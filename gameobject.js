@@ -2,28 +2,31 @@ import Vec from '/.vec.js';
 import Part from './part.js';
 
 export default class GameObject {
-  #localPosition = { x: 0, y: 0 };   //READ ONLY
+  #localPosition = { x: 0, y: 0 };    //READ ONLY
   get localPosition() {
     return this.#localPosition;
   }
-  #localRotation = 0;           //READ ONLY
+  #localRotation = 0;                 //READ ONLY
   get localRotation() {
     return this.#localRotation;
   }
-  #centerOfMass = { x: 0, y: 0 };
-  worldPosition = undefined;    //assigned when added to Game.
-  worldRotation = undefined;    //assigned when added to Game.
-  velocity = { x: 0, y: 0 };         //Is changed by application of linear acceleration.
-  spin = 0;                     //Is changed by application of angular acceleration.
-  name = undefined;             //assigned by constructor  
-  body = undefined;             //assigned by constructor
-  spinningParts = [];           //collected during "finalize" step..
-  allParts = [];                 //collected during "finalize" step..
-  constructor(name, body) {
+  
+  worldPosition = undefined;          //assigned when added to Game.
+  worldRotation = undefined;          //assigned when added to Game.
+  velocity = { x: 0, y: 0 };          //Is changed by application of linear acceleration.
+  spin = 0;                           //Is changed by application of angular acceleration.
+  name = undefined;                   //assigned by constructor  
+  body = undefined;                   //assigned by when object adds itself to this.
+  allParts = [];                      //collected during "finalize" step..
+  spinningParts = [];                 //collected during "finalize" step..
+  centerOfMass = undefined;           //Calculated in "finalize" step.
+  momentOfInertia = undefined;        //Calculated in "finalize" step.
+
+  constructor(name) {
     this.name = name;
-    this.body = body;
   }
   finalize() {                  //Once after all the parts have been added.
+    if (this.body===undefined) throw new Error (`GameObject [${this.name}] has no body.`);
     this.allParts = this.#getAllParts();
     let mass = this.#calcMass();
     this.centerOfMass = mass.center;
@@ -64,7 +67,6 @@ export default class GameObject {
     }
   }
   #calcMomentOfInertia() {
-    let origin = { "x": 0, "y": 0 };
     let moment = 0;
     for (let part of this.allParts) {
       moment += part.mass * (part.localPosition.x ** 2 + part.localPosition.y ** 2);
