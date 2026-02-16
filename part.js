@@ -20,6 +20,9 @@ export default class Part {
     this.mass = mass;
     this.faces.push(...faces);
   }
+  clone (){
+    return new Part (this.name, this.faces, this.mass);    
+  }
   get worldPosition() {
     return Vec.add(this.root.worldPosition, this.localPosition)
   }
@@ -36,9 +39,9 @@ export default class Part {
     this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.ownPosition, this.parent.localRotation));
   }
   addTo(parent, offset, rotation) {
-    if (!parent) throw new Error('Missing parameter (parent):' + this.name);
-    if (!offset) throw new Error('Missing parameter (offset):' + this.name);
-    if (isNaN(rotation)) throw new Error('Missing parameter (parent):' + this.name);
+    if (!parent) throw new Error('Missing parameter (parent): ' + this.name);
+    if (!offset) throw new Error('Missing parameter (offset): ' + this.name);
+    if (isNaN(rotation)) throw new Error('Missing parameter (rotation): ' + this.name);
     /*
     A part can have as many parts added to it as you want, but if your adding this to a GameObject 
     it will overwrite the existing (if any) body.  Because GameObjects can only have one part as 
@@ -68,18 +71,28 @@ export default class Part {
     throw new Error(`Part [${name}] not found.`);
   }
   getWorldFaces() {                                     //The "rendering pipeline"
+    let debug = false;
+    if (debug) console.log ('GetWorldFaces Pipeline:');
     let worldFaces = [];
     for (let face of this.faces) {
       let worldFace = { color: face.color, points: [] };
       for (let point of face.points) {
         let p = structuredClone(point);        
+        if (debug) console.log (p);
         p = Vec.rotate(p, this.localRotation);
+        if (debug) console.log (p);
         p = Vec.add(p, this.localPosition);
+        if (debug) console.log (p);
         p = Vec.rotate(p, this.root.worldRotation);
+        if (debug) console.log (p);
         p = Vec.add(p, this.root.worldPosition);
+        if (debug) console.log (p);
         p = Vec.sub(p, View.camera);  //Camera can be a Vec because it has an x and y.
+        if (debug) console.log (p);
         p = Vec.scale(p, View.camera.zoom);
+        if (debug) console.log (p);
         p = Vec.add(p, View.screenCenter);
+        if (debug) console.log (p);
         worldFace.points.push(p);
       }
       worldFaces.push(worldFace);

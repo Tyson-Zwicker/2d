@@ -1,3 +1,4 @@
+import Main from './main.js';
 import Vec from './vec.js';
 import View from './view.js';
 
@@ -20,14 +21,14 @@ export default class GameObject {
   allParts = [];                      //collected during "finalize" step..
   spinningParts = [];                 //collected during "finalize" step..
   totalMass = undefined;              //Calculated in "finalize" step.
-  centerOfMass = undefined;           //Calculated in "finalize" step.
+  centerOfMass = undefined;           //Calculated in "finalize" step. (Local Coordinate Space)
   momentOfInertia = undefined;        //Calculated in "finalize" step.
-  finalized = false;
+  finalized = false;                  //Set to true, when "finalized". (Game will not allow unfinalized objects to be added).
+
   constructor(name) {
     this.name = name;
   }
-  finalize() {                  //Once after all the parts have been added.
-    
+  finalize() {                        //Once after all the parts have been added.    
     if (this.body === undefined) throw new Error(`GameObject [${this.name}] has no body.`);
     this.allParts = this.#getAllParts(this.body);
     let mass = this.#calcMass();
@@ -37,11 +38,18 @@ export default class GameObject {
     this.spinningParts = this.#getSpinningParts();
     this.finalized = true;
   }
+  getPart(name) {
+    for (let i = 0; i < this.allParts.length; i++) {
+      if (this.allParts[i].name === name) return this.allParts[i];
+    }
+  }
   #getAllParts(part, found = []) {
+    let debug = false;
     for (let innerPart of part.parts) {
       found.push(...this.#getAllParts(innerPart));
     }
     found.push(part);
+    if (debug) console.log(found);
     return found;
   }
   #getSpinningParts() {
@@ -75,16 +83,15 @@ export default class GameObject {
     return moment;
   }
   move() {
-    this.centerOfMass = Vec.add(this.centerOfMass, this.velocity);
-    this.worldPosition = Vec.add (this.centerOfMass, this.velocity);
-    this.worldRotation = this.worldRotation + this.spin;
+    this.worldPosition = Vec.add(this.worldPosition, Vec.scale(this.velocity, Main.delta));
+    this.worldRotation = this.worldRotation + this.spin * Main.delta;
   }
   render() {
-    if (this.allParts.length===0){
-      throw new Error ('No Parts found to render.  GameObject has not body, or it is has not been finalized.');
+    if (this.allParts.length === 0) {
+      throw new Error('No Parts found to render.  GameObject has not body, or it is has not been finalized.');
     }
     for (let part of this.allParts) {
-      let faces = part.getWorldFaces();      
+      let faces = part.getWorldFaces();
       for (let face of faces) {
         View.context.fillStyle = face.color;
         let path = new Path2D();
@@ -92,7 +99,7 @@ export default class GameObject {
         if (points.length === 0) continue;
         path.moveTo(points[0].x, points[0].y);
         for (let i = 1; i < points.length; i++) {
-          path.lineTo(points[i].x, points[i].y);          
+          path.lineTo(points[i].x, points[i].y);
         }
         path.closePath();
         View.context.fill(path);
@@ -116,5 +123,23 @@ export default class GameObject {
     View.context.stroke();
     View.context.lineWidth = oldWidth;
     View.context.strokeStyle = oldStyle;
+  }
+  applyForce(forceVector, localPosition) {
+    //For localPosition, use which ever part is generting (or receiving) the force.
+    //See test3 for proof of concept..
+    console.log(forceVector);
+    console.log(localPosition);
+    let forceScale = Main.delta;
+    let impulse = Vec.scale(forceVector, forceScale);
+    let linearAcceleration = Vec.scale(impulse, 1/this.totalMass);
+    let arm = Vec.sub(localPosition, this.centerOfMass);
+    //let torque = Vec.cross(arm, impulse);
+    let torque = arm.x * impulse.y - arm.y * impulse.x;
+    let angularAcceleration = (torque / this.momentOfInertia) * (180/Math.PI);
+    
+    this.velocity = Vec.add (this.velocity, linearAcceleration);
+    this.spin += angularAcceleration;
+    console.log('l: (' + linearAcceleration.x + ',' + linearAcceleration.y + ') ,a :' + angularAcceleration);
+    return { "linear": linearAcceleration, "angular": angularAcceleration };
   }
 }
