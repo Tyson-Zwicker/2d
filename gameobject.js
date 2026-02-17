@@ -125,21 +125,16 @@ export default class GameObject {
     View.context.strokeStyle = oldStyle;
   }
   applyForce(forceVector, localPosition) {
-    //For localPosition, use which ever part is generting (or receiving) the force.
-    //See test3 for proof of concept..
-    console.log(forceVector);
-    console.log(localPosition);
     let forceScale = Main.delta;
     let impulse = Vec.scale(forceVector, forceScale);
     let linearAcceleration = Vec.scale(impulse, 1/this.totalMass);
-    let arm = Vec.sub(localPosition, this.centerOfMass);
-    //let torque = Vec.cross(arm, impulse);
-    let torque = arm.x * impulse.y - arm.y * impulse.x;
+    let rotatedLocalPos = Vec.rotate (localPosition,this.worldRotation);
+    let arm = Vec.sub(rotatedLocalPos, this.centerOfMass); //<-this local position is not rotated
+    let torque = Vec.cross(arm, impulse);
+    //let torque = arm.x * impulse.y - arm.y * impulse.x;
     let angularAcceleration = (torque / this.momentOfInertia) * (180/Math.PI);
-    
     this.velocity = Vec.add (this.velocity, linearAcceleration);
     this.spin += angularAcceleration;
-    console.log('l: (' + linearAcceleration.x + ',' + linearAcceleration.y + ') ,a :' + angularAcceleration);
     return { "linear": linearAcceleration, "angular": angularAcceleration };
   }
 }
