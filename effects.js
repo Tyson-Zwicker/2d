@@ -7,10 +7,18 @@ export default class Effects {
   static background = [];
 
   static addForeground(effect) {
-    this.foreground.push(effect);
+    if (Array.isArray (effect)){
+      this.foreground.push (...effect);
+    }else{
+      this.foreground.push(effect);
+    }
   }
   static addBackground(effect) {
-    this.background.push (effect);
+    if (Array.isArray (effect)){
+      this.foreground.push (...effect);
+    }else{
+      this.background.push (effect);
+    }
   }
   static renderForeground() {
     let survivors = [];
