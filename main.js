@@ -1,6 +1,7 @@
 import View from './view.js';
 import Game from './game.js';
 import Keyboard from './keyboard.js';
+import Effects from '../effects.js';
 export default class Main {
   static delta = 0;
   static time = 0;
