@@ -43,10 +43,10 @@ export default class Main {
     let t = Date.now();
     try {
       View.clear();
-      for (let gameObject of Game.gameObjects.values()) {
-        gameObject.move();
-        gameObject.render();
-      }
+      for (let gameObject of Game.gameObjects.values()) gameObject.move();
+      Effects.renderBackground();
+      for (let gameObject of Game.gameObjects.values()) gameObject.render();
+      Effects.renderForeground();
       Main.checkMouse();
       if (Main.time - Main.lastKeyCheck > Main.keyCheckInterval) Keyboard.processKeyEvents(Main.delta);
       Main.showDelta();
