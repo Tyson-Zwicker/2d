@@ -15,7 +15,7 @@ export default class Effects {
   }
   static addBackground(effect) {
     if (Array.isArray (effect)){
-      this.foreground.push (...effect);
+      this.background.push (...effect);
     }else{
       this.background.push (effect);
     }
