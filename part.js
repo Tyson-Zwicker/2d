@@ -71,32 +71,23 @@ export default class Part {
     throw new Error(`Part [${name}] not found.`);
   }
   getWorldFaces() {                                     //The "rendering pipeline"
-    let debug = false;
-    if (debug) console.log ('GetWorldFaces Pipeline:');
     let worldFaces = [];
     for (let face of this.faces) {
       let worldFace = { color: face.color, points: [] };
       for (let point of face.points) {
         let p = structuredClone(point);        
-        if (debug) console.log (p);
         p = Vec.rotate(p, this.localRotation);
-        if (debug) console.log (p);
         p = Vec.add(p, this.localPosition);
-        if (debug) console.log (p);
         p = Vec.rotate(p, this.root.worldRotation);
-        if (debug) console.log (p);
         p = Vec.add(p, this.root.worldPosition);
-        if (debug) console.log (p);
         p = Vec.sub(p, View.camera);  //Camera can be a Vec because it has an x and y.
-        if (debug) console.log (p);
         p = Vec.scale(p, View.camera.zoom);
-        if (debug) console.log (p);
         p = Vec.add(p, View.screenCenter);
-        if (debug) console.log (p);
         worldFace.points.push(p);
       }
       worldFaces.push(worldFace);
     }
     return worldFaces;
   }
+
 }

@@ -44,12 +44,10 @@ export default class GameObject {
     }
   }
   #getAllParts(part, found = []) {
-    let debug = false;
     for (let innerPart of part.parts) {
       found.push(...this.#getAllParts(innerPart));
     }
     found.push(part);
-    if (debug) console.log(found);
     return found;
   }
   #getSpinningParts() {

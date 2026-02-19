@@ -16,7 +16,6 @@ export default class LineEffect {
     let screenPoint1 = Vec.add(Vec.scale(Vec.sub(this.endPoint, View.camera), View.camera.zoom), View.screenCenter);
     let opacity = Math.floor (15 * (this.life/ this.durationInSeconds));    
     let color = this.color + opacity.toString(16);
-    
     View.context.strokeStyle = color;
     View.context.lineWidth = this.thickness;
     View.context.beginPath();

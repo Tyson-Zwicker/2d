@@ -49,17 +49,6 @@ export default class Keyboard {
     let holdStartTime = Date.now();
     return { "key": e.key, "when": Date.now(), "holdStartTime": holdStartTime, "action": 'press' };
   }
-
-  static #getHoldEvent(e, lastEvent) {
-    let duration = Date.now() - lastEvent.holdStartTime;
-    return { "key": e.key, "when": Date.now(), "holdStartTime": lastEvent.holdStartTime,"duration":duration,  "action": 'hold' };
-  }
-
-  static #getUpdateHoldEvent(e, lastEvent) {
-    let duration = Date.now() - lastEvent.holdStartTime;
-    return { "key": e.key, "when": Date.now(), "holdStartTime": holdStartTime, "duration": duration,  "action": 'hold' };
-  }
-
   static #getReleaseEvent(e, lastEvent) {
     let duration = Date.now() - lastEvent.holdStartTime; // it had to have been pressed to get released..
     return { "key": e.key, "when": Date.now(), "duration": duration, "action": 'release' };
