@@ -73,7 +73,7 @@ export default class Part {
   getWorldFaces() {                                     //The "rendering pipeline"
     let worldFaces = [];
     for (let face of this.faces) {
-      let worldFace = { color: face.color, points: [] };
+      let worldFace = { appearance: face.appearance, points: [] };
       for (let point of face.points) {
         let p = structuredClone(point);        
         p = Vec.rotate(p, this.localRotation);
@@ -89,5 +89,4 @@ export default class Part {
     }
     return worldFaces;
   }
-
 }

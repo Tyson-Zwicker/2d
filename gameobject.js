@@ -11,7 +11,6 @@ export default class GameObject {
   get localRotation() {
     return this.#localRotation;
   }
-
   worldPosition = undefined;          //assigned when added to Game.
   worldRotation = undefined;          //assigned when added to Game.
   velocity = { x: 0, y: 0 };          //Is changed by application of linear acceleration.
@@ -91,7 +90,8 @@ export default class GameObject {
     for (let part of this.allParts) {
       let faces = part.getWorldFaces();
       for (let face of faces) {
-        View.context.fillStyle = face.color;
+        View.context.fillStyle = face.appearance.normal.backgroundColor;        
+        View.context.strokeStyle = face.appearance.normal.borderColor;
         let path = new Path2D();
         let points = face.points;
         if (points.length === 0) continue;
@@ -101,6 +101,7 @@ export default class GameObject {
         }
         path.closePath();
         View.context.fill(path);
+        View.context.stroke(path);
       }
     }
     this.#drawCenterOfMass();
