@@ -7,7 +7,7 @@ export default class View {
   static bounds = undefined;
   static camera = { x: 0, y: 0, zoom: 1 };//World Coordinates.. update this to keep view on a particular thing/place otherwise mouse moves it around.
   static minimumZoom = 0.01;
-  static mouse = { x: 0, y: 0 };
+  static mouse = { x: 0, y: 0, buttonDown: false };
   static screenCenter = undefined;
   static zoomFactor = 10; //How much each zoom changes when the wheel is scrolled.
 
