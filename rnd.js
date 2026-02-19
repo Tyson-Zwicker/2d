@@ -49,9 +49,9 @@ export default class Rnd {
     return { x: Rnd.int(bounds.x0, bounds.x1), y: Rnd.int(bounds.y0, bounds.y1) };
   }
   static vec(minAngle, maxAngle, minMag, maxMag) {
-    let a = Rnd.int(minAngle, maxAngle);
-    let m = Rnd.int(minMag, maxMag);
-    return Vec.fromPolar(a, m);
+    let a = Rnd.float(minAngle, maxAngle);
+    let m = Rnd.float(minMag, maxMag);
+    return Vec.fromAngleAndMagnitude(a, m);
   }
   static color(min) {
     if (typeof min !== 'number') {
