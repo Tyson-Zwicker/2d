@@ -8,28 +8,26 @@ import Keyboard from '../../keyboard.js';
 //TODO: Play with particles
 
 Keyboard.setKeyFunction(' ', () => { Main.continue = false; });
-Main.creatorsFunction = () => {
-  let debug = true;
-  //let effect = new LineEffect(point0, point1, color, thickness, duration);
-  //Effects.addForeground(effect);
 
-  let bounds = { x0: -300, y0: -300, x1: 300, y1: 300 }
-  let point = Rnd.point(bounds);
-  let color = '#00f'
+let point = {x:0,y:0};
+  let color = '#fff'
   let angle = 0;
-  let angleSpan = 360;
-  let velMin = 1;
-  let velMax = 10;
-  let thickness = 1;
+  let angleSpan = 10;
+  let velMin = 5;
+  let velMax = 20;
+  let thickness = 2;
   let groupSize = 10;
   let durMin = 1;
-  let durMax = 3;
+  let durMax = 6;
 
+//let particles = ParticleEffect.generateGroup(point, angle, angleSpan, velMin, velMax, thickness, color, groupSize, durMin, durMax);
 
-  if (Effects.foreground.length + Effects.background.length < 1000) {
-    let particles = ParticleEffect.generateGroup(point, angle, angleSpan, velMin, velMax, thickness, color, groupSize, durMin, durMax);
-    Effects.addBackground(particles);
+console.log (Effects.background);
+Main.creatorsFunction = () => {
+  if (Effects.background.length+Effects.foreground.length<1000){
+    let particles = ParticleEffect.generateGroup(point, angle, angleSpan, velMin, velMax, thickness, color, groupSize, durMin, durMax);  
+    Effects.addBackground (particles);
   }
 }
 
-Main.run(30);
+Main.run(100);
