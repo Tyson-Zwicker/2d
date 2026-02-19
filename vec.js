@@ -18,7 +18,6 @@ export default class Vec {
   static dist(p0, p1) {
     return Math.sqrt((p0.x - p1.x) ** 2 + (p0.y - p1.y) ** 2);
   }
-
   static scale(p, s) {
     return { "x": p.x * s, "y": p.y * s };
   }
