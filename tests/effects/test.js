@@ -5,13 +5,12 @@ import RadialEffect from '../../radialeffect.js';
 import CircleEffect from '../../circleeffect.js';
 import Rnd from '../../rnd.js';
 import Keyboard from '../../keyboard.js';
-//TODO: Play with particles
-
 Keyboard.setKeyFunction(' ', () => { Main.continue = false; });
 Main.creatorsFunction = () => {
   let effect;
   let bounds = { x0: -1000, y0: -500, x1: 1000, y1: 500 }
   if (Effects.foreground.length < 10) {
+    let b = Rnd.bool();
     let type = Rnd.int(0, 3);
     let point0 =  Rnd.point(bounds);;//Rnd.point(bounds);
     let point1 = Rnd.point(bounds);
@@ -27,7 +26,11 @@ Main.creatorsFunction = () => {
     } else {
       effect = new CircleEffect(point0, initialRadius, expansionRate, color, duration, 0, 360);
     }
-    Effects.addForeground(effect);
+    if (b) {
+      Effects.addForeground(effect);
+    }else {
+      Effects.addBackground(effect);
+    }
   }
 }
 
