@@ -2,6 +2,7 @@ import GUI from './gui.js';
 import GUIElement from './guielement.js';
 import Button from './button.js';
 import Draw from './draw.js';
+import View from './view.js';
 export default class GUIPanel {
   elements = [];
   listElements = new Map();
@@ -28,6 +29,8 @@ export default class GUIPanel {
         GUI.activeListItemElements.push(itemElement);
         this.elements.push(itemElement);
       }
+    }else{
+      this.recalculate();
     }
   }
   calculateFloat(listElement) {
@@ -121,25 +124,26 @@ export default class GUIPanel {
     let height = View.canvas.height;
     switch (this.location) {
       case 'top':
-        this.direction = new Point(1, 0);
-        this.boundry = { x0: GUI.columnWidth, y0: 0, x1: width - GUI.columnWidth, y1: GUI.rowHeight };
+        this.direction = { x: 1, y: 0 };
+        this.boundry = { x0: GUI.columnWidth, y0: 0, x1: width - GUI.columnWidth, y1: GUI.rowHeight };        
         break;
       case 'bottom':
-        this.direction = new Point(1, 0);
+        this.direction = { x: 1, y: 0 }   ;
         this.boundry = { x0: GUI.columnWidth, y0: height - GUI.rowHeight, x1: width - GUI.columnWidth, y1: height };
         break;
       case 'left':
-        this.direction = new Point(0, 1);
+        this.direction = { x: 0, y: 1 };
         this.boundry = { x0: 0, y0: GUI.rowHeight, x1: GUI.columnWidth, y1: height - GUI.rowHeight };
         break;
       case 'right':
-        this.direction = new Point(0, 1);
+        this.direction = { x: 0, y: 1 };
         this.boundry = { x0: width - GUI.columnWidth, y0: GUI.rowHeight, x1: width, y1: height - GUI.rowHeight };
         break;
       default:
         throw new Error('GUIPanel:calculate(): unknown location :' + this.location);
-    }
+    }    
     this.offset = { x: this.boundry.x0, y: this.boundry.y0 };
+    console.log('recalculated panel', this.location, 'boundry', this.boundry);
   }
   #getFloatElementsCollectiveWidth(listElement) {
     if (listElement.panel.location === 'top' || listElement.panel.location === 'bottom') {
@@ -158,22 +162,20 @@ export default class GUIPanel {
   drawPanel() {
     if (this.elements.length > 0) {
       Draw.rect(this.boundry.x0, this.boundry.y0, this.boundry.x1, this.boundry.y1, '#022', false);
-      let cursor = Point.from(this.offset);
-      for (let element of this.elements) {
-        console.log (element.text, 'bounds', element.bounds); 
+      let cursor = {x:this.offset.x, y:this.offset.y};
+      for (let element of this.elements) {        
         if (element.type === 'list' && element === this.activeList) {
           this.drawElement(element, cursor, true);
           this.listPanel.drawPanel();
         } else {
           this.drawElement(element, cursor, this.activeList !== undefined);//passing where to start drawing and if it should look "shadowed" or not.
         }
-        cursor.x += this.direction.x * (GUI.gap + element.bounds.width);
-        cursor.y += this.direction.y * (GUI.gap + element.bounds.height);
+        cursor.x += this.direction.x * (GUI.gap + (element.bounds.x1-element.bounds.x0));
+        cursor.y += this.direction.y * (GUI.gap + (element.bounds.y1-element.bounds.y0));        
       }
     }
   }
   drawElement(element, cursor, shadow) {
-    console.log ('drawing element', element.text, 'at', cursor, 'shadow=', shadow);
     let facade = GUI.appearance.normal;
     if (shadow) {
       facade = element.shadowAppearance;
