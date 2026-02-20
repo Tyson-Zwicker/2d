@@ -20,42 +20,42 @@ export default class Appearance {
     new Facade('#fff', '#eee', '#222', 1, 'Arial', 12)
   );
   static Red = new Appearance(
-    new Facade('#f00', '#f00', '#fff', 1, 'Arial', 12),
+    new Facade('#720', '#f00', '#fff', 1, 'Arial', 12),
     new Facade('#f55', '#f55', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#f66', '#000', 1, 'Arial', 12),
     new Facade('#900', '#900', '#777', 1, 'Arial', 12),
     new Facade('#f66', '#f66', '#222', 1, 'Arial', 12)
   );
   static Green = new Appearance(
-    new Facade('#0f0', '#0f0', '#fff', 1, 'Arial', 12),
+    new Facade('#060', '#0f0', '#fff', 1, 'Arial', 12),
     new Facade('#5f5', '#5f5', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#6f6', '#000', 1, 'Arial', 12),
     new Facade('#090', '#090', '#777', 1, 'Arial', 12),
     new Facade('#6f6', '#6f6', '#222', 1, 'Arial', 12)
   );
   static Blue = new Appearance(
-    new Facade('#00f', '#00f', '#fff', 1, 'Arial', 12),
+    new Facade('#027', '#00f', '#fff', 1, 'Arial', 12),
     new Facade('#55f', '#55f', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#66f', '#000', 1, 'Arial', 12),
     new Facade('#009', '#009', '#777', 1, 'Arial', 12),
     new Facade('#66f', '#66f', '#222', 1, 'Arial', 12)
   );  
   static Yellow = new Appearance(
-    new Facade('#ff0', '#ff0', '#fff', 1, 'Arial', 12),
+    new Facade('#aa0', '#ff0', '#fff', 1, 'Arial', 12),
     new Facade('#ff5', '#ff5', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#ff6', '#000', 1, 'Arial', 12),
     new Facade('#990', '#990', '#777', 1, 'Arial', 12),
     new Facade('#ff6', '#ff6', '#222', 1, 'Arial', 12)
   );
   static Cyan = new Appearance(
-    new Facade('#0ff', '#0ff', '#fff', 1, 'Arial', 12),
+    new Facade('#066', '#0ff', '#fff', 1, 'Arial', 12),
     new Facade('#5ff', '#5ff', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#6ff', '#000', 1, 'Arial', 12),
     new Facade('#099', '#099', '#777', 1, 'Arial', 12),
     new Facade('#6ff', '#6ff', '#222', 1, 'Arial', 12)
   );
   static Magenta = new Appearance(
-    new Facade('#f0f', '#f0f', '#fff', 1, 'Arial', 12),
+    new Facade('#606', '#f0f', '#fff', 1, 'Arial', 12),
     new Facade('#f5f', '#f5f', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#f6f', '#000', 1, 'Arial', 12),
     new Facade('#909', '#909', '#777', 1, 'Arial', 12),
