@@ -2,14 +2,13 @@ import Main from '../../main.js';
 import Appearance from '../../appearance.js';
 import GUI from '../../gui.js';
 
-
 makeGUI();
 console.log ('PRE-RUN: GUI elements:', GUI.elements.length, 'panels:', GUI.panels.size);
 Main.run();
 
 
 function makeGUI() {
-  GUI.initialize(100, 30, 5, 5, Appearance.Green);
+
   GUI.addText('top', 'Top Text 1');
   GUI.addText('top', 'Top Text 2');
   GUI.addText('left', 'Left Text 1');
