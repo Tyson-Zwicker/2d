@@ -10,7 +10,7 @@ export default class Button {
   toggle = false;
   //Must be bound by an actor or Element to do anything..
   //They must bind the actor OR guiElement property.
-  constructor(clickFn = null, toggle = false, value) {
+  constructor(clickFn, toggle = false, value) {
     this.clickFn = clickFn;
     this.toggle = toggle;
     this.value = value;
@@ -57,7 +57,7 @@ export default class Button {
     if (!this.toggle) {
       if (typeof this.clickFn === 'function') {
         this.clickFn(r);
-        if (this.originalFn) this.originalFn(r)
+        if (this.originalFn) this.originalFn(r);
       }
     } else {
       this.clicked = !this.clicked;
