@@ -81,7 +81,7 @@ export default class GUIPanel {
     for (let element of this.elements) element.active = true; //Re-active everything- floating panel is gone..
     this.floatingPanel = undefined;
     GUI.activeListItemElements.length = 0;
-    this.recalculate;
+    this.recalculate();
 
   }
 

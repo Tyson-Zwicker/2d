@@ -40,6 +40,7 @@ export default class GUI {
   static resize() {
     //Don't resize 'float' -floating panes are dismissed 
     //if a window is resized so they don't care..
+    console.log ('resizing GUI panels..'+GUI);
     GUI.panels.get('top').recalculate();
     GUI.panels.get('bottom').recalculate();
     GUI.panels.get('left').recalculate();
@@ -47,38 +48,33 @@ export default class GUI {
     GUI.render();
   }
   static render() {
-    let top = GUI.panels.get('top');
-    top.drawPanel();
-    let bottom = GUI.panels.get('bottom');
-    bottom.drawPanel();
-    let left = GUI.panels.get('left');
-    left.drawPanel();
-    let right = GUI.panels.get('right');
-    right.drawPanel();
+    GUI.panels.get('top').drawPanel();
+    GUI.panels.get('bottom').drawPanel();
+    GUI.panels.get('left').drawPanel();
+    GUI.panels.get('right').drawPanel();
     console.log('rendering GUI with', GUI.elements.length, 'elements');
   }
   static addText(location, text) {
-    console.log('adding text to', location, ':', text);
+    
     let panel = GUI.panels.get(location);
     let textElement = panel.addText(text);
-    console.log(text, 'bounds', textElement.bounds);
     GUI.elements.push(textElement);
-    console.log(GUI.elements.length, 'total GUI elements');
+    
   }
   static addButton(location, text, toggle, fn, value) {
-    console.log('adding button to', location, ':', text);
+    
     let panel = GUI.panels.get(location);
     let buttonElement = panel.addButton(text, toggle, fn, value);
-    console.log(text, 'bounds', buttonElement.bounds);
+    
     GUI.elements.push(buttonElement);
-    console.log(GUI.elements.length, 'total GUI elements');
+    
   }
   static addList(location, text, listItems, fn, defaultValue) {
-    console.log('adding list to', location, ':', text);
+ 
     let panel = GUI.panels.get(location);
     let listElement = panel.addList(text, listItems, fn, defaultValue);
-    console.log('list element bounds', listElement.bounds);
+ 
     GUI.elements.push(listElement);
-    console.log(GUI.elements.length, 'total GUI elements');
+ 
   }
 }

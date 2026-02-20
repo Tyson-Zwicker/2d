@@ -33,7 +33,7 @@ export default class View {
     View.canvas.oncontextmenu = View.handleContextMenu;
     window.addEventListener('resize', View.resizeCanvas);
     View.#calcBounds();
-    console.log ('View Initialized.');
+    console.log ('View Initialized..');
   }
   static canSee(point, radius) {
     let { x0, y0, x1, y1 } = View.bounds;
@@ -136,6 +136,7 @@ export default class View {
     View.canvas.height = window.innerHeight;
     View.screenCenter = { x: View.canvas.width / 2, y: View.canvas.height / 2 };
     View.#calcBounds();
-    GUI.resize();
+    console.log ('canvas resized to', View.canvas.width, 'x', View.canvas.height);
+    if (GUI.initialized) GUI.resize();
   }
 }

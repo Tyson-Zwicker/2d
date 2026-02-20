@@ -14,8 +14,9 @@ export default class Main {
   static lastKeyCheck = 0;
   static keyCheckInterval = 100;
   static run(fps = 0) {
+    console.log ('GUI.beforeViewInit:'+GUI.elements.length, 'panels:'+GUI.panels.size);
     View.initialize();    
-    console.log ('GUI:'+GUI.elements.length, 'panels:'+GUI.panels.size);
+    console.log ('GUI:afterViewInit:'+GUI.elements.length, 'panels:'+GUI.panels.size);
     let startTime = Date.now();
     Main.loopTime = 0;
     if (fps === 0) {
