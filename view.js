@@ -136,7 +136,6 @@ export default class View {
     View.canvas.height = window.innerHeight;
     View.screenCenter = { x: View.canvas.width / 2, y: View.canvas.height / 2 };
     View.#calcBounds();
-    console.log ('canvas resized to', View.canvas.width, 'x', View.canvas.height);
     if (GUI.initialized) GUI.resize();
   }
 }

@@ -143,7 +143,6 @@ export default class GUIPanel {
         throw new Error('GUIPanel:calculate(): unknown location :' + this.location);
     }    
     this.offset = { x: this.boundry.x0, y: this.boundry.y0 };
-    console.log('recalculated panel', this.location, 'boundry', this.boundry);
   }
   #getFloatElementsCollectiveWidth(listElement) {
     if (listElement.panel.location === 'top' || listElement.panel.location === 'bottom') {

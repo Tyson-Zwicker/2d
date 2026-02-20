@@ -35,7 +35,6 @@ export default class Draw{
     return { "width": metrics.width, "height": (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) ?? fontSize };
   }
   static textBox(x0, y0, x1, y1, text, facade) {
-    console.log('Drawing text box:', text, 'in area:', x0, y0, x1, y1, 'with facade:', facade);
     Draw.rect(x0, y0, x1, y1, facade.borderColor, false);
     Draw.rect(x0, y0, x1, y1, facade.backgroundColor,true);
     View.context.fillStyle = facade.textColor;

@@ -3,7 +3,6 @@ import Appearance from '../../appearance.js';
 import GUI from '../../gui.js';
 
 makeGUI();
-console.log ('PRE-RUN: GUI elements:', GUI.elements.length, 'panels:', GUI.panels.size);
 Main.run();
 
 

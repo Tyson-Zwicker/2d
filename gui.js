@@ -26,8 +26,6 @@ export default class GUI {
     GUI.panels.set('right', new GUIPanel('right'));
     GUI.elements = [];    
     GUI.initialized = true;
-    console.log('GUI initialized with columnWidth', columnWidth, 'rowHeight', rowHeight, 'gap', gap, 'padding', padding);
-    console.log (appearance);
   }
   static isMouseIn(element) {
     let x = View.mouse.x;
@@ -41,7 +39,6 @@ export default class GUI {
   static resize() {
     //Don't resize 'float' -floating panes are dismissed 
     //if a window is resized so they don't care..
-    console.log ('resizing GUI panels..');
     GUI.panels.get('top').recalculate();
     GUI.panels.get('bottom').recalculate();
     GUI.panels.get('left').recalculate();
@@ -53,7 +50,6 @@ export default class GUI {
     GUI.panels.get('bottom').drawPanel();
     GUI.panels.get('left').drawPanel();
     GUI.panels.get('right').drawPanel();
-    console.log('rendering GUI with', GUI.elements.length, 'elements');
   }
   static addText(location, text) {
     let panel = GUI.panels.get(location);
