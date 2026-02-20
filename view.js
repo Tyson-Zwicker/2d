@@ -1,5 +1,5 @@
 import Vec from './vec.js';
-
+import GUI from './gui.js';
 export default class View {
   static bgPressed = false;
   static bgPressCoord = null;
@@ -136,5 +136,6 @@ export default class View {
     View.canvas.height = window.innerHeight;
     View.screenCenter = { x: View.canvas.width / 2, y: View.canvas.height / 2 };
     View.#calcBounds();
+    GUI.resize();
   }
 }
