@@ -29,7 +29,7 @@ export default class Vec {
   }
   static norm(v) {
     const length = Math.sqrt(v.x ** 2 + v.y ** 2);
-    if (length === 0) throw new Error(`Point.normalize: zero-length vector`);
+    if (length === 0) throw new Error(`Vec.normalize: zero-length vector`);
     return { "x": v.x / length, "y": v.y / length };
   }
   static rotate(p, θ) {
