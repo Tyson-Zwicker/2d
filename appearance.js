@@ -14,7 +14,7 @@ export default class Appearance {
   }
   static Default = new Appearance(
     new Facade('#444', '#ccc', '#fff', 1, 'Arial', 12),
-    new Facade('#ddd', '#ddd', '#000', 1, 'Arial', 12),
+    new Facade('#ddd', '#fff', '#000', 1, 'Arial', 12),
     new Facade('#eee', '#eee', '#000', 1, 'Arial', 12),
     new Facade('#222', '#444', '#777', 1, 'Arial', 12),
     new Facade('#fff', '#eee', '#222', 1, 'Arial', 12)
