@@ -13,10 +13,12 @@ export default class Main {
   static currentFrame = 0;
   static lastKeyCheck = 0;
   static keyCheckInterval = 100;
-  static run(fps = 0) {
-    console.log ('GUI.beforeViewInit:'+GUI.elements.length, 'panels:'+GUI.panels.size);
-    View.initialize();    
-    console.log ('GUI:afterViewInit:'+GUI.elements.length, 'panels:'+GUI.panels.size);
+  static {
+    View.initialize();
+    GUI.initialize(100, 30, 5, 5, Appearance.Green);
+    console.log('Main initialized..');
+  } 
+  static run(fps = 0) {    
     let startTime = Date.now();
     Main.loopTime = 0;
     if (fps === 0) {
