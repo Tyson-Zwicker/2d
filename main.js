@@ -1,5 +1,7 @@
+import Appearance from './appearance.js';
 import View from './view.js';
 import Game from './game.js';
+import GUI from './gui.js';
 import Keyboard from './keyboard.js';
 import Effects from '../effects.js';
 export default class Main {
@@ -12,7 +14,8 @@ export default class Main {
   static lastKeyCheck = 0;
   static keyCheckInterval = 100;
   static run(fps = 0) {
-    View.initialize();
+    View.initialize();    
+    console.log ('GUI:'+GUI.elements.length, 'panels:'+GUI.panels.size);
     let startTime = Date.now();
     Main.loopTime = 0;
     if (fps === 0) {
@@ -48,6 +51,7 @@ export default class Main {
       Effects.renderBackground();
       for (let gameObject of Game.gameObjects.values()) gameObject.render();
       Effects.renderForeground();
+      GUI.render();
       Main.checkMouse();
       if (Main.time - Main.lastKeyCheck > Main.keyCheckInterval) Keyboard.processKeyEvents(Main.delta);
       Main.showDelta();
