@@ -17,8 +17,8 @@ export default class Main {
     View.initialize();
     GUI.initialize(100, 30, 5, 5, Appearance.Green);
     console.log('Main initialized..');
-  } 
-  static run(fps = 0) {    
+  }
+  static run(fps = 0) {
     let startTime = Date.now();
     Main.loopTime = 0;
     if (fps === 0) {
@@ -67,16 +67,23 @@ export default class Main {
   }
   static checkMouse() {
     let interactionOccured = false;
+    for (let element of GUI.elements) {
+      if (element.button) element.button.checkForMouse();
+    }
     View.handleCameraDrag(interactionOccured);
   }
   static showDelta() {
-    let y = 5;
     View.context.textBaseline = 'top';
     View.context.fillStyle = '#FFFFFF';
     View.context.strokeStyle = '#FFFFFF';
     let oldfont = View.context.font;
-    View.context.font = "bold 16px Arial"
-    View.context.fillText(String(Main.currentFrame).padStart(6, '0') + ' Δ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0') + ' : Σ' + String(Main.loopTime).padStart(4, '0'), 5, y);
+    View.context.font = "bold 14px Arial"
+    let frameStr = String(Main.currentFrame).padStart(6, '0');
+    let deltaStr = 'Δ ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0');
+    let loopTimeStr = 'Σ ' + String(Main.loopTime).padStart(4, '0');
+    View.context.fillText(frameStr, 20, 8);
+    View.context.fillText(deltaStr, 20, View.canvas.height - 20);
+    View.context.fillText(loopTimeStr, View.canvas.width - 70, 8);
     let debugIndent = 0;
     for (let msg of Main.tickMsg) {
       debugIndent += msg.indent;

@@ -4,7 +4,7 @@ export default class View {
   static bgPressed = false;
   static bgPressCoord = null;
   static bgColor = "#555";
-  static bounds = undefined;
+  static cameraBounds = undefined;
   static camera = { x: 0, y: 0, zoom: 1 };//World Coordinates.. update this to keep view on a particular thing/place otherwise mouse moves it around.
   static minimumZoom = 0.01;
   static mouse = { x: 0, y: 0, buttonDown: false };
@@ -32,11 +32,11 @@ export default class View {
     View.canvas.onmouseup = View.handleMouseUp;
     View.canvas.oncontextmenu = View.handleContextMenu;
     window.addEventListener('resize', View.resizeCanvas);
-    View.#calcBounds();
+    View.calculateCameraBounds();
     console.log ('View Initialized..');
   }
   static canSee(point, radius) {
-    let { x0, y0, x1, y1 } = View.bounds;
+    let { x0, y0, x1, y1 } = View.cameraBounds;
     if (radius && typeof radius === 'number') {
       x0 -= radius;
       y0 -= radius;
@@ -50,8 +50,8 @@ export default class View {
       point.y <= y1
     );
   }
-  static #calcBounds() {
-    View.bounds = {
+  static calculateCameraBounds() {
+    View.cameraBounds = {
       "x0": View.camera.x - View.screenCenter.x / View.camera.zoom,
       "y0": View.camera.y - View.screenCenter.y / View.camera.zoom,
       "x1": View.camera.x + View.screenCenter.x / View.camera.zoom,
@@ -76,7 +76,7 @@ export default class View {
         drag = Vec.add(drag, inverseMouse);
         drag = Vec.scale(drag, 1 / View.camera.zoom);
         Vec.addInPlace(View.camera, drag); //If you don't add in place it will give back a new Vec and it won't have zoom anymore!
-        View.#calcBounds();
+        View.calculateCameraBounds();
         View.bgPressCoord = { x: View.mouse.x, y: View.mouse.y };
       }
       else if (View.bgPressed && !View.mouse.buttonDown) {
@@ -129,13 +129,13 @@ export default class View {
     View.camera.x += xchange;
     View.camera.y += ychange;
     View.camera.zoom = Math.max(View.minimumZoom, View.camera.zoom);
-    View.#calcBounds();
+    View.calculateCameraBounds();
   }
   static resizeCanvas() {
     View.canvas.width = window.innerWidth;
     View.canvas.height = window.innerHeight;
     View.screenCenter = { x: View.canvas.width / 2, y: View.canvas.height / 2 };
-    View.#calcBounds();
+    View.calculateCameraBounds();
     if (GUI.initialized) GUI.resize();
   }
 }

@@ -3,7 +3,7 @@ import Appearance from '../../appearance.js';
 import GUI from '../../gui.js';
 
 makeGUI();
-Main.run();
+Main.run(60);
 
 
 function makeGUI() {

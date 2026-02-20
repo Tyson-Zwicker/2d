@@ -65,7 +65,7 @@ export default class GUIPanel {
       x1 = listElement.drawnBounds.x1 + itemsWidth;
       y1 = listElement.drawnBounds.y1;
     }
-    return { offset: { x: x0, y: y0 }, boundry: new Boundry(x0, y0, x1, y1), direction: direction };
+    return { offset: { x: x0, y: y0 }, boundry: { x0, y0, x1, y1 }, direction: direction };
   }
 
   showList(listElement) {
@@ -82,7 +82,7 @@ export default class GUIPanel {
     this.activeList.changeFn(this.activeList.value);
     this.activeList = undefined;
     for (let element of this.elements) element.active = true; //Re-active everything- floating panel is gone..
-    this.floatingPanel = undefined;
+    this.listPanel = undefined;
     GUI.activeListItemElements.length = 0;
     this.recalculate();
 
@@ -176,15 +176,17 @@ export default class GUIPanel {
   }
   drawElement(element, cursor, shadow) {
     let facade = GUI.appearance.normal;
+    
     if (shadow) {
-      facade = element.shadowAppearance;
+      facade = GUI.appearance.shadowed;
     } else if (element.type === 'button') {
       if (element.button.pressed) {
-        facade = element.button.pressedAppearance;
+        facade = GUI.appearance.pressed;
       } else if (element.button.hovered) {
-        facade = element.button.hoveredAppearance;
+        facade = GUI.appearance.hovered;
       }
     }
+    
     Draw.textBox(
       element.bounds.x0 + cursor.x, element.bounds.y0 + cursor.y,
       element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
@@ -196,5 +198,6 @@ export default class GUIPanel {
       x1: element.bounds.x1 + cursor.x,
       y1: element.bounds.y1 + cursor.y
     };
+    
   }
 }

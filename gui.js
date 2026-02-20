@@ -26,15 +26,16 @@ export default class GUI {
     GUI.panels.set('right', new GUIPanel('right'));
     GUI.elements = [];    
     GUI.initialized = true;
+    console.log('GUI initialized..');
   }
   static isMouseIn(element) {
     let x = View.mouse.x;
     let y = View.mouse.y;
     return (
-      x > element.drawBounds.x0 &&
-      x < element.drawBounds.x1 &&
-      y > element.drawBounds.y0 &&
-      y < element.drawBounds.y1);
+      x > element.drawnBounds.x0 &&
+      x < element.drawnBounds.x1 &&
+      y > element.drawnBounds.y0 &&
+      y < element.drawnBounds.y1);
   }
   static resize() {
     //Don't resize 'float' -floating panes are dismissed 
