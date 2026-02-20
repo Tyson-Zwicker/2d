@@ -1,3 +1,4 @@
+import View from './view.js';
 export default class Draw{
   static circle(x, y, radius, color,fill) {
     View.context.beginPath();
@@ -34,16 +35,16 @@ export default class Draw{
     return { "width": metrics.width, "height": (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) ?? fontSize };
   }
   static textBox(x0, y0, x1, y1, text, facade) {
-    if (!(Check.num(x0) && Check.num(x1) &&Check.num(y0) && Check.num (y1))) throw new Error (`Draw.textBox: invalid bounds ${x0},${y1},${x1},${y1}`);
-    Draw.rect(x0, y0, x1, y1, facade.border, false);
-    Draw.rect(x0, y0, x1, y1, facade.fill, facade.lineWidth);
-    View.context.fillStyle = facade.text;
+    console.log('Drawing text box:', text, 'in area:', x0, y0, x1, y1, 'with facade:', facade);
+    Draw.rect(x0, y0, x1, y1, facade.borderColor, false);
+    Draw.rect(x0, y0, x1, y1, facade.backgroundColor,true);
+    View.context.fillStyle = facade.textColor;
     View.context.textBaseline = 'top';
     View.context.textAlign = 'left';
     View.context.font = `${facade.fontSize}px ${facade.fontName}`;
     let textSize = this.getTextSize(text, facade);
     let tx = x0 + ((x1 - x0) - textSize.width) / 2;
     let ty = y0 + ((y1 - y0) - textSize.height) / 2;
-    this.g.fillText(text, tx, ty);
+    View.context.fillText(text, tx, ty);
   }
 }
