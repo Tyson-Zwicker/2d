@@ -5,7 +5,7 @@ const ctx = canvasEl.getContext("2d");
 const touchStatusEl = document.getElementById("touchStatus");
 
 const rectangles = [
-  { label: "A", color: "#5b8def", bound: Boundary.make(140, 140, 380, 300) },
+  { label: "A", color: "#5b8def", bound: Boundary.make(140, 140, 680, 300) },
   { label: "B", color: "#f5537c", bound: Boundary.make(540, 260, 860, 500) },
 ];
 
