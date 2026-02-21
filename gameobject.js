@@ -22,6 +22,8 @@ export default class GameObject {
   totalMass = undefined;              //Calculated in "finalize" step.
   centerOfMass = undefined;           //Calculated in "finalize" step. (Local Coordinate Space)
   momentOfInertia = undefined;        //Calculated in "finalize" step.
+  radius = undefined;                //Calculated in "finalize" step. (The radius of the smallest circle that can enclose all parts).
+
   finalized = false;                  //Set to true, when "finalized". (Game will not allow unfinalized objects to be added).
 
   constructor(name) {
@@ -34,6 +36,7 @@ export default class GameObject {
     this.centerOfMass = mass.center;
     this.totalMass = mass.total;
     this.momentOfInertia = this.#calcMomentOfInertia();
+    this.radius = this.#calcRadius();
     this.spinningParts = this.#getSpinningParts();
     this.finalized = true;
   }
@@ -78,6 +81,16 @@ export default class GameObject {
       moment += part.mass * (part.localPosition.x ** 2 + part.localPosition.y ** 2);
     }
     return moment;
+  }
+  #calcRadius() {
+    let maxDistance = 0;
+    for (let part of this.allParts) {
+      let distance = Math.sqrt(part.localPosition.x ** 2 + part.localPosition.y ** 2) + part.radius;
+      if (distance > maxDistance) {
+        maxDistance = distance;
+      }
+    }
+    return maxDistance;
   }
   move() {
     this.worldPosition = Vec.add(this.worldPosition, Vec.scale(this.velocity, Main.delta));

@@ -14,11 +14,24 @@ export default class Part {
   parts = [];                   //added to by addPart();
   faces = [];                   //assigned by constructor
   mass = undefined;             //assigned by constructor.
+  radius = undefined;           //Calculated upon construction. (The radius of the smallest circle that can enclose this part). 
   constructor(name, faces, mass) {
     if (!name || !faces || !mass) throw Error('Missing parameter');
     this.name = name;
     this.mass = mass;
     this.faces.push(...faces);
+    this.radius = this.#calcRadius();
+  }
+  #calcRadius() {
+    // Calculate the radius of the smallest circle that can enclose this part
+    let maxDistance = 0;
+    for (let face of this.faces) {
+      for (let point of face.points) {
+        const distance = Math.sqrt(point.x * point.x + point.y * point.y);
+        maxDistance = Math.max(maxDistance, distance);
+      }
+    }
+    return maxDistance;
   }
   clone (){
     return new Part (this.name, this.faces, this.mass);    
