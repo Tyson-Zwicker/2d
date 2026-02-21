@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QuadTree visual test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #475569;
+      --panel: #ffffff;
+      --accent: #0ea5e9;
+      --highlight: #f97316;
+      --grid: #e2e8f0;
+      --quad: #2dd4bf;
+      --hit: #fb923c;
+      --bg: radial-gradient(120% 120% at 18% 20%, #f6f7f2, #e3edf3);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Space Grotesk', 'Inter', 'Segoe UI', sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 24px;
+    }
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 12px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -0.01em;
+    }
+    .lede {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 900px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 3fr 1.08fr;
+      gap: 18px;
+      align-items: start;
+    }
+    .stage {
+      background: var(--panel);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(12, 30, 60, 0.14);
+      padding: 16px;
+      border: 1px solid #dfe4ee;
+    }
+    .canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      border: 1px solid #d8dde6;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 720px;
+    }
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid #e5e9f0;
+      background: #f8fafc;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: #e0f2fe;
+      color: #075985;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .swatch { width: 12px; height: 12px; border-radius: 4px; }
+    .controls {
+      background: var(--panel);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(12, 30, 60, 0.14);
+      border: 1px solid #dfe4ee;
+      padding: 18px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .controls h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+    .control {
+      display: grid;
+      grid-template-columns: 1fr 72px;
+      gap: 10px;
+      align-items: center;
+    }
+    label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #0f172a;
+      background: #e0f2fe;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      box-shadow: 0 10px 24px rgba(12, 30, 60, 0.12);
+    }
+    button.primary { background: #0ea5e9; color: #f8fafc; }
+    button:active { transform: translateY(1px); box-shadow: 0 6px 18px rgba(12, 30, 60, 0.12); }
+    .summary {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .summary strong { color: #bef264; }
+    .hit-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .hit-list li { margin-bottom: 4px; }
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: 1fr; }
+      canvas { height: 520px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>QuadTree playground</h1>
+      <p class="lede">Click the canvas to drop circles of varying radii into the tree. Move the cursor to sweep the query circle; matching objects are highlighted and listed. Adjust capacity and minimum node size to see subdivisions update.</p>
+    </header>
+    <div class="layout">
+      <section class="stage">
+        <div class="canvas-wrap">
+          <canvas id="playfield" width="1100" height="720"></canvas>
+        </div>
+        <div class="legend">
+          <span class="pill"><span class="swatch" style="background:#0ea5e9"></span>Objects</span>
+          <span class="pill"><span class="swatch" style="background:#2dd4bf"></span>QuadTree bounds</span>
+          <span class="pill"><span class="swatch" style="background:#fb923c"></span>Query hits</span>
+          <span>Click to insert • Move to query • Drag sliders to tweak</span>
+        </div>
+      </section>
+      <aside class="controls">
+        <h2>Controls</h2>
+        <div class="control">
+          <label for="radiusInput">Insert radius (<span id="radiusValue"></span>px)</label>
+          <input id="radiusInput" type="range" min="6" max="80" value="22" step="1" />
+        </div>
+        <div class="control">
+          <label for="queryRadiusInput">Query radius (<span id="queryRadiusValue"></span>px)</label>
+          <input id="queryRadiusInput" type="range" min="20" max="200" value="110" step="2" />
+        </div>
+        <div class="control">
+          <label for="capacityInput">Node capacity (<span id="capacityValue"></span>)</label>
+          <input id="capacityInput" type="range" min="1" max="8" value="4" step="1" />
+        </div>
+        <div class="control">
+          <label for="minSizeInput">Minimum node size (<span id="minSizeValue"></span>px)</label>
+          <input id="minSizeInput" type="range" min="4" max="40" value="12" step="1" />
+        </div>
+        <div class="buttons">
+          <button class="primary" id="scatterBtn">Scatter 16 objects</button>
+          <button id="clearBtn">Clear objects</button>
+        </div>
+        <div class="summary" aria-live="polite">
+          <div id="summaryText">No objects yet.</div>
+          <ul class="hit-list" id="hitList"></ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <script type="module" src="./test.js"></script>
+</body>
+</html>
