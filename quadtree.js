@@ -1,18 +1,17 @@
-import Boundry from './boundary.js';
-import Draw from './draw.js';
+import RectBounds from './rectBounds.js';
 
-export default class Quadtree {
-  constructor(bounds, capacity, minimumSize = 1) {
-    if (!bounds.isBoundry()) throw (`Quadtree boundry was not a boundry: ${bounds}`);
-    this.bounds = bounds; // { x1, y1, x2, y2 }
+export default class QuadTree {
+  constructor(bounds, capacity = 1, minimumSize = 1) {
+    if (!RectBounds.isValidRectBound(bounds)) throw new Error(`Quadtree boundary was not valid: ${JSON.stringify(bounds)}`);
+    this.bounds = bounds;
     this.capacity = capacity; // Maximum objects before subdivision
-    this.minimumSize = minimumSize; // Minimum size (the side of the square, defined in world coordinates) before subdivision
-    this.actors = [];
+    this.minimumSize = minimumSize; // Minimum side length (world units) before subdivision
+    this.objects = [];
     this.divided = false;
-    this.hasReachedMinimumSize = bounds.width <= minimumSize || bounds.height <= minimumSize;
+    this.hasReachedMinimumSize = RectBounds.width(bounds) <= minimumSize || RectBounds.height(bounds) <= minimumSize;
   }
   clear() {
-    this.actors = [];
+    this.objects = [];
     if (this.divided) {
       this.northeast = undefined;
       this.northwest = undefined;
@@ -21,84 +20,88 @@ export default class Quadtree {
       this.divided = false;
     }
   }
-  findInRange(rangeBoundry, found = []) {
-    let touchesThisBoundry = Boundry.touches(rangeBoundry, this.bounds)
-    if (!touchesThisBoundry) return found; //Safely ignore this whole quadrant..
-    for (let actor of this.actors) {
-      let actorBoundry = new Boundry(
-        actor.position.x - actor.radius,
-        actor.position.y - actor.radius,
-        actor.position.x + actor.radius,
-        actor.position.y + actor.radius
+  findInRange(rectBounds, found = []) {
+    const touchesThisBoundary = RectBounds.touches(rectBounds, this.bounds);
+    if (!touchesThisBoundary) return found; // Safely ignore this whole quadrant
+
+    for (const object of this.objects) {
+      const objectBoundary = RectBounds.make(
+        object.position.x - object.radius,
+        object.position.y - object.radius,
+        object.position.x + object.radius,
+        object.position.y + object.radius
       );
-      if (Boundry.touches(rangeBoundry, actorBoundry)) {
-        found.push(actor);                                //Anything in the same quadrant is worth looking at more closely..
+      if (RectBounds.touches(rectBounds, objectBoundary)) {
+        found.push(object); // Anything in the same quadrant is worth looking at more closely
       }
     }
-    if (this.divided) {                                   //Probably nothing in the top level quadrant because it has been subdivided,
-      this.northwest.findInRange(rangeBoundry, found);    //and the actors moved to other locations, so we check the subquadants
-      this.northeast.findInRange(rangeBoundry, found);
-      this.southwest.findInRange(rangeBoundry, found);
-      this.southeast.findInRange(rangeBoundry, found);
-    }
-    return found;                                         //Recurse..
-  }
-  insert(actor) {
-    //If the object is not in the quadtree, check if it is within the bounds
-    let actorBoundry = new Boundry(
-      actor.position.x - actor.radius,
-      actor.position.y - actor.radius,
-      actor.position.x + actor.radius,
-      actor.position.y + actor.radius);
 
-    let actorTouchesThisBoundry = Boundry.touches(this.bounds, actorBoundry);
-    if (!actorTouchesThisBoundry) return false;
-    //If this cannot be put into a subquadrant because it would be to big... it gets an exemption!
-    let toBigtoSplit = actor.radius >= Math.min(this.bounds.width / 2, this.bounds.height / 2);
-    //Insert the actor in this quadrant ONLY if there is room, BUT exceed the capacity rule if:
-    //  the quadrant cannot be reduced because it is at minimize allowed size
+    if (this.divided) { // Probably nothing in the top level quadrant because it has been subdivided,
+      this.northwest.findInRange(rectBounds, found); // so we check the subquadrants
+      this.northeast.findInRange(rectBounds, found);
+      this.southwest.findInRange(rectBounds, found);
+      this.southeast.findInRange(rectBounds, found);
+    }
+    return found; // Recurse
+  }
+  insert(object) {
+    //If the object is not in the quadtree, check if it is within the bounds
+    const objectBoundary = RectBounds.make(
+      object.position.x - object.radius,
+      object.position.y - object.radius,
+      object.position.x + object.radius,
+      object.position.y + object.radius);
+
+    const objectTouchesThisBoundary = RectBounds.touches(this.bounds, objectBoundary);
+    if (!objectTouchesThisBoundary) return false;
+
+    const width = RectBounds.width(this.bounds);
+    const height = RectBounds.height(this.bounds);
+    const toBigToSplit = object.radius >= Math.min(width / 2, height / 2);
+    // Insert the object in this quadrant ONLY if there is room, BUT exceed the capacity rule if:
+    //  the quadrant cannot be reduced because it is at minimum allowed size
     //  or the object would not fit in a subdivision of this quadrant
-    let rules = toBigtoSplit || this.actors.length < this.capacity || this.hasReachedMinimumSize;
+    const rules = toBigToSplit || this.objects.length < this.capacity || this.hasReachedMinimumSize;
 
     if (rules) {
-      this.actors.push(actor);
+      this.objects.push(object);
       return true;
     }
 
-    //The quadrant is full, but the actor will fit in a subquarant,and there is space for another subdivision so find one for it...
+    // The quadrant is full, but the object will fit in a subquadrant, and there is space for another subdivision so find one for it...
     if (!this.divided) this.subdivide();
-    if (!this.northeast) throw Error('subdivision failed NE.');
-    if (!this.northwest) throw Error('subdivision failed NW.');
-    if (!this.southeast) throw Error('subdivision failed SE.');
-    if (!this.southwest) throw Error('subdivision failed SW.');
-    if (this.northeast.insert(actor)) return true;
-    if (this.northwest.insert(actor)) return true;
-    if (this.southeast.insert(actor)) return true;
-    if (this.southwest.insert(actor)) return true;
+    if (!this.northeast) throw new Error('subdivision failed NE.');
+    if (!this.northwest) throw new Error('subdivision failed NW.');
+    if (!this.southeast) throw new Error('subdivision failed SE.');
+    if (!this.southwest) throw new Error('subdivision failed SW.');
+    if (this.northeast.insert(object)) return true;
+    if (this.northwest.insert(object)) return true;
+    if (this.southeast.insert(object)) return true;
+    if (this.southwest.insert(object)) return true;
     throw new Error('Quadtree unable to insert object.');
   }
   subdivide() {
-    const { x1, y1, x2, y2 } = this.bounds;
-    const midX = (x1 + x2) / 2;
-    const midY = (y1 + y2) / 2;
+    const { x0, y0, x1, y1 } = this.bounds;
+    const midX = (x0 + x1) / 2;
+    const midY = (y0 + y1) / 2;
 
-    this.northwest = new Quadtree(
-      new Boundry(x1, y1, midX, midY),
+    this.northwest = new QuadTree(
+      RectBounds.make(x0, y0, midX, midY),
       this.capacity,
       this.minimumSize
     );
-    this.northeast = new Quadtree(
-      new Boundry(midX, y1, x2, midY),
+    this.northeast = new QuadTree(
+      RectBounds.make(midX, y0, x1, midY),
       this.capacity,
       this.minimumSize
     );
-    this.southwest = new Quadtree(
-      new Boundry(x1, midY, midX, y2),
+    this.southwest = new QuadTree(
+      RectBounds.make(x0, midY, midX, y1),
       this.capacity,
       this.minimumSize
     );
-    this.southeast = new Quadtree(
-      new Boundry(midX, midY, x2, y2),
+    this.southeast = new QuadTree(
+      RectBounds.make(midX, midY, x1, y1),
       this.capacity,
       this.minimumSize
     );
@@ -106,23 +109,31 @@ export default class Quadtree {
     this.divided = true;
   }
 
-  draw(context, offsetX, offsetY, currentColorIndex) {
-   
-    let colors = ['#d00', '#090', '#00f'];
-    if (!currentColorIndex) currentColorIndex = 0;
-    let x1 = this.bounds.x1 + offsetX;
-    let y1 = this.bounds.y1 + offsetY;
-    let x2 = this.bounds.x2 + offsetX;
-    let y2 = this.bounds.y2 + offsetY;
+  draw(context, offsetX = 0, offsetY = 0, currentColorIndex = 0) {
+    const colors = ['#d00', '#090', '#00f'];
+    const { x0, y0, x1, y1 } = this.bounds;
+    const width = RectBounds.width(this.bounds);
+    const height = RectBounds.height(this.bounds);
 
-    Draw.rect(x1, y1, x2, y2, colors[currentColorIndex % colors.length], false);
-    currentColorIndex = (currentColorIndex + 1) % colors.length;
-    if (this.northeast) this.northeast.draw(context, offsetX, offsetY, currentColorIndex);
-    if (this.southeast) this.southeast.draw(context, offsetX, offsetY, currentColorIndex);
-    if (this.northwest) this.northwest.draw(context, offsetX, offsetY, currentColorIndex);
-    if (this.southwest) this.southwest.draw(context, offsetX, offsetY, currentColorIndex);
-    for (let actor of this.actors) {
-      draw.circleHex(actor.position.x + offsetX, actor.position.y + offsetY, actor.radius, '#fff');
+    context.save();
+    context.strokeStyle = colors[currentColorIndex % colors.length];
+    context.lineWidth = 1;
+    context.strokeRect(x0 + offsetX, y0 + offsetY, width, height);
+    context.restore();
+
+    const nextColorIndex = (currentColorIndex + 1) % colors.length;
+    if (this.northeast) this.northeast.draw(context, offsetX, offsetY, nextColorIndex);
+    if (this.southeast) this.southeast.draw(context, offsetX, offsetY, nextColorIndex);
+    if (this.northwest) this.northwest.draw(context, offsetX, offsetY, nextColorIndex);
+    if (this.southwest) this.southwest.draw(context, offsetX, offsetY, nextColorIndex);
+
+    context.save();
+    context.strokeStyle = '#fff';
+    for (const object of this.objects) {
+      context.beginPath();
+      context.arc(object.position.x + offsetX, object.position.y + offsetY, object.radius, 0, Math.PI * 2);
+      context.stroke();
     }
+    context.restore();
   }
 }
