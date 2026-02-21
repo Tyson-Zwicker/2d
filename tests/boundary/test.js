@@ -1,12 +1,12 @@
-import Boundary from "../../boundary.js";
+import RectBounds from "../../rectBounds.js";
 
 const canvasEl = document.getElementById("playfield");
 const ctx = canvasEl.getContext("2d");
 const touchStatusEl = document.getElementById("touchStatus");
 
 const rectangles = [
-  { label: "A", color: "#5b8def", bound: Boundary.make(140, 140, 680, 300) },
-  { label: "B", color: "#f5537c", bound: Boundary.make(540, 260, 860, 500) },
+  { label: "A", color: "#5b8def", bound: RectBounds.make(140, 140, 680, 300) },
+  { label: "B", color: "#f5537c", bound: RectBounds.make(540, 260, 860, 500) },
 ];
 
 let activeDrag = null;
@@ -28,8 +28,8 @@ function updateStatus(touching) {
 
 function drawRect(rect, highlight) {
   const { x0, y0, x1, y1 } = rect.bound;
-  const width = Boundary.width(rect.bound);
-  const height = Boundary.height(rect.bound);
+  const width = RectBounds.width(rect.bound);
+  const height = RectBounds.height(rect.bound);
 
   ctx.fillStyle = highlight ? `${rect.color}33` : `${rect.color}26`;
   ctx.strokeStyle = rect.color;
@@ -64,7 +64,7 @@ function render() {
   }
   ctx.restore();
 
-  const touching = Boundary.touches(rectangles[0].bound, rectangles[1].bound);
+  const touching = RectBounds.touches(rectangles[0].bound, rectangles[1].bound);
   rectangles.forEach((rect) => drawRect(rect, touching));
 
   if (touching) {
@@ -79,8 +79,8 @@ function render() {
 function handlePointerDown(event) {
   const point = toCanvasPoint(event);
   const hitIndex = rectangles.findIndex((rect) =>
-    Boundary.isPointInside(point.x, point.y, rect.bound) ||
-    Boundary.isPointOnEdge(point.x, point.y, rect.bound)
+    RectBounds.isPointInside(point.x, point.y, rect.bound) ||
+    RectBounds.isPointOnEdge(point.x, point.y, rect.bound)
   );
   if (hitIndex === -1) return;
   const bound = rectangles[hitIndex].bound;
@@ -88,8 +88,8 @@ function handlePointerDown(event) {
     index: hitIndex,
     offsetX: point.x - bound.x0,
     offsetY: point.y - bound.y0,
-    width: Boundary.width(bound),
-    height: Boundary.height(bound),
+    width: RectBounds.width(bound),
+    height: RectBounds.height(bound),
   };
   canvasEl.setPointerCapture(event.pointerId);
 }
@@ -100,7 +100,7 @@ function handlePointerMove(event) {
   const newX0 = point.x - activeDrag.offsetX;
   const newY0 = point.y - activeDrag.offsetY;
   const rect = rectangles[activeDrag.index];
-  rect.bound = Boundary.make(newX0, newY0, newX0 + activeDrag.width, newY0 + activeDrag.height);
+  rect.bound = RectBounds.make(newX0, newY0, newX0 + activeDrag.width, newY0 + activeDrag.height);
   render();
 }
 
