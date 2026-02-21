@@ -46,7 +46,6 @@ export default class Boundary {
     if (y === bound.y1 && x > bound.x0 && x < bound.x1) return true //bottom edge
     return false;
   }
-
   static touches(bound1, bound2) {
     if (!bound1 || !bound2) return false;
     const horizontalOverlap = bound1.x0 <= bound2.x1 && bound1.x1 >= bound2.x0;
