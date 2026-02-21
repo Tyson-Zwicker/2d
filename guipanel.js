@@ -74,7 +74,7 @@ export default class GUIPanel {
       let floatingPanel = new GUIPanel('float', listElement); //floating panel just needs items..    
       this.listPanel = floatingPanel;
       this.activeList = listElement;
-      for (let element of this.elements) element.active = false; //deactive everything so list is only active elemenet..    
+      for (let element of this.elements) element.active = false; //deactive everything so list is only active element..    
     }
   }
 
@@ -161,7 +161,7 @@ export default class GUIPanel {
   }
   drawPanel() {
     if (this.elements.length > 0) {
-      Draw.rect(this.boundry.x0, this.boundry.y0, this.boundry.x1, this.boundry.y1, '#022', false);
+      Draw.rect(this.boundry.x0, this.boundry.y0, this.boundry.x1, this.boundry.y1, View.bgColor, true);
       let cursor = {x:this.offset.x, y:this.offset.y};
       for (let element of this.elements) {        
         if (element.type === 'list' && element === this.activeList) {

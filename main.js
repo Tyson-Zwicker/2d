@@ -67,9 +67,17 @@ export default class Main {
   }
   static checkMouse() {
     let interactionOccured = false;
+    /*This element is important because the activeListElements need to be drawn once
+    before they can be checked for mouse interaction BECAUSE they need their drawnBounds set.
+    And the draw method will occur again before checkMouse is called again.\
+    */
+    for (let element of GUI.activeListItemElements) {
+      if (element.button) element.button.checkForMouse();
+    }
     for (let element of GUI.elements) {
       if (element.button) element.button.checkForMouse();
     }
+   
     View.handleCameraDrag(interactionOccured);
   }
   static showDelta() {
