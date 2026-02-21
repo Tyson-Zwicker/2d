@@ -3,7 +3,7 @@ import Appearance from '../../appearance.js';
 import GUI from '../../gui.js';
 
 makeGUI();
-Main.run(60);
+Main.run(10);
 
 
 function makeGUI() {
@@ -21,8 +21,8 @@ function makeGUI() {
     { text: 'Selection C', value: 'C' },
     { text: 'D!', value: 'D' }
   ]
-  GUI.addList('left', 'Choose', listOptions, (newValue) => { alert('left = ' + newValue); }, 'A');
-  GUI.addList('right', 'Choose', listOptions, (newValue) => { alert('right = ' + newValue); }, 'B');
-  GUI.addList('top', 'Choose', listOptions, (newValue) => { alert('top = ' + newValue); }, 'C');
-  GUI.addList('bottom', 'Choose', listOptions, (newValue) => { alert('bottom = ' + newValue); }, 'D');
+  GUI.addList('left', 'ChooseL', listOptions, (newValue) => { alert('left = ' + newValue); }, 'A');
+  GUI.addList('right', 'ChooseR', listOptions, (newValue) => { alert('right = ' + newValue); }, 'B');
+  GUI.addList('top', 'ChooseT', listOptions, (newValue) => { alert('top = ' + newValue); }, 'C');
+  GUI.addList('bottom', 'ChooseB', listOptions, (newValue) => { alert('bottom = ' + newValue); }, 'D');
 }
