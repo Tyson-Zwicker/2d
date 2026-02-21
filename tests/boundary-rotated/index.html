@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rotated rectangle touch</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 20% 20%, #f4f6fb, #e8ecf5);
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: #0f172a;
+      }
+      .frame {
+        width: min(1180px, 100vw - 32px);
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 16px 42px rgba(15, 30, 60, 0.16);
+        padding: 18px 18px 24px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+      }
+      .subhead {
+        margin: 0;
+        color: #475569;
+        font-size: 14px;
+      }
+      .status {
+        padding: 9px 16px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #ecfeff;
+        color: #0ea5e9;
+      }
+      .status.touching { background: #fee2e2; color: #b91c1c; }
+      .stage {
+        position: relative;
+        border: 1px solid #d7dce5;
+        border-radius: 14px;
+        overflow: hidden;
+        background: linear-gradient(120deg, #f8fafc, #f1f5f9);
+      }
+      canvas { width: 100%; height: 640px; display: block; }
+      .legend {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .chip { width: 14px; height: 14px; border-radius: 4px; }
+      .hint { color: #0f172a; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <header>
+        <div>
+          <h1>Rotated rectangles</h1>
+          <p class="subhead">Drag inside a shape to move it. Drag the small handle to rotate. Edges count as touching.</p>
+        </div>
+        <div id="touchStatus" class="status" aria-live="polite">Not touching</div>
+      </header>
+      <div class="stage">
+        <canvas id="playfield" width="1100" height="640"></canvas>
+      </div>
+      <div class="legend">
+        <div class="chip" style="background:#5b8def"></div>
+        <span>Rect A</span>
+        <div class="chip" style="background:#f5537c"></div>
+        <span>Rect B</span>
+        <span class="hint">Handles sit on each rectangle's right edge; grab them to rotate.</span>
+      </div>
+    </div>
+    <script type="module" src="./test.js"></script>
+  </body>
+</html>
