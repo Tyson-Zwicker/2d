@@ -1,6 +1,6 @@
 import GUI from './gui.js';
 import View from './view.js';
-
+import Main from './main.js';
 export default class Button {
   guiElement = undefined;
   clicked = false;
@@ -22,6 +22,7 @@ export default class Button {
   #doButton(insideBounds) {
     let interaction = false;
     if (insideBounds) {
+      
       if (View.mouse.buttonDown && !this.hovered) {
         //*Must* be checked first.. mouse went down somewhere else, but not here.. doesn't affect this actor..
         return false;
@@ -29,7 +30,7 @@ export default class Button {
       else if (!View.mouse.buttonDown && !this.hovered) {
         //mouse hovers over actor, not button pressed..
         this.hovered = true
-        interaction = true;
+        interaction = true;       
       }
       else if (View.mouse.buttonDown && this.hovered && !this.pressed) {
         //they just pressed on this button, which was being hovered over..

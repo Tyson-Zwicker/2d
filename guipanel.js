@@ -3,6 +3,7 @@ import GUIElement from './guielement.js';
 import Button from './button.js';
 import Draw from './draw.js';
 import View from './view.js';
+import Main from './main.js';
 export default class GUIPanel {
   elements = [];
   listElements = new Map();
@@ -176,17 +177,18 @@ export default class GUIPanel {
   }
   drawElement(element, cursor, shadow) {
     let facade = GUI.appearance.normal;
-    
+    let stop = false;
     if (shadow) {
       facade = GUI.appearance.shadowed;
-    } else if (element.type === 'button') {
+    } else if (element.type === 'button' || element.type === 'list') {
       if (element.button.pressed) {
         facade = GUI.appearance.pressed;
       } else if (element.button.hovered) {
         facade = GUI.appearance.hovered;
+        stop = true;
       }
     }
-    
+   
     Draw.textBox(
       element.bounds.x0 + cursor.x, element.bounds.y0 + cursor.y,
       element.bounds.x1 + cursor.x, element.bounds.y1 + cursor.y,
@@ -198,6 +200,5 @@ export default class GUIPanel {
       x1: element.bounds.x1 + cursor.x,
       y1: element.bounds.y1 + cursor.y
     };
-    
   }
 }
