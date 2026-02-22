@@ -1,4 +1,4 @@
-import RectBounds from './rectBounds.js';
+import RectBounds from './rectbounds.js';
 
 export default class QuadTree {
   static {
@@ -11,6 +11,7 @@ export default class QuadTree {
     let minimumSize = 100; // Define the minimum size for each quadrant (world units)
     let maxX = 50000, maxY = 50000; // Define the maximum world size for the quadtree
     let minY = -50000, minX = -50000; // Define the minimum world size for the quadtree
+    QuadTree.bounds = RectBounds.make(minX, minY, maxX, maxY);
     //minY and MinX must be negative to allow for objects to be placed in the negative world space, which is common in many games and simulations. This allows for a more flexible and realistic representation of the world, as objects can exist in any quadrant of the quadtree, including those that extend into negative coordinates.
     let size = (maxX-minX * maxY-minY) / 1000; // Define the size of each quadrant (e.g., 10,000 world units)
     QuadTree.capacity = capacity;
@@ -22,6 +23,10 @@ export default class QuadTree {
       if (i % 1000 === 0) console.log(`Created ${i} QuadTree objects...`);
     }
   }
+  constructor(bounds = QuadTree.bounds, capacity = QuadTree.capacity, minimumSize = QuadTree.minimumSize) {
+    this.init(bounds ?? QuadTree.bounds, capacity ?? QuadTree.capacity, minimumSize ?? QuadTree.minimumSize);
+  }
+
   static acquire(bounds, capacity = QuadTree.capacity, minimumSize = QuadTree.minimumSize) {
     const node = QuadTree.pool.length ? QuadTree.pool.pop() : new QuadTree(bounds, capacity, minimumSize);
     node.init(bounds, capacity, minimumSize);
@@ -31,23 +36,6 @@ export default class QuadTree {
     if (!node) return;
     node.clear();
     QuadTree.pool.push(node);
-  }
-  constructor(bounds, capacity = QuadTree.capacity, minimumSize = QuadTree.minimumSize) {
-    this.init(bounds, capacity ?? QuadTree.capacity, minimumSize ?? QuadTree.minimumSize);
-  }
-  init(bounds, capacity, minimumSize) {
-    if (!RectBounds.isValidRectBound(bounds)) throw new Error(`Quadtree boundary was not valid: ${JSON.stringify(bounds)}`);
-    this.bounds = bounds;
-    this.capacity = capacity; // Maximum objects before subdivision
-    this.minimumSize = minimumSize; // Minimum side length (world units) before subdivision
-    this.objects = this.objects || [];
-    this.objects.length = 0;
-    this.divided = false;
-    this.northeast = undefined;
-    this.northwest = undefined;
-    this.southeast = undefined;
-    this.southwest = undefined;
-    this.hasReachedMinimumSize = RectBounds.width(bounds) <= minimumSize || RectBounds.height(bounds) <= minimumSize;
   }
   clear() {
     this.objects.length = 0;
@@ -63,6 +51,23 @@ export default class QuadTree {
       this.divided = false;
     }
   }
+
+  
+  init(bounds, capacity, minimumSize) {
+    if (!RectBounds.isValidRectBound(bounds)) throw new Error(`Quadtree boundary was not valid: ${JSON.stringify(bounds)}`);
+    this.bounds = bounds;
+    this.capacity = capacity; // Maximum objects before subdivision
+    this.minimumSize = minimumSize; // Minimum side length (world units) before subdivision
+    this.objects = this.objects || [];
+    this.objects.length = 0;
+    this.divided = false;
+    this.northeast = undefined;
+    this.northwest = undefined;
+    this.southeast = undefined;
+    this.southwest = undefined;
+    this.hasReachedMinimumSize = RectBounds.width(bounds) <= minimumSize || RectBounds.height(bounds) <= minimumSize;
+  }
+  
   findInRange(rectBounds, found = []) {
     const touchesThisBoundary = RectBounds.touches(rectBounds, this.bounds);
     if (!touchesThisBoundary) return found; // Safely ignore this whole quadrant
