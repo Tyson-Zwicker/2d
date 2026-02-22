@@ -64,7 +64,7 @@ export default class Part {
       this.root = parent;
       parent.body = this;
     } else {
-      if (parent.root === undefined) throw new Error('Cannot attach to an unattached object. Attach objjectss in parent first order.');
+      if (parent.root === undefined) throw new Error('Cannot attach to an unattached object. Attach objects in parent first order.');
       this.root = parent.root;
       parent.parts.push(this);
     }
