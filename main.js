@@ -13,6 +13,7 @@ export default class Main {
   static currentFrame = 0;
   static lastKeyCheck = 0;
   static keyCheckInterval = 100;
+  static maxLoopTime =0;
   static {
     View.initialize();
     GUI.initialize(100, 30, 5, 5, Appearance.Green);
@@ -61,6 +62,7 @@ export default class Main {
       Main.showDelta();
       if (Main.creatorsFunction) Main.creatorsFunction();
       Main.loopTime = Date.now() - t;
+      if (Main.loopTime> Main.maxLoopTime &&Main.currentFrame>10) Main.maxLoopTime = Main.loopTime;
     } catch (error) {
       Main.continue = false;
       throw error;
@@ -68,7 +70,7 @@ export default class Main {
   }
   static checkMouse() {
     let interactionOccured = false;
-    /*This element is important because the activeListElements need to be drawn once
+    /*The order here is important: The activeListElements need to be drawn once
     before they can be checked for mouse interaction BECAUSE they need their drawnBounds set.
     And the draw method will occur again before checkMouse is called again.\
     */
@@ -90,9 +92,11 @@ export default class Main {
     let frameStr = String(Main.currentFrame).padStart(6, '0');
     let deltaStr = 'Δ ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0');
     let loopTimeStr = 'Σ ' + String(Main.loopTime).padStart(4, '0');
+    let maxLoopTimeStr = 'Ω ' + String(Main.maxLoopTime).padStart(4, '0');
     View.context.fillText(frameStr, 20, 8);
     View.context.fillText(deltaStr, 20, View.canvas.height - 20);
     View.context.fillText(loopTimeStr, View.canvas.width - 70, 8);
+    View.context.fillText(maxLoopTimeStr, View.canvas.width - 70, View.canvas.height - 20);
     let debugIndent = 0;
     for (let msg of Main.tickMsg) {
       debugIndent += msg.indent;
