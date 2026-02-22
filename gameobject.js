@@ -23,11 +23,12 @@ export default class GameObject {
   centerOfMass = undefined;           //Calculated in "finalize" step. (Local Coordinate Space)
   momentOfInertia = undefined;        //Calculated in "finalize" step.
   radius = undefined;                //Calculated in "finalize" step. (The radius of the smallest circle that can enclose all parts).
-
+  canMove = true;                     //Determines which QuadTree this object is added to.
   finalized = false;                  //Set to true, when "finalized". (Game will not allow unfinalized objects to be added).
 
-  constructor(name) {
+  constructor(name, canMove = true) {
     this.name = name;
+    this.canMove = canMove;
   }
   finalize() {                        //Once after all the parts have been added.    
     if (this.body === undefined) throw new Error(`GameObject [${this.name}] has no body.`);
