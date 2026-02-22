@@ -49,6 +49,7 @@ export default class Main {
   static doWork() {
     let t = Date.now();
     try {
+      Game.rebuildQuadTrees();
       View.clear();
       for (let gameObject of Game.gameObjects.values()) gameObject.move();
       Effects.renderBackground();
