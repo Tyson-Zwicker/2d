@@ -27,14 +27,14 @@ export default class Appearance {
     new Facade('#f66', '#f66', '#222', 1, 'Arial', 12)
   );
   static Green = new Appearance(
-    new Facade('#060', '#0f0', '#fff', 1, 'Arial', 12),
+    new Facade('#060', '#2f4', '#fff', 1, 'Arial', 12),
     new Facade('#5f5', '#5f5', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#6f6', '#000', 1, 'Arial', 12),
     new Facade('#090', '#090', '#777', 1, 'Arial', 12),
     new Facade('#6f6', '#6f6', '#222', 1, 'Arial', 12)
   );
   static Blue = new Appearance(
-    new Facade('#027', '#00f', '#fff', 1, 'Arial', 12),
+    new Facade('#027', '#26f', '#fff', 1, 'Arial', 12),
     new Facade('#55f', '#55f', '#fff', 1, 'Arial', 12),
     new Facade('#fff', '#66f', '#000', 1, 'Arial', 12),
     new Facade('#009', '#009', '#777', 1, 'Arial', 12),
