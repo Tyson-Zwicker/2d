@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Collision Playground</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #0b1224;
+        --accent: #06b6d4;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --chip-off: #1e293b;
+        --chip-on: #f97316;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at 20% 20%, #16213e, #0b1224 55%, #050915);
+        color: var(--text);
+        font-family: "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .frame {
+        width: min(1180px, 100vw - 24px);
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 18px;
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
+        padding: 18px 18px 12px;
+      }
+      header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: -0.01em;
+      }
+      .subhead {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .chips {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: var(--chip-off);
+        color: var(--text);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+      .chip.on {
+        background: var(--chip-on);
+        color: #0b0d14;
+      }
+      .chip strong { font-weight: 600; }
+      .panel {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .stat {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--muted);
+      }
+      .stat span:last-child {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .vel-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 10px;
+        align-items: center;
+        margin: 4px 0 10px;
+      }
+      .vel-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      .vel-label {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        min-width: 96px;
+      }
+      label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      input[type=number] {
+        width: 92px;
+        padding: 6px 8px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: #0c1221;
+        color: var(--text);
+      }
+      button {
+        background: linear-gradient(135deg, #0ea5e9, #0f766e);
+        color: #0c0f1a;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+      }
+      button.secondary {
+        background: #1f2937;
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      button:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25); }
+      .canvas-wrap {
+        background: linear-gradient(135deg, #0c1221, #0a1020);
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        position: relative;
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .hint {
+        margin: 10px 2px 0;
+        color: var(--muted);
+        font-size: 13px;
+        letter-spacing: 0.01em;
+      }
+      .legend {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <header>
+        <div>
+          <h1>Collision playground</h1>
+          <p class="subhead">Drag the discs. When they overlap, narrow phase contact info and impulses appear.</p>
+        </div>
+        <div class="chips">
+          <div class="chip" id="collisionStatus">Clear</div>
+          <div class="chip" id="treeStatus">QuadTree hydrated</div>
+        </div>
+      </header>
+
+      <div class="panel">
+        <div class="stat"><span>Center distance</span><span id="distanceValue">--</span></div>
+        <div class="stat"><span>Overlap</span><span id="overlapValue">--</span></div>
+        <div class="stat"><span>Impulse |F|</span><span id="impulseValue">--</span></div>
+        <div class="controls">
+          <button id="resetBtn">Reset positions</button>
+          <button class="secondary" id="scatterBtn">Scatter</button>
+        </div>
+      </div>
+
+      <div class="vel-controls">
+        <div class="vel-group">
+          <p class="vel-label">Alpha velocity</p>
+          <label>vx <input id="alphaVx" type="number" value="0" step="10" /></label>
+          <label>vy <input id="alphaVy" type="number" value="0" step="10" /></label>
+        </div>
+        <div class="vel-group">
+          <p class="vel-label">Bravo velocity</p>
+          <label>vx <input id="bravoVx" type="number" value="0" step="10" /></label>
+          <label>vy <input id="bravoVy" type="number" value="0" step="10" /></label>
+        </div>
+        <button id="applyVelocityBtn">Apply velocities</button>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="playfield" width="1100" height="620"></canvas>
+      </div>
+      <div class="legend">
+        <div class="pill"><span class="swatch" style="background:#0ea5e9"></span><span>Alpha</span></div>
+        <div class="pill"><span class="swatch" style="background:#f97316"></span><span>Bravo</span></div>
+        <div class="pill">Dash line = contact; arrow = normal/impulse direction</div>
+      </div>
+      <p class="hint">Tip: overlap the discs slightly to trigger the narrow phase and view contact forces.</p>
+    </div>
+
+    <script type="module" src="./test.js"></script>
+  </body>
+</html>
