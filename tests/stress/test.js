@@ -12,6 +12,7 @@ let blueBlock = new Part('blue-block', [{ appearance: Appearance.Blue, points: b
 for (let i = 0; i < 1200; i++) {
   let gameObject = new GameObject('blocks'+i);
   gameObject.velocity = { x: Rnd.int(-10, 10), y: Rnd.int(-10, 10) };
+  gameObject.spin = Rnd.int (-10,10);
   let r = redBlock.clone();
   let g = greenBlock.clone();
   let b = blueBlock.clone();
