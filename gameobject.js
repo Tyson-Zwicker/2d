@@ -137,14 +137,13 @@ export default class GameObject {
     View.context.lineWidth = oldWidth;
     View.context.strokeStyle = oldStyle;
   }
-  applyForce(forceVector, localPosition) {
+  applyForce(forceVector, localPosition) { //Used by thrusters and other internally generated forces.
     let forceScale = Main.delta;
     let impulse = Vec.scale(forceVector, forceScale);
     let linearAcceleration = Vec.scale(impulse, 1/this.totalMass);
     let rotatedLocalPos = Vec.rotate (localPosition,this.worldRotation);
     let arm = Vec.sub(rotatedLocalPos, this.centerOfMass); //<-this local position is not rotated
-    let torque = Vec.cross(arm, impulse);
-    //let torque = arm.x * impulse.y - arm.y * impulse.x;
+    let torque = Vec.cross(arm, impulse);    
     let angularAcceleration = (torque / this.momentOfInertia) * (180/Math.PI);
     this.velocity = Vec.add (this.velocity, linearAcceleration);
     this.spin += angularAcceleration;
