@@ -20,8 +20,7 @@ for (let i = 0; i < 1200; i++) {
   g.addTo(r, { x: -20, y: 0 }, 0);
   gameObject.finalize();
   
-  Game.add(gameObject, { x: Rnd.int(-100, 100), y: Rnd.int(-100, 100) }, 0);
-  
+  Game.add(gameObject, { x: Rnd.int(-100, 100), y: Rnd.int(-100, 100) }, 0);  
 }
 
 Main.run(30);
