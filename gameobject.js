@@ -1,6 +1,7 @@
 import Main from './main.js';
 import Vec from './vec.js';
 import View from './view.js';
+import ParticleEffect from './particleeffect.js';
 
 export default class GameObject {
   #localPosition = { x: 0, y: 0 };    //READ ONLY
@@ -104,7 +105,7 @@ export default class GameObject {
     for (let part of this.allParts) {
       let faces = part.getWorldFaces();
       for (let face of faces) {
-        View.context.fillStyle = face.appearance.normal.backgroundColor;        
+        View.context.fillStyle = face.appearance.normal.backgroundColor;
         View.context.strokeStyle = face.appearance.normal.borderColor;
         let path = new Path2D();
         let points = face.points;
@@ -117,8 +118,12 @@ export default class GameObject {
         View.context.fill(path);
         View.context.stroke(path);
       }
+      if (part.particleGenParams !== undefined && part.particleGenState) {
+        let pram = part.particleGeneratorParams;
+        ParticleEffect.generateGroup(part.worldPosition, part.worldRotation, pram.angleSpan, pram.velMin, pram.velMax, pram.thickness, pram.color, pram.groupSize, pram.durMin, pram.durMax);        
+      }
     }
-    this.#drawCenterOfMass();
+    //this.#drawCenterOfMass();
   }
   #drawCenterOfMass() {
     let oldStyle = View.context.strokeStyle;
@@ -140,12 +145,12 @@ export default class GameObject {
   applyForce(forceVector, localPosition) { //Used by thrusters and other internally generated forces.
     let forceScale = Main.delta;
     let impulse = Vec.scale(forceVector, forceScale);
-    let linearAcceleration = Vec.scale(impulse, 1/this.totalMass);
-    let rotatedLocalPos = Vec.rotate (localPosition,this.worldRotation);
+    let linearAcceleration = Vec.scale(impulse, 1 / this.totalMass);
+    let rotatedLocalPos = Vec.rotate(localPosition, this.worldRotation);
     let arm = Vec.sub(rotatedLocalPos, this.centerOfMass); //<-this local position is not rotated
-    let torque = Vec.cross(arm, impulse);    
-    let angularAcceleration = (torque / this.momentOfInertia) * (180/Math.PI);
-    this.velocity = Vec.add (this.velocity, linearAcceleration);
+    let torque = Vec.cross(arm, impulse);
+    let angularAcceleration = (torque / this.momentOfInertia) * (180 / Math.PI);
+    this.velocity = Vec.add(this.velocity, linearAcceleration);
     this.spin += angularAcceleration;
     return { "linear": linearAcceleration, "angular": angularAcceleration };
   }

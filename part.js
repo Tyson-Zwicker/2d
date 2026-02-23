@@ -13,13 +13,16 @@ export default class Part {
   name = undefined;             //assigned by constructor
   parts = [];                   //added to by addPart();
   faces = [];                   //assigned by constructor
+  particleGenParams = undefined;//assigned by constructor (optional)
+  particleGenState = false;     //turn particle generation on and off. Set by user.
   mass = undefined;             //assigned by constructor.
   radius = undefined;           //Calculated upon construction. (The radius of the smallest circle that can enclose this part). 
-  constructor(name, faces, mass) {
+  constructor(name, faces, mass, particleGenParams) {
     if (!name || !faces || !mass) throw Error('Missing parameter');
     this.name = name;
     this.mass = mass;
     this.faces.push(...faces);
+    if (typeof particleGenParams==='object') this.particleGenParams = particleGenParams;
     this.radius = this.#calcRadius();
   }
   #calcRadius() {
