@@ -17,6 +17,7 @@ export default class Part {
   particleGenState = false;     //turn particle generation on and off. Set by user.
   mass = undefined;             //assigned by constructor.
   radius = undefined;           //Calculated upon construction. (The radius of the smallest circle that can enclose this part). 
+  depth = undefined;            //Calculated when addTo() parent object..
   constructor(name, faces, mass, particleGenParams) {
     if (!name || !faces || !mass) throw Error('Missing parameter');
     this.name = name;
@@ -37,7 +38,7 @@ export default class Part {
       }
       return maxDistance;
     } catch (err) {
-      console.log ('---ERROR---')
+      console.log('---ERROR---')
       console.log(this.name);
       console.log(this.faces);
       console.log(err);
@@ -82,6 +83,7 @@ export default class Part {
     this.parent = parent;
     this.ownPosition = offset;
     this.ownRotation = rotation;
+    this.depth = parent.depth + 1;
     this.calculateLocals();
   }
   get(name) {

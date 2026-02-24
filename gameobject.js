@@ -26,7 +26,7 @@ export default class GameObject {
   radius = undefined;                //Calculated in "finalize" step. (The radius of the smallest circle that can enclose all parts).
   canMove = true;                     //Determines which QuadTree this object is added to.
   finalized = false;                  //Set to true, when "finalized". (Game will not allow unfinalized objects to be added).
-
+  depth = 0;                           //used to sort part rendering order.  (low #'s render first)
   constructor(name, canMove = true) {
     this.name = name;
     this.canMove = canMove;
@@ -34,6 +34,13 @@ export default class GameObject {
   finalize() {                        //Once after all the parts have been added.    
     if (this.body === undefined) throw new Error(`GameObject [${this.name}] has no body.`);
     this.allParts = this.#getAllParts(this.body);
+    //TODO: Sort this array by depth of nodes. Deepest ones should be last in order, so they don't get drawn over.
+    this.allParts.sort((a, b) =>  a.depth - b.depth );
+    console.log('--sorted all parts--')
+    for (let i = 0; i < this.allParts.length; i++) {
+      console.log(`${this.allParts[i].name} -> ${this.allParts[i].depth}`);
+    }
+    console.log('-- --')
     let mass = this.#calcMass();
     this.centerOfMass = mass.center;
     this.totalMass = mass.total;
@@ -120,7 +127,7 @@ export default class GameObject {
       }
       if (part.particleGenParams !== undefined && part.particleGenState) {
         let pram = part.particleGeneratorParams;
-        ParticleEffect.generateGroup(part.worldPosition, part.worldRotation, pram.angleSpan, pram.velMin, pram.velMax, pram.thickness, pram.color, pram.groupSize, pram.durMin, pram.durMax);        
+        ParticleEffect.generateGroup(part.worldPosition, part.worldRotation, pram.angleSpan, pram.velMin, pram.velMax, pram.thickness, pram.color, pram.groupSize, pram.durMin, pram.durMax);
       }
     }
     //this.#drawCenterOfMass();
