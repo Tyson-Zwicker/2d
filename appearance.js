@@ -6,7 +6,7 @@ export default class Appearance {
   shadowed = Facade.shadowed;
   highlighted = Facade.highlighted;
   constructor(normal, hovered, pressed, shadowed, highlighted) {
-    this.normal = normal;
+    this.normal = normal;             //Required to render parts, the rest are required for interactive things (like gui buttons/lists)
     this.hovered = hovered;
     this.pressed = pressed;
     this.shadowed = shadowed;

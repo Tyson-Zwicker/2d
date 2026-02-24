@@ -22,22 +22,30 @@ export default class Part {
     this.name = name;
     this.mass = mass;
     this.faces.push(...faces);
-    if (typeof particleGenParams==='object') this.particleGenParams = particleGenParams;
+    if (typeof particleGenParams === 'object') this.particleGenParams = particleGenParams;
     this.radius = this.#calcRadius();
   }
   #calcRadius() {
     // Calculate the radius of the smallest circle that can enclose this part
-    let maxDistance = 0;
-    for (let face of this.faces) {
-      for (let point of face.points) {
-        const distance = Math.sqrt(point.x * point.x + point.y * point.y);
-        maxDistance = Math.max(maxDistance, distance);
+    try {
+      let maxDistance = 0;
+      for (let face of this.faces) {
+        for (let point of face.points) {
+          const distance = Math.sqrt(point.x * point.x + point.y * point.y);
+          maxDistance = Math.max(maxDistance, distance);
+        }
       }
+      return maxDistance;
+    } catch (err) {
+      console.log ('---ERROR---')
+      console.log(this.name);
+      console.log(this.faces);
+      console.log(err);
+      throw err;
     }
-    return maxDistance;
   }
-  clone (){
-    return new Part (this.name, this.faces, this.mass);    
+  clone() {
+    return new Part(this.name, this.faces, this.mass);
   }
   get worldPosition() {
     return Vec.add(this.root.worldPosition, this.localPosition)
@@ -91,7 +99,7 @@ export default class Part {
     for (let face of this.faces) {
       let worldFace = { appearance: face.appearance, points: [] };
       for (let point of face.points) {
-        let p = structuredClone(point);        
+        let p = structuredClone(point);
         p = Vec.rotate(p, this.localRotation);
         p = Vec.add(p, this.localPosition);
         p = Vec.rotate(p, this.root.worldRotation);
