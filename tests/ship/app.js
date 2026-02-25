@@ -66,6 +66,10 @@ let face_hull = { appearance: ap_hull, points: pts_hull };
 let face_hull_arm = { appearance: ap_arm, points: pts_hull_arm };
 let face_thr = { appearance: ap_nzl, points: pts_thr };
 
+//particle gen params: angleSpan, velMin, velMax, thickness, color, groupSize, durMin, durMax
+let thr_particles = { angleSpan: 8, velMin: 10, velMax: 30, thickness: 1, color: '#09f', groupSize: 10, durMin: 0.2, durMax: 0.6 };
+let eng_particles = { angleSpan: 15, velMin: 20, velMax: 60, thickness: 2, color: '#fc9', groupSize: 10, durMin: 0.3, durMax: 0.7 };
+
 let xoffset = secSize * 3 + secSize //fwd edge of midsections + 1/2 width of section
 for (let i = 0; i < fwdHullSections; i++) {
   let part_hull = new Part(`hull-fwd${i}`, [face_hull], secMass);
@@ -82,9 +86,9 @@ for (let i = 0; i < fwdHullSections; i++) {
     part_turret.addTo(part_hull, { x: 0, y: 0 }, 0, 1);
   }
   if (i === fwdHullSections - 1) {
-    let part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass); //TODO: particle gen..
+    let part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
     part_thr_fwd_prt.addTo(part_hull, { x: 0, y: -secSize - armDep * 4 }, 90);
-    let part_thr_fwd_stb = new Part('fwd-stb-thrust', [face_thr], thrMass); //TODO: particle gen..
+    let part_thr_fwd_stb = new Part('fwd-stb-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
     part_thr_fwd_stb.addTo(part_hull, { x: 0, y: secSize + armDep * 4 }, -90);
   }
 }
@@ -98,10 +102,10 @@ for (let i = 0; i < engSections; i++) {
   let part_eng_stb = new Part(`engine-stb${i}`, [face_eng], engMass);
   part_eng_stb.addTo(part_mid, { x: xoffset - 2 * secSize * i, y: secSize }, 180);
   if (i === engSections - 1) {
-    let part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass); //TODO: particle gen..
-    part_thr_fwd_prt.addTo(part_eng_prt, { x: 0, y: -secSize*1.3 }, 90);
-    let part_thr_fwd_stb = new Part('fwd-stb-thrust', [face_thr], thrMass); //TODO: particle gen..
-    part_thr_fwd_stb.addTo(part_eng_stb, { x: 0, y: -secSize*1.3 }, 90);
+    let part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
+    part_thr_fwd_prt.addTo(part_eng_prt, { x: 0, y: -secSize * 1.3 }, 90);
+    let part_thr_fwd_stb = new Part('fwd-stb-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
+    part_thr_fwd_stb.addTo(part_eng_stb, { x: 0, y: -secSize * 1.3 }, 90);
   }
 }
 
@@ -110,7 +114,7 @@ let prt_rct = new Part(`reactor`, [face_rct], 3);
 prt_rct.addTo(part_mid, { x: -6 * secSize, y: 0 }, 0)
 
 let face_nzl = { appearance: ap_nzl, points: pts_nzl };
-let prt_nzl = new Part('engine-exhaust', [face_nzl], 0.5); //TODO:<--Give this particle generator params
+let prt_nzl = new Part('engine-exhaust', [face_nzl], 0.5, eng_particles); //TODO:<--Give this particle generator params
 prt_nzl.addTo(prt_rct, { x: -4 * secSize, y: 0 }, 0);
 
 ship.finalize();
