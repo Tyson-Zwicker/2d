@@ -63,7 +63,7 @@ export default class Part {
     this.localRotation = (this.ownRotation + this.parent.localRotation) % 360;
     this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.ownPosition, this.parent.localRotation));
   }
-  addTo(parent, offset, rotation) {
+  addTo(parent, offset, rotation=0, depthModifier = 0) {
     if (!parent) throw new Error('Missing parameter (parent): ' + this.name);
     if (!offset) throw new Error('Missing parameter (offset): ' + this.name);
     if (isNaN(rotation)) throw new Error('Missing parameter (rotation): ' + this.name);
@@ -83,7 +83,7 @@ export default class Part {
     this.parent = parent;
     this.ownPosition = offset;
     this.ownRotation = rotation;
-    this.depth = parent.depth + 1;
+    this.depth = parent.depth + 1 +depthModifier; //This is ONLY used when rendering. Higher numbers render last.
     this.calculateLocals();
   }
   get(name) {
