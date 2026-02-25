@@ -79,7 +79,7 @@ for (let i = 0; i < fwdHullSections; i++) {
   if (i === 1 || i === 4) {
     let face_tur = { appearance: ap_tur, points: pts_tur };
     let part_turret = new Part(`turret-${i == 1 ? 'A' : 'B'}`, [face_tur], 0.5);
-    part_turret.addTo(part_hull, { x: 0, y: 0 }, 45);
+    part_turret.addTo(part_hull, { x: 0, y: 0 }, 0, 1);
   }
   if (i === fwdHullSections - 1) {
     let part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass); //TODO: particle gen..
