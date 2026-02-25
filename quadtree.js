@@ -13,14 +13,14 @@ export default class QuadTree {
     let minY = -50000, minX = -50000; // Define the minimum world size for the quadtree
     QuadTree.bounds = RectBounds.make(minX, minY, maxX, maxY);
     //minY and MinX must be negative to allow for objects to be placed in the negative world space, which is common in many games and simulations. This allows for a more flexible and realistic representation of the world, as objects can exist in any quadrant of the quadtree, including those that extend into negative coordinates.
-    let size = (maxX-minX * maxY-minY) / 1000; // Define the size of each quadrant (e.g., 10,000 world units)
+    let size = (maxX-minX * maxY-minY) / 10000; // Define the size of each quadrant (e.g., 10,000 world units)
     QuadTree.capacity = capacity;
     QuadTree.minimumSize = minimumSize;
     QuadTree.pool = [];
     console.log (`Initializing QuadTree pool with ${size} objects...`);
     for (let i =0; i<size; i++) {
       QuadTree.pool.push(new QuadTree(RectBounds.make(0, 0, 1, 1))); // Create dummy QuadTree objects to fill the pool
-      if (i % 1000 === 0) console.log(`Created ${i} QuadTree objects...`);
+      if (i % 10000 === 0) console.log(`Created ${i} QuadTree objects... ${Math.ceil(100*i/size)}%`);
     }
   }
   constructor(bounds = QuadTree.bounds, capacity = QuadTree.capacity, minimumSize = QuadTree.minimumSize) {
@@ -52,7 +52,6 @@ export default class QuadTree {
     }
   }
 
-  
   init(bounds, capacity, minimumSize) {
     if (!RectBounds.isValidRectBound(bounds)) throw new Error(`Quadtree boundary was not valid: ${JSON.stringify(bounds)}`);
     this.bounds = bounds;
