@@ -70,12 +70,14 @@ let face_thr = { appearance: ap_nzl, points: pts_thr };
 let thr_particles = { angleSpan: 8, velMin: 10, velMax: 30, thickness: 1, color: '#09f', groupSize: 10, durMin: 0.2, durMax: 0.6 };
 let eng_particles = { angleSpan: 15, velMin: 20, velMax: 60, thickness: 2, color: '#fc9', groupSize: 10, durMin: 0.3, durMax: 0.7 };
 
+let part_thr_fwd_prt, part_thr_fwd_stb, part_thr_aft_prt, part_thr_aft_stb;
+
 let xoffset = secSize * 3 + secSize //fwd edge of midsections + 1/2 width of section
 for (let i = 0; i < fwdHullSections; i++) {
   let part_hull = new Part(`hull-fwd${i}`, [face_hull], secMass);
   part_hull.addTo(part_mid, { x: xoffset + (i * secSize * 2), y: 0 }, 0);
 
-  let part_hull_arm_stb = new Part(`hull-arm-stb{i}`, [face_hull_arm], armMass);
+  let part_hull_arm_stb = new Part(`hull-arm-stb${i}`, [face_hull_arm], armMass);
   part_hull_arm_stb.addTo(part_hull, { x: 0, y: secSize + armDep }, 0);
 
   let part_hull_arm_prt = new Part(`hull-arm-prt${i}`, [face_hull_arm], armMass);
@@ -86,9 +88,9 @@ for (let i = 0; i < fwdHullSections; i++) {
     part_turret.addTo(part_hull, { x: 0, y: 0 }, 0, 1);
   }
   if (i === fwdHullSections - 1) {
-    let part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
+    part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
     part_thr_fwd_prt.addTo(part_hull, { x: 0, y: -secSize - armDep * 4 }, 90);
-    let part_thr_fwd_stb = new Part('fwd-stb-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
+    part_thr_fwd_stb = new Part('fwd-stb-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
     part_thr_fwd_stb.addTo(part_hull, { x: 0, y: secSize + armDep * 4 }, -90);
   }
 }
@@ -102,10 +104,10 @@ for (let i = 0; i < engSections; i++) {
   let part_eng_stb = new Part(`engine-stb${i}`, [face_eng], engMass);
   part_eng_stb.addTo(part_mid, { x: xoffset - 2 * secSize * i, y: secSize }, 180);
   if (i === engSections - 1) {
-    let part_thr_fwd_prt = new Part('fwd-prt-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
-    part_thr_fwd_prt.addTo(part_eng_prt, { x: 0, y: -secSize * 1.3 }, 90);
-    let part_thr_fwd_stb = new Part('fwd-stb-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
-    part_thr_fwd_stb.addTo(part_eng_stb, { x: 0, y: -secSize * 1.3 }, 90);
+    part_thr_aft_prt = new Part('aft-prt-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
+    part_thr_aft_prt.addTo(part_eng_prt, { x: 0, y: -secSize * 1.3 }, 90);
+    part_thr_aft_stb = new Part('aft-stb-thrust', [face_thr], thrMass, thr_particles); //TODO: particle gen..
+    part_thr_aft_stb.addTo(part_eng_stb, { x: 0, y: -secSize * 1.3 }, 90);
   }
 }
 
@@ -120,66 +122,72 @@ prt_nzl.addTo(prt_rct, { x: -4 * secSize, y: 0 }, 0);
 ship.finalize();
 console.log(ship);
 Game.add(ship, { x: 0, y: 0 }, 0);
-/*
+
 Keyboard.setKeyFunction('7', () => {
   for (let i = 0; i < 4; i++) {
-    let obj = Game.get('blocks' + i);
-    let part = obj.getPart('green-block9');
+    let obj = Game.get('ship');    
+    let part = obj.getPart('fwd-prt-thrust');
+    part.particleGenState = true;
+    console.log (part.particleGenState);
     let position = part.localPosition;
     let force = 20;
     let rotatedPos = Vec.rotate(position, obj.worldRotation);
     let forceVector = Vec.scale(Vec.perp(Vec.norm(rotatedPos)), force);
-    obj.applyForce(forceVector, position);
+    //obj.applyForce(forceVector, position);
   }
 });
 
 Keyboard.setKeyFunction('9', () => {
   for (let i = 0; i < 4; i++) {
-    let obj = Game.get('blocks' + i);
-    let part = obj.getPart('green-block9');
+    let obj = Game.get('ship');
+    let part = obj.getPart('fwd-stb-thrust');
+    part.particleGenState = !part.particleGenState;
     let position = part.localPosition;
     let force = -20;
     let rotatedPos = Vec.rotate(position, obj.worldRotation);
     let forceVector = Vec.scale(Vec.perp(Vec.norm(rotatedPos)), force);
-    obj.applyForce(forceVector, position);
+    //obj.applyForce(forceVector, position);
   }
 });
 
 Keyboard.setKeyFunction('1', () => {
   for (let i = 0; i < 4; i++) {
-    let obj = Game.get('blocks' + i);
-    let part = obj.getPart('blue-block9');
+    let obj = Game.get('ship');
+    let part = obj.getPart('aft-prt-thrust');
+    part.particleGenState = !part.particleGenState;
     let position = part.localPosition;
     let force = 20;
     let rotatedPos = Vec.rotate(position, obj.worldRotation);
     let forceVector = Vec.scale(Vec.perp(Vec.norm(rotatedPos)), force);
-    obj.applyForce(forceVector, position);
+    //obj.applyForce(forceVector, position);
   }
 });
 
 Keyboard.setKeyFunction('3', () => {
   for (let i = 0; i < 4; i++) {
-    let obj = Game.get('blocks' + i);
-    let part = obj.getPart('blue-block9');
+    let obj = Game.get('ship');
+    let part = obj.getPart('aft-stb-thrust');
+    part.particleGenState = !part.particleGenState;
     let position = part.localPosition;
     let force = -20;
     let rotatedPos = Vec.rotate(position, obj.worldRotation);
     let forceVector = Vec.scale(Vec.perp(Vec.norm(rotatedPos)), force);
-    obj.applyForce(forceVector, position);
+    //obj.applyForce(forceVector, position);
   }
 });
 Keyboard.setKeyFunction(' ', () => {
   for (let i = 0; i < 4; i++) {
-    let obj = Game.get('blocks' + i);
-    let part = obj.getPart('blue-block9');
+    let obj = Game.get('ship');
+    let part = obj.getPart('engine-exhaust-block');
+    part.particleGenState = !part.particleGenState;
     let position = part.localPosition;
     let force = -100;
     let rotatedPos = Vec.rotate(position, obj.worldRotation);
     let forceVector = Vec.scale(Vec.norm(rotatedPos), force);
-    obj.applyForce(forceVector, position);
+    //obj.applyForce(forceVector, position);
   }
 });
-*/
-Main.run();
+
+Main.run(60);
 
 
