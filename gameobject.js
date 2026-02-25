@@ -33,14 +33,8 @@ export default class GameObject {
   }
   finalize() {                        //Once after all the parts have been added.    
     if (this.body === undefined) throw new Error(`GameObject [${this.name}] has no body.`);
-    this.allParts = this.#getAllParts(this.body);
-    //TODO: Sort this array by depth of nodes. Deepest ones should be last in order, so they don't get drawn over.
+    this.allParts = this.#getAllParts(this.body);    
     this.allParts.sort((a, b) =>  a.depth - b.depth );
-    console.log('--sorted all parts--')
-    for (let i = 0; i < this.allParts.length; i++) {
-      console.log(`${this.allParts[i].name} -> ${this.allParts[i].depth}`);
-    }
-    console.log('-- --')
     let mass = this.#calcMass();
     this.centerOfMass = mass.center;
     this.totalMass = mass.total;

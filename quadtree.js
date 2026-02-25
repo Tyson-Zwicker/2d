@@ -17,11 +17,12 @@ export default class QuadTree {
     QuadTree.capacity = capacity;
     QuadTree.minimumSize = minimumSize;
     QuadTree.pool = [];
-    console.log (`Initializing QuadTree pool with ${size} objects...`);
+    //console.log (`Initializing QuadTree pool with ${size} objects...`);
     for (let i =0; i<size; i++) {
       QuadTree.pool.push(new QuadTree(RectBounds.make(0, 0, 1, 1))); // Create dummy QuadTree objects to fill the pool
-      if (i % 10000 === 0) console.log(`Created ${i} QuadTree objects... ${Math.ceil(100*i/size)}%`);
+      //if (i % 10000 === 0) console.log(`Created ${i} QuadTree objects... ${Math.ceil(100*i/size)}%`);
     }
+    console.log ('QuadTree initialized..');
   }
   constructor(bounds = QuadTree.bounds, capacity = QuadTree.capacity, minimumSize = QuadTree.minimumSize) {
     this.init(bounds ?? QuadTree.bounds, capacity ?? QuadTree.capacity, minimumSize ?? QuadTree.minimumSize);
