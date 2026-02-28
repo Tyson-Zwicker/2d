@@ -19,16 +19,14 @@ export default class Button {
   }
   checkForMouse() {
     if (this.guiElement) {
-      let insideBounds = GUI.isMouseIn(this.guiElement);
-      return this.#doButton(insideBounds);  // Do this even if NOT in bounds to allow others to de-hover..
+      const inside = GUI.isMouseIn(this.guiElement);
+      return this.#doButton(inside);
     }
     if (this.gameObjectPart) {
-     // console.log('checking button for part', this.gameObjectPart.name);
-      let mouseWorldCoords = View.screenToWorld(View.mouse.x, View.mouse.y);
-     // console.log('checking mouse in part', this.gameObjectPart.name, 'mouse coords', mouseWorldCoords);
-      let insideBounds = GameObject.isMouseIn(this.gameObjectPart);
-      return this.#doButton(insideBounds);
+      const inside = GameObject.isMouseIn(this.gameObjectPart);
+      return this.#doButton(inside);
     }
+    return false;
   }
   #doButton(insideBounds) {
     let interaction = false;
@@ -65,21 +63,14 @@ export default class Button {
     return interaction;
   }
   #click() {
-    let buttonOwner = this.guiElement;
-    let r = { "owner": buttonOwner, "value": this.value };
+    const owner = this.guiElement ?? this.gameObjectPart ?? null;
+    const r = { owner, value: this.value };
     if (!this.toggle) {
-      if (typeof this.clickFn === 'function') {
-        this.clickFn(r);
-        if (this.originalFn) this.originalFn(r);
-      }
+      this.clicked = false;
     } else {
       this.clicked = !this.clicked;
-      if (this.clicked) {
-        if (typeof this.clickFn === 'function') {
-          this.clickFn(r);//check for 'original function' too.
-          if (this.originalFn) this.originalFn(r);
-        }
-      }
     }
+    if (this.clickFn) this.clickFn(r);
+    Events.add('click', owner);
   }
 }

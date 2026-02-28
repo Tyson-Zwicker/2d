@@ -101,16 +101,15 @@ export default class GameObject {
     }
     return maxDistance;
   }
-  static isMouseIn(gameObjectPart) {
-    let mouseWorldCoords = View.screenToWorld();
-    let partWorldBoundry = RectBounds.make(
-      gameObjectPart.worldPosition.x - gameObjectPart.radius * View.camera.zoom,
-      gameObjectPart.worldPosition.y - gameObjectPart.radius * View.camera.zoom,
-      gameObjectPart.worldPosition.x + gameObjectPart.radius * View.camera.zoom,
-      gameObjectPart.worldPosition.y + gameObjectPart.radius * View.camera.zoom,
+   static isMouseIn(gameObjectPart) {
+    const mouseWorld = View.screenToWorld();
+    const bounds = RectBounds.make(
+      gameObjectPart.worldPosition.x - gameObjectPart.radius,
+      gameObjectPart.worldPosition.y - gameObjectPart.radius,
+      gameObjectPart.worldPosition.x + gameObjectPart.radius,
+      gameObjectPart.worldPosition.y + gameObjectPart.radius
     );
-    //console.log('checking mouse in part', gameObjectPart.name, 'mouse coords', mouseWorldCoords, 'part bounds', partWorldBoundry);  
-    return (RectBounds.isPointInside(mouseWorldCoords.x, mouseWorldCoords.y, partWorldBoundry));
+    return RectBounds.isPointInside(mouseWorld.x, mouseWorld.y, bounds);
   }
   move() {
     this.worldPosition = Vec.add(this.worldPosition, Vec.scale(this.velocity, Main.delta));

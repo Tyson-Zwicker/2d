@@ -17,6 +17,6 @@ export default class Events{
     for (let e of Events.#occurences){
       if (e.type===type) occ.push (e);
     }
-    return e;
+    return occ;
   }
 }
