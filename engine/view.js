@@ -35,10 +35,10 @@ export default class View {
     View.calculateCameraBounds();
     console.log ('View Initialized..');
   }
-  static screenToWorld (){
-    let scaledMouse = Vec.scale (View.mouse, 1 / View.camera.zoom);
-    let worldCoordinates = Vec.add (scaledMouse, View.camera);
-    return worldCoordinates;
+  static screenToWorld() {
+    const centered = Vec.sub(View.mouse, View.screenCenter);
+    const scaled = Vec.scale(centered, 1 / View.camera.zoom);
+    return Vec.add(scaled, View.camera);
   }
   static canSee(point, radius) {
     let { x0, y0, x1, y1 } = View.cameraBounds;
