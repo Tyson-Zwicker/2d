@@ -49,7 +49,7 @@ export default class Button {
       else if (!View.mouse.buttonDown && this.pressed) {
         //they just let up on the button after pressing.. that is a click.
         this.#click();
-        Events.add('button-clicked', (this.guiElement ? this.guiElement : this.GameObject));
+        Events.add('button-clicked', (this.guiElement ? this.guiElement : this.gameObjectPart));
         this.hovered = false;
         this.pressed = false;
         interaction = true;
