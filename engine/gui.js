@@ -5,7 +5,7 @@ import View from './view.js';
 import Draw from './draw.js';
 
 export default class GUI {
-  static locations = ['top', 'bottom', 'left', 'right', 'float'];
+  static locations = ['top', 'bottom', 'left', 'right', 'listPanel'];
   static listElements = new Map();
   static elements = [];
   static panels = new Map();
@@ -17,22 +17,14 @@ export default class GUI {
   static padding = 5;             //set in constructor
   static initialized = false;
   static activeModal = null; // { backdrop: {bounds}, dialog: { draw, bounds, onMouse?, onKey? } }
-  static initialize(columnWidth, rowHeight, gap, padding, mien) {
-    GUI.columnWidth = columnWidth;
-    GUI.rowHeight = rowHeight;
+  static initialize(gap, padding, mien = Mien.Green) {
     GUI.gap = gap;
     GUI.padding = padding;
-
     GUI.panels.set('top', new GUIPanel('top'));
     GUI.panels.set('bottom', new GUIPanel('bottom'));
     GUI.panels.set('left', new GUIPanel('left'));
     GUI.panels.set('right', new GUIPanel('right'));
-    GUI.elements = [];
-    if (mien) {
-      GUI.mien = mien;
-    } else {
-      GUI.mien = Mien.Green;  //Default- can be set anytime later..
-    }
+    GUI.panels.set('modal', new GUIPanel('modal'));
     GUI.initialized = true;
     console.log('GUI initialized..');
   }
@@ -46,8 +38,8 @@ export default class GUI {
       y < element.drawnBounds.y1);
   }
   static resize() {
-    //Don't resize 'float' -floating panes are dismissed 
-    //if a window is resized so they don't care..
+    //TODO: IGNORE PANELS:  they contain constraints and directions.. let the elements determine their own size based
+    //ontheir needs and the constraint placed upon them by the panels.
     GUI.panels.get('top').recalculate();
     GUI.panels.get('bottom').recalculate();
     GUI.panels.get('left').recalculate();
@@ -55,26 +47,24 @@ export default class GUI {
     GUI.render();
   }
   static render() {
+    //TODO: Ignore panels. Call elements render instead.
     GUI.panels.get('top').drawPanel();
     GUI.panels.get('bottom').drawPanel();
     GUI.panels.get('left').drawPanel();
     GUI.panels.get('right').drawPanel();
-    GUI.renderModal();
+    if (GUI.activeModal) GUI.renderModal();
   }
-  static addText(location, text) {
-    let panel = GUI.panels.get(location);
-    let textElement = panel.addText(text);
-    GUI.elements.push(textElement);
+  static addText(panelName, text) {
+    GUIElement.makeButton (GUI.panels.get(panelName), text);
   }
-  static addButton(location, text, toggle, fn, value) {
-    let panel = GUI.panels.get(location);
-    let buttonElement = panel.addButton(text, toggle, fn, value);
-    GUI.elements.push(buttonElement);
+  static addButton(panelName, text, value, toggle, fn) {
+    GUIElement.makeButton (GUI.panels.get(panelName),text,value,toggle,fn);
   }
-  static addList(location, text, listItems, fn, defaultValue) {
-    let panel = GUI.panels.get(location);
-    let listElement = panel.addList(text, listItems, fn, defaultValue);
-    GUI.elements.push(listElement);
+  static addList(panelName, text, defaultValue, listItems, fn) {
+    GUIElement.makeList (GUI.panels.get(panelName),text, defaultValue, listItems, fn);
+  }
+  static addInfoPanel(attachedTo, panel){ //ataches to a part and uses its world xcoords
+    //TODO: THIS IS JUST A LESS-SPECIFIC CASE OF LIST...
   }
 
   // Modal helpers: render-only scaffolding. Event gating should be done by callers
