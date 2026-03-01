@@ -1,4 +1,5 @@
 import Main from './main.js';
+import Button from './button.js';
 import Vec from './vec.js';
 import View from './view.js';
 import ParticleEffect from './particleeffect.js';
@@ -128,10 +129,21 @@ export default class GameObject {
     }
     for (let part of this.allParts) {
       let polygons = part.getWorldPolygons();
-      for (let polygon of polygons) {
-        //TODO: This is where you'd change the mien based on if its got a button, and that button's state        
-        View.context.fillStyle = polygon.mien.normal.bgColor;
-        View.context.strokeStyle = polygon.mien.normal.borderColor;
+      for (let polygon of polygons) {        
+        let fillStyle = polygon.mien.normal.bgColor;
+        let strokeStyle = polygon.mien.normal.borderCololr;        
+        if (part.button){
+          if (part.button.hovered){
+            fillStyle = polygon.mien.hovered.bgColor;
+            strokeStyle = polygon.mien.hovered.borderColor;        
+          }
+          else if (part.button.pressed){
+            fillStyle = polygon.mien.pressed.bgColor;
+            strokeStyle = polygon.mien.pressed.borderColor;        
+          }
+        }
+        View.context.fillStyle = fillStyle;
+        View.context.strokeStyle = strokeStyle;
         let path = new Path2D();
         let points = polygon.points;
         if (points.length === 0) continue;
