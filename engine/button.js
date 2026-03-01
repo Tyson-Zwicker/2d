@@ -1,10 +1,13 @@
 import Events from './events.js';
 import GameObject from './gameobject.js';
 import GUI from './gui.js';
+import GUIElement from './guielement.js';
 import View from './view.js';
 export default class Button {
-  guiElement = undefined;
-  gameObjectPart = undefined;
+  #owner  = undefined;
+  get owner(){
+    return this.#owner;
+  }
   clicked = false;
   clickFn = undefined;
   hovered = false;
@@ -17,13 +20,17 @@ export default class Button {
     this.toggle = toggle;
     this.value = value;
   }
+  bind (owner){
+    owner.button = this;
+    this.#owner = owner;
+  }
   checkForMouse() {
-    if (this.guiElement) {
-      const inside = GUI.isMouseIn(this.guiElement);
+    if (this.owner!==undefined && (this.owner instanceof GUIElement)) {
+      const inside = GUI.isMouseIn(this.owner);
       return this.#doButton(inside);
     }
-    if (this.gameObjectPart) {
-      const inside = GameObject.isMouseIn(this.gameObjectPart);
+    if (this.owner!==undefined && (this.owner instanceof Part)) {
+      const inside = GameObject.isMouseIn(this.owner);
       return this.#doButton(inside);
     }
     return false;
@@ -49,7 +56,7 @@ export default class Button {
       else if (!View.mouse.buttonDown && this.pressed) {
         //they just let up on the button after pressing.. that is a click.
         this.#click();
-        Events.add('button-clicked', (this.guiElement ? this.guiElement : this.gameObjectPart));
+        Events.add('button-clicked', (this.owner));
         this.hovered = false;
         this.pressed = false;
         interaction = true;
@@ -63,7 +70,7 @@ export default class Button {
     return interaction;
   }
   #click() {
-    const owner = this.guiElement ?? this.gameObjectPart ?? null;
+    const owner = this.owner;
     const r = { owner, value: this.value };
     if (!this.toggle) {
       this.clicked = false;
