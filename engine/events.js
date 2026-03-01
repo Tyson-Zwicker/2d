@@ -11,7 +11,7 @@ export default class Events{
     Events.#occurences.length = 0;
   }
   
-  static get (type){
+  static getEvents(type){
     if (!type) return this.#occurences;
     let occ = [];
     for (let e of Events.#occurences){
