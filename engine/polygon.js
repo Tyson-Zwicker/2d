@@ -6,6 +6,13 @@ export default class Polygon {
     this.points = points;
     this.mien = mien;
   }
+  static translate(t) {
+    let r = [];
+    for (p of this.points) {
+      r.push(Vec.add(p, t));
+    }
+    return { mien: this.mien, points: r };
+  }
   static flipVertical(polygon) {
     let pts = [];
     for (let p in polygon.points) {
