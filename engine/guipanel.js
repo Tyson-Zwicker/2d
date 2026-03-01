@@ -177,16 +177,14 @@ export default class GUIPanel {
   }
   drawElement(element, cursor, shadow) {
     let appearance = GUI.mien.normal;
-    
-    let stop = false;
+   
     if (shadow) {
       appearance = GUI.mien.shadowed;
     } else if (element.type === 'button' || element.type === 'list') {
       if (element.button.pressed) {
         appearance = GUI.mien.pressed;
       } else if (element.button.hovered) {
-        appearance = GUI.mien.hovered;
-        stop = true;
+        appearance = GUI.mien.hovered;        
       }
     }
     //console.log (appearance);

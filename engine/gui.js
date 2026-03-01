@@ -2,6 +2,7 @@
 import GUIPanel from './guipanel.js';
 import Mien from './mien.js';
 import View from './view.js';
+import Draw from './draw.js';
 
 export default class GUI {
   static locations = ['top', 'bottom', 'left', 'right', 'float'];
@@ -15,6 +16,7 @@ export default class GUI {
   static gap = 5;                 //set in constructor
   static padding = 5;             //set in constructor
   static initialized = false;
+  static activeModal = null; // { backdrop: {bounds}, dialog: { draw, bounds, onMouse?, onKey? } }
   static initialize(columnWidth, rowHeight, gap, padding, mien) {
     GUI.columnWidth = columnWidth;
     GUI.rowHeight = rowHeight;
@@ -57,6 +59,7 @@ export default class GUI {
     GUI.panels.get('bottom').drawPanel();
     GUI.panels.get('left').drawPanel();
     GUI.panels.get('right').drawPanel();
+    GUI.renderModal();
   }
   static addText(location, text) {
     let panel = GUI.panels.get(location);
@@ -72,5 +75,27 @@ export default class GUI {
     let panel = GUI.panels.get(location);
     let listElement = panel.addList(text, listItems, fn, defaultValue);
     GUI.elements.push(listElement);
+  }
+
+  // Modal helpers: render-only scaffolding. Event gating should be done by callers
+  // before dispatching to other GUI/game handlers.
+  static showModal(dialog) {
+    // dialog: { draw(), bounds: {x0,y0,x1,y1}, onMouse?, onKey? }
+    const backdrop = {
+      bounds: { x0: 0, y0: 0, x1: View.canvas.width, y1: View.canvas.height }
+    };
+    GUI.activeModal = { backdrop, dialog };
+  }
+
+  static hideModal() {
+    GUI.activeModal = null;
+  }
+
+  static renderModal() {
+    if (!GUI.activeModal) return;
+    const { backdrop, dialog } = GUI.activeModal;
+    // Dim the scene; relies on Draw.rect supporting rgba fill.
+    Draw.rect(backdrop.bounds.x0, backdrop.bounds.y0, backdrop.bounds.x1, backdrop.bounds.y1, 'rgba(0,0,0,0.5)', true);
+    dialog.draw();
   }
 }
