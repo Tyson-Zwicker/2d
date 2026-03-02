@@ -53,4 +53,6 @@ export default class Draw {
     let ty = y0 + ((y1 - y0) - textSize.height) / 2;
     View.context.fillText(text, tx, ty);
   }
+      //TODO: Better draw method:
+      //    //Draw.textBox2 (position, size, [textLines],mien)
 }
