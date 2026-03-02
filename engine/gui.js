@@ -44,6 +44,9 @@ export default class GUI {
     GUI.panels.get('bottom').recalculate();
     GUI.panels.get('left').recalculate();
     GUI.panels.get('right').recalculate();
+    
+    //TODO: call resize and visibleLines on elements....
+    
     GUI.render();
   }
   static render() {

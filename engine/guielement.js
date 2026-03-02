@@ -3,52 +3,41 @@ import Draw from './draw.js';
 import GUI from './gui.js';
 
 export default class GUIElement {
-  panel = undefined;
-  #words = undefined;
-  #text = '*insert text*'
-  //TODO: CALCULATED ON CONSTRUCTION
+  panel = undefined;          //Assigned by constructor
+  #words = undefined;         //calculate on construction
+  #text = 'insert text';    //required..
+  #finalized = false;       //resize makes it true..
   get words() {
     if (!this.#words) this.#words = this.#text.split(' ');
     return this.#words;
   }
-  get size() {
-
-    let lineData = this.#getTextLineData;
-
-    //text lines are already trimmed to panel width contraint
-    // EXPAND width if to small..
-    // EXPAND height if text is to small..
-    // OR CULL height if text is too TALL    
-
-  }
-
-  #getTextLineData() {
-    let lines = [];
+  resize() {
+    //First, go by word until width exceeded..
+    let startLines = [];
     let remainingWords = structuredClone(this.words);
     let currentLineLength = 0;
     let currentLine = '';
     while (remainingWords.length > 0) {
       let word = remainingWords.pop() + ' ';
-      let wordLength = Draw.getTextSize(word)
+      let wordLength = Draw.getTextSize(word);
       if (this.panel.constraint.width > 0 && lineLength + wordLength <= this.panel.constraint.width) {
         currentLineLength += wordLength;
         currentLine = word + currentLine;
       } else {
-        lines.push({ text: currentLine, width: currentLineLength });
+        startLines.push({ text: currentLine, width: currentLineLength });
         currentLine = word;
       }
     }
-    lines.widest = this.#getWidestLine(lines);
-    return lines;
-  }
-  #getWidestLine(lines) {
-    let widest = 0;
-    for (let line of lines) {
-      if (line.width > widest) {
-        widest = line.width;
-      }
+    //Then AFTER, go by line to see when height exceed...
+    let keepLines = [];
+    let i = 0;
+    while (keepLines.length * GUI.mein.fontSize < this.panel.constraint.largest.height) {
+      keepLines.push(startLines[i]);
+      i++;
     }
-    return widest;
+    //FINALLY, Use keepLines and constraints to establish size 
+    //POSITION IS NOT OUR PROBLEM, BECAUSE RENDERING OFFSETS WILL COME FROM ANCHOR WHEN NEEDED
+
   }
 
   constructor(panel, text = '*insert text*') {
@@ -56,16 +45,17 @@ export default class GUIElement {
     this.panel = panel;
     this.active = true;
     this.drawnBounds = undefined;
+    this.resize();
   }
   static makeText(panel, text) {
-    let el = new GUIElement(panel,text);
+    let el = new GUIElement(panel, text);
     el.type = 'text';
     panel.elements.push(el);
     GUI.elements.push(el);
     return el;
   }
   static makeButton(panel, text, value, toggle, fn) {
-    let el = new GUIElement(panel,text);
+    let el = new GUIElement(panel, text);
     el.type = 'button';
     panel.elements.push(el);
     GUI.elements.push(el);
@@ -73,9 +63,9 @@ export default class GUIElement {
     return el;
   }
   static makeList(panel, text, defaultValue, listItems, fn) {
-    let el = new GUIElement(panel,text);
+    let el = new GUIElement(panel, text);
     el.#text = text;
-    el.defaultValue = defaultValue; 
+    el.defaultValue = defaultValue;
     el.listItemData = listItems; //{text,value} used to make buttons
     el.type = 'list';
     el.panel = panel;
