@@ -19,14 +19,14 @@ export default class GUIElement {
     this.active = true;
     this.bounds = undefined; //defined when rendered..
   }
-  render (offset){
-    this.position = offset;
+  render (cursor){
+    let lines = this.lines; //Call first, everything else needs it.
+    this.position = cursor;
     Draw.textBox (
-      offset.x,offset.y, offset.x + this.size.x, offset.y + this.size.y,
-      //TODO: Draw TextBox doesn't do arrays....
+      this.position,
+      this.size,
+      lines
     );
-    //TODO: Better draw method:
-    //Draw.textBox2 (position, size, [textLines],mien)
   }
 
   get lines() {
@@ -43,6 +43,8 @@ export default class GUIElement {
   }
 
   #getLines() {
+    //** When rendering, knowing the actual text size PER LINE vs. what the panels
+    // want would be very helpful. Lets collect that information here... */
     //First, go by word until width exceeded..
     let remainingWords = structuredClone(this.#words);
     let currentLineLength = 0;
@@ -62,6 +64,8 @@ export default class GUIElement {
           remainingWords.pop();
         } else {
           //This word does not fit.. so push the line we have into parsedLines
+          //FIXME: ?? Probably fine but I slipped this because its were I think it should be.
+          currentLine.textWidth = currentLineLength; //** Render wants this */
           parsedLines.push(currentLine);
           //Start new line..
           currentLine += remainingWords.pop() + ' ';
@@ -77,6 +81,7 @@ export default class GUIElement {
         longestLine = Draw.getTextSize(currentLine, GUI.mien);
         remainingWords.length = 0; //No more words to cut up into lines..
       }
+      return parsedLines;
     }
     //Next cull lines that will not fit vertically..
     let currentHeight = 0;

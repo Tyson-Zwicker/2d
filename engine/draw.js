@@ -41,7 +41,7 @@ export default class Draw {
     let metrics = View.context.measureText(text);
     return { "width": metrics.width, "height": (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) ?? mien.fontSize };
   }
-  static textBox(x0, y0, x1, y1, text, mien) {    
+  static textBox2(x0, y0, x1, y1, text, mien) {
     Draw.rect(x0, y0, x1, y1, mien.borderColor, false);
     Draw.rect(x0, y0, x1, y1, mien.bgColor, true);
     View.context.fillStyle = mien.textColor;
@@ -53,6 +53,25 @@ export default class Draw {
     let ty = y0 + ((y1 - y0) - textSize.height) / 2;
     View.context.fillText(text, tx, ty);
   }
-      //TODO: Better draw method:
-      //    //Draw.textBox2 (position, size, [textLines],mien)
+  static textBox(pos, size, lines, mien, center = true) {
+    Draw.rect(pos.x, pos.y, pos.x + size.width, pos.y + size.height, mien.borderColor, false);
+    Draw.rect(pos.x, pos.y, pos.x + size.width, pos.y + size.height, mien.bgColor, true);
+    View.context.fillStyle = mien.textColor;
+    View.context.textBaseline = 'top';
+    View.context.font = `${mien.fontSize}px ${mien.fontName}`;
+    let y = pos.y;
+    for (txt of lines) {
+      if (center) {
+        let textWidth = txt.textWidth;
+        View.context.textAlign = 'center';
+        let x = pos.x + textWidth / 2;
+        View.context.fillText(txt, x, y);
+      } else {
+        View.Context.textAlign='left';
+        let x = pos.x;
+        View.context.fillText (txt,x,y);
+      }
+      y+=GUI.mien.fontSize;
+    }
+  }
 }
