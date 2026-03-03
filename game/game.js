@@ -23,14 +23,12 @@ star.addTo(homeStar, { x: 0, y: 0 });
 planet1.addTo(star, { x: 0, y: 0 });
 homeStar.finalize();
 
-GUI.addText('left', 'Left Text 2');
-GUI.addButton('left', 'Button', false, (response) => { alert(`${response.owner} says ${response.value}`) }, 'Hello');
-GUI.addList ('left',
-   'List', 
-   [{ text: 'Option 1', value: 1 },
-    { text: 'Option 2', value: 2 },
-    { text: 'Option 3', value: 3 },]
-  ,(response)=>{alert (`${response.owner} says ${response.value}`)},2);
+GUI.setLeftPanel (120,120);
+GUI.setTopPanel (40,120);
+GUI.addButton ('left','Click Me','a value');
+GUI.addText ('top','I am text');
+GUI.addButton ('top','I am button');
+
 Game.add(homeStar, { x: 500, y: 500 });
 
 Main.creatorsFunction = () => {
