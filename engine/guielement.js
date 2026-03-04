@@ -1,134 +1,134 @@
+
 import Draw from './draw.js';
 import GUI from './gui.js';
-/*GUIElement
-* Only job: Using own text and panel constraints to establish size.
-* Figure out what text can be drawn (needed for own size to be calculated)
-*/
+import Button from './button.js';
+import View from './view.js';
+
 export default class GUIElement {
-  panel = undefined;          //Assigned by constructor
-  #text = 'insert text';      //Assigned by constructor
-  #words = undefined;         //calculate on construction
-  #size = undefined;         //calculated on addition to panel (because contraints are needed)  
-  #lines = undefined;         //calculate on addition to panel (because contraints are needed)
-  position = undefined;       //calculated on render.
-
-  constructor(panel, text = '*insert text*') {
-    this.#text = text;
-    this.#words = text = this.#text.split(' ');
-    this.panel = panel;
+  constructor(panel, text) {
+    this.drawnBounds = {}//determined when draw..
     this.active = true;
-    this.bounds = undefined; //defined when rendered..
+    this.text = text;
+    this.processedText = GUIElement.#cutTextIntoLines(text, panel);
+    this.size = GUIElement.#getSize(panel, this.processedText);
+    this.panel = panel;
+    panel.elements.push(this);
+    GUI.elements.push(this);
   }
-  render (cursor){
-    let lines = this.lines; //Call first, everything else needs it.
-    this.position = cursor;
-    Draw.textBox (
-      this.position,
-      this.size,
-      lines
+  render(position) {
+    let mien = GUI.mien.normal;
+    if (this.button && this.button.hovered) mien = GUI.mien.hovered;
+    if (this.button && this.button.pressed) mien = GUI.mien.pressed;
+    if (this.button && this.button.toggled) mien = GUI.mien.highlighted;
+    Draw.multiLineText(
+      position.x, position.y,
+      position.x + this.size.width, position.y + this.size.height,
+      this.processedText.lines, this.processedText.lineHeight,mien
     );
+    this.drawnBounds.x0 = position.x;
+    this.drawnBounds.y0 = position.y;
+    this.drawnBounds.x1 = position.x + this.size.width;
+    this.drawnBounds.y1 = position.y + this.size.height;
   }
 
-  get lines() {
-    if (!this.#lines) this.#lines = this.#getLines();
-    return this.#lines();
-  }
-  get size() {
-    //use text size, unless thats not big enough, then extend to panel min constraints...
-    let textSize = this.lines;
-    this.#size = {width: textSize.width, height: textSize.height};
-    if (textSize.width < this.panel.constraint.min.width) this.#size.width = this.panel.constraint.min.width;
-    if (textSize.height < this.panel.contraint.min.height) this.#size.height = this.panel.constraint.min.height;
-    return this.#size;
-  }
-
-  #getLines() {
-    //** When rendering, knowing the actual text size PER LINE vs. what the panels
-    // want would be very helpful. Lets collect that information here... */
-    //First, go by word until width exceeded..
-    let remainingWords = structuredClone(this.#words);
-    let currentLineLength = 0;
-    let currentLine = '';
-    let parsedLines = [];
-    let longestLine = 0;
-    while (remainingWords.length > 0) {
-      let nextWord = remainingWords[remainingWords.length - 1] + ' ';
-      let wordLength = Draw.getTextSize(word, GUI.mien);
-      //Break out into lines based on width constraint...
-      if (this.panel.constraint.max.width > 0) {
-        //it cares about width..
-        if (currentLineLength + wordLength <= this.panel.constraint.width) { //but you fit..
-          currentLineLength += wordLength;
-          currentLine = currentLine + nextWord;
-          if (currentLineLength > longestLine) longestLine = len;
-          remainingWords.pop();
-        } else {
-          //This word does not fit.. so push the line we have into parsedLines
-          //FIXME: ?? Probably fine but I slipped this because its were I think it should be.
-          currentLine.textWidth = currentLineLength; //** Render wants this */
-          parsedLines.push(currentLine);
-          //Start new line..
-          currentLine += remainingWords.pop() + ' ';
-          currentLineLength = Draw.getTextSize(currentLine, GUI.mien);
-          if (currentLineLength > longestLine) longestLine = len;
-        }
-      } else {
-        //It doesn't care about width, shove everything into current line...
-        for (let w of remainingWords) {
-          currentLine += w + ' ';
-        }
-        parsedLines.push(currentLine);
-        longestLine = Draw.getTextSize(currentLine, GUI.mien);
-        remainingWords.length = 0; //No more words to cut up into lines..
+  static #getSize(panel, processedText) {
+    if (panel.direction === 'vertical') {
+      let w = panel.constraint.max.width;
+      let h = processedText.height;
+      if (panel.constraint.min.height > 0 && h < panel.constraint.min.height) {
+        h = panel.constraint.min.height;
       }
-      return parsedLines;
+      return { width: w, height: h };
+    } else if (panel.direction === 'horizontal') {
+      let w = processedText.width;
+      let h = panel.constraint.max.height;
+      if (panel.constraint.min.width > 0 && processedText.width < panel.constraint.min.width) {
+        w = panel.constraint.min.width;
+      }
+      return { width: w, height: h };
+    } else {
+      throw new Error('unknown panel direction:' + panel.direction);
     }
-    //Next cull lines that will not fit vertically..
-    let currentHeight = 0;
-    let remainingLines = [];
-    for (let lineNum = 0; lineNum < parsedLines.length; lineNum++) {
-      if (currentHeight + GUI.mien.fontSize > this.panel.constraint.max.height) break;
-      currentHeight += GUI.mien.fontSize;
-      remainingLines.push(parsedLines[lineNum]);
+  }
+  static #cutTextIntoLines(text, panel) {
+    let lines = [];
+    if (panel.constraint.max.width <= 0) {
+      lines.push(text);  //No width contraint
+      return lines;
+    } else {
+      let remainingWords = text.split(' ');
+      let currentLine = '';
+      let maxWidth = 0;
+      let lineHeight = 0;
+      do {
+        let word = remainingWords.shift();
+        let currentLineMetric = GUIElement.#getTextSize(currentLine + ' ' + word);
+        if (lineHeight<currentLineMetric.height) lineHeight = currentLineMetric.height;
+        
+        if (currentLineMetric.width > panel.constraint.max.width) {
+          lines.push(currentLine);
+          let ts = GUIElement.#getTextSize(currentLine);
+          if (ts.width > maxWidth) maxWidth = ts.width;
+          currentLine = '';
+        }
+        currentLine += word + ' ';
+      } while (remainingWords.length > 0);
+      lines.push(currentLine);
+      while (lines.length * lineHeight > panel.constraint.max.height) {
+        lines.pop();
+      }
+      return {
+        lines: lines,
+        width: maxWidth,
+        height: lines.length * lineHeight,
+        lineHeight: lineHeight
+      };
     }
-    this.#lines = remainingLines;
-    return { textHeight: currentHeight, textWidth: longestLine};
+  }
+  static #getTextSize(text) {
+    View.context.textBaseline = 'top';
+    View.context.textAlign = 'left';
+    View.context.font = `${GUI.mien.normal.fontSize}px ${GUI.mien.normal.fontName}`;
+    let metrics = View.context.measureText(text);
+    //let h = (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) ?? mien.normal.fontSize
+    let h = GUI.mien.normal.fontSize;
+    return {
+      "width": metrics.width,
+      "height":h
+    };
+  }
+  static addText(panel, text) {
+    let textElement = new GUIElement(panel, text);
+    textElement.type = 'text';
+    return textElement;
+  }
+  static addButton(panel, text, value, toggle, fn) {
+    let buttonElement = new GUIElement(panel, text);
+    buttonElement.type = 'button';
+    let button = new Button(value, toggle, fn);
+    button.guiElement = buttonElement;
+    buttonElement.button = button;
+    return buttonElement;
   }
 
-  static makeText(panel, text) {
-    let el = new GUIElement(panel, text);
-    el.type = 'text';
-    panel.elements.push(el);
-    GUI.elements.push(el);
-    return el;
-  }
-  static makeButton(panel, text, value, toggle, fn) {
-    let el = new GUIElement(panel, text);
-    el.type = 'button';
-    panel.elements.push(el);
-    GUI.elements.push(el);
-    new Button(value, toggle, fn).bind(el);
-    return el;
+
+  //So just a normal button that carries fn.. which launches a other panel.
+  //this is where the idea that panel has an 'anchor' to calculate its own positin from.
+  //normal panels just treat the top-left of the screen as a default anchor,\
+  //but if one IS defined, its position + sideoffset must be added to this position as well.
+  static addList(panel, text, listItems, fn, defaultValue) {
   }
   /*
-
-  //TODO: Lists are a specialcase of attached..
-
-  //This is where you need to define  how you want he elemnts listed
-  //aka how the panel is going to layout
-  //horizontal, vertical ?
-  static makeList(panel, text, defaultValue, listItems, fn) {
-    let el = new GUIElement(panel, text);
-    el.#text = text;
-    el.defaultValue = defaultValue;
-    el.listItemData = listItems; //{text,value} used to make buttons
-    el.type = 'list';
-    el.panel = panel;
-    el.changeFn = fn;
-    panel.elements.push(el);
-    GUI.elements.push(el);
-    new Button(value, toggle, (e) => { e.owner.panel.showList(e.owner) }).bind(el);
-    return el;
+  static addList(panel, text, listItems, fn, defaultValue) {
+    let listElement = new GUIElement(panel, text);
+    listElement.listItemsData = listItems;//{text, value}
+    listElement.type = "list"
+    listElement.changeFn = fn;
+    let listCallback = (e) => { e.owner.panel.showList(e.owner); }
+    let listButton = new Button(defaultValue, false, listCallback);
+    listButton.guiElement = listElement;
+    listElement.button = listButton;
+    return listElement;
   }
   */
 }

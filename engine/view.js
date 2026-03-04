@@ -140,6 +140,5 @@ export default class View {
     View.canvas.height = window.innerHeight;
     View.screenCenter = { x: View.canvas.width / 2, y: View.canvas.height / 2 };
     View.calculateCameraBounds();
-    if (GUI.initialized) GUI.resize();
   }
 }

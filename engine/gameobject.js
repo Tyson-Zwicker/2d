@@ -129,7 +129,8 @@ export default class GameObject {
     }
     for (let part of this.allParts) {
       let polygons = part.getWorldPolygons();
-      for (let polygon of polygons) {        
+      for (let polygon of polygons) {
+        //TODO: This is where you'd change the mien based on if its got a button, and that button's state
         let fillStyle = polygon.mien.normal.bgColor;
         let strokeStyle = polygon.mien.normal.borderCololr;        
         if (part.button){

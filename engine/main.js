@@ -3,7 +3,6 @@ import Events from './events.js';
 import Game from './game.js';
 import GUI from './gui.js';
 import View from './view.js';
-
 export default class Main {
   static delta = 0;
   static time = 0;
@@ -13,7 +12,7 @@ export default class Main {
   static maxLoopTime = 0;
   static {
     View.initialize();
-    GUI.initialize(100, 30, 5, 5);
+    GUI.initialize();
     console.log('Main initialized..');
   }
   static run(fps = 0) {
@@ -68,29 +67,15 @@ export default class Main {
   }
   static checkMouse() {
     let interactionOccured = false;
-    /*The order here is important: The activeListElements need to be drawn once
-    before they can be checked for mouse interaction BECAUSE they need their drawnBounds set.
-    And the draw method will occur again before checkMouse is called again.\
-    */
-    for (let element of GUI.activeListItemElements) {
-      if (element.button) interactionOccured = element.button.checkForMouse();
-    }
-    if (!interactionOccured) {
-      for (let element of GUI.elements) {
-        if (element.button) interactionOccured = element.button.checkForMouse();
+    for (let element of GUI.elements) {      
+      if (element.button) {
+        if (element.button.checkForMouse()) interactionOccured = true;
       }
     }
-    if (!interactionOccured) {
-      for (let object of Game.gameObjects.values()) {
-        //console.log('checking object', object);
-        //console.log('buttons', object.buttons); 
-        if (object.buttons && object.buttons.length > 0) {
-          for (let button of object.buttons) {
-            //console.log ('checking button', button);
-            interactionOccured = button.checkForMouse();
-            //console.log('interaction occured', interactionOccured);
-            //Main.continue=false;
-          }
+    for (let object of Game.gameObjects.values()) {
+      if (object.buttons && object.buttons.length > 0) {
+        for (let button of object.buttons) {
+          if (button.checkForMouse()) interactionOccured = true;
         }
       }
     }

@@ -1,17 +1,21 @@
 import Events from './events.js';
 import GameObject from './gameobject.js';
 import GUI from './gui.js';
-import GUIElement from './guielement.js';
 import View from './view.js';
 export default class Button {
+  guiElement = undefined;
+  gameObjectPart = undefined;
   #owner  = undefined;
   get owner(){
-    return this.#owner;
+    if (this.#owner) return this.#owner;
+    if (this.guiElement)  return this.guiElement;
+    if (this.gameObjectPart) return this.gameObjectPart;
   }
   clicked = false;
   clickFn = undefined;
   hovered = false;
   pressed = false;
+  toggled = false;
   toggle = false;
   //Must be bound by an actor or Element to do anything..
   //They must bind the actor OR guiElement property.
@@ -20,17 +24,13 @@ export default class Button {
     this.toggle = toggle;
     this.value = value;
   }
-  bind (owner){
-    owner.button = this;
-    this.#owner = owner;
-  }
   checkForMouse() {
-    if (this.owner!==undefined && (this.owner instanceof GUIElement)) {
-      const inside = GUI.isMouseIn(this.owner);
+    if (this.guiElement) {
+      const inside = GUI.isMouseIn(this.guiElement);
       return this.#doButton(inside);
     }
-    if (this.owner!==undefined && (this.owner instanceof Part)) {
-      const inside = GameObject.isMouseIn(this.owner);
+    if (this.gameObjectPart) {
+      const inside = GameObject.isMouseIn(this.gameObjectPart);
       return this.#doButton(inside);
     }
     return false;
@@ -56,7 +56,7 @@ export default class Button {
       else if (!View.mouse.buttonDown && this.pressed) {
         //they just let up on the button after pressing.. that is a click.
         this.#click();
-        Events.add('button-clicked', (this.owner));
+        Events.add('button-clicked', (this.guiElement ? this.guiElement : this.gameObjectPart));
         this.hovered = false;
         this.pressed = false;
         interaction = true;
@@ -69,8 +69,21 @@ export default class Button {
     }
     return interaction;
   }
+  
   #click() {
-    const owner = this.owner;
+    const owner = this.guiElement ?? this.gameObjectPart ?? null;
+    const r = { owner, value: this.value };
+    this.clicked = false;
+    if (this.toggle) {
+      this.toggled = !this.toggled;
+      r.toggled = this.toggled;
+    }
+    if (this.clickFn) this.clickFn(r);
+    Events.add('click', owner);
+  }
+/*
+  #click() {
+    const owner = this.guiElement ?? this.gameObjectPart ?? null;
     const r = { owner, value: this.value };
     if (!this.toggle) {
       this.clicked = false;
@@ -80,4 +93,5 @@ export default class Button {
     if (this.clickFn) this.clickFn(r);
     Events.add('click', owner);
   }
+*/
 }
