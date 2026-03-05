@@ -81,17 +81,4 @@ export default class Button {
     if (this.clickFn) this.clickFn(r);
     Events.add('click', owner);
   }
-/*
-  #click() {
-    const owner = this.guiElement ?? this.gameObjectPart ?? null;
-    const r = { owner, value: this.value };
-    if (!this.toggle) {
-      this.clicked = false;
-    } else {
-      this.clicked = !this.clicked;
-    }
-    if (this.clickFn) this.clickFn(r);
-    Events.add('click', owner);
-  }
-*/
 }

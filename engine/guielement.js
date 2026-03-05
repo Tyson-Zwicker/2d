@@ -23,7 +23,7 @@ export default class GUIElement {
     Draw.multiLineText(
       position.x, position.y,
       position.x + this.size.width, position.y + this.size.height,
-      this.processedText.lines, this.processedText.lineHeight,mien
+      this.processedText.lines, this.processedText.lineHeight, mien
     );
     this.drawnBounds.x0 = position.x;
     this.drawnBounds.y0 = position.y;
@@ -33,16 +33,20 @@ export default class GUIElement {
 
   static #getSize(panel, processedText) {
     if (panel.direction === 'vertical') {
+
       let w = panel.constraint.max.width;
       let h = processedText.height;
       if (panel.constraint.min.height > 0 && h < panel.constraint.min.height) {
         h = panel.constraint.min.height;
       }
       return { width: w, height: h };
+
     } else if (panel.direction === 'horizontal') {
+
       let w = processedText.width;
+      console.log(processedText);
       let h = panel.constraint.max.height;
-      if (panel.constraint.min.width > 0 && processedText.width < panel.constraint.min.width) {
+      if (panel.constraint.min.width > 0 && panel.constraint.min.width > processedText.width) {
         w = panel.constraint.min.width;
       }
       return { width: w, height: h };
@@ -52,38 +56,39 @@ export default class GUIElement {
   }
   static #cutTextIntoLines(text, panel) {
     let lines = [];
-    if (panel.constraint.max.width <= 0) {
-      lines.push(text);  //No width contraint
-      return lines;
-    } else {
-      let remainingWords = text.split(' ');
-      let currentLine = '';
-      let maxWidth = 0;
-      let lineHeight = 0;
-      do {
-        let word = remainingWords.shift();
-        let currentLineMetric = GUIElement.#getTextSize(currentLine + ' ' + word);
-        if (lineHeight<currentLineMetric.height) lineHeight = currentLineMetric.height;
-        
-        if (currentLineMetric.width > panel.constraint.max.width) {
-          lines.push(currentLine);
-          let ts = GUIElement.#getTextSize(currentLine);
-          if (ts.width > maxWidth) maxWidth = ts.width;
-          currentLine = '';
-        }
-        currentLine += word + ' ';
-      } while (remainingWords.length > 0);
-      lines.push(currentLine);
-      while (lines.length * lineHeight > panel.constraint.max.height) {
-        lines.pop();
+
+    let remainingWords = text.split(' ');
+    let currentLine = '';
+    let maxWidth = 0;
+    let lineHeight = 0;
+    
+    do {
+      let word = remainingWords.shift();
+      let currentLineMetric = GUIElement.#getTextSize(currentLine + ' ' + word);
+      if (lineHeight < currentLineMetric.height) lineHeight = currentLineMetric.height;
+
+      if (currentLineMetric.width > panel.constraint.max.width) {
+        lines.push(currentLine);
+        let ts = GUIElement.#getTextSize(currentLine);
+        if (ts.width > maxWidth) maxWidth = ts.width;
+        currentLine = '';
+      }else{
+        if (currentLineMetric.width > maxWidth) maxWidth = currentLineMetric.width;
       }
-      return {
-        lines: lines,
-        width: maxWidth,
-        height: lines.length * lineHeight,
-        lineHeight: lineHeight
-      };
+      
+      currentLine += word + ' ';
+    } while (remainingWords.length > 0);
+    lines.push(currentLine);
+    while (lines.length * lineHeight > panel.constraint.max.height) {
+      lines.pop();
     }
+    return {
+      lines: lines,
+      width: maxWidth,
+      height: lines.length * lineHeight,
+      lineHeight: lineHeight
+    };
+
   }
   static #getTextSize(text) {
     View.context.textBaseline = 'top';
@@ -94,7 +99,7 @@ export default class GUIElement {
     let h = GUI.mien.normal.fontSize;
     return {
       "width": metrics.width,
-      "height":h
+      "height": h
     };
   }
   static addText(panel, text) {
