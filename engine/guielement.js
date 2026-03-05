@@ -1,5 +1,6 @@
 
 import Draw from './draw.js';
+import Events from './events.js';
 import GUI from './gui.js';
 import GUIPanel from './guipanel.js';
 import Button from './button.js';
@@ -145,18 +146,20 @@ export default class GUIElement {
         false,
         (data) => {
           let listElement = data.owner.panel.anchor;//<-- the item that showed the panel in the first place.
-          listElement.receiveListItemSelection(data.owner.button.value); //Give it the selected Value..
+          listElement.receiveListItemSelection(data); //Give it the selected Value..
         }
       );
     }
     listItemPanel.anchor = listElement;
     listElement.attachedPanel = listItemPanel;
   }
-  receiveListItemSelection(value) { //should only be called by a button element that is part of a list item panel..
-    this.button.value = value; //change this button value to selected value..
+  receiveListItemSelection(data) { //should only be called by a button element that is part of a list item panel..
+    this.button.value = data.value; //change this button value to selected value..
     GUI.removePanel(this.attachedPanel); //thrown away, won't be drawn    
     this.attachedPanel.anchor = undefined;
     this.attachedPanel = undefined;
+    data.owner = this;
+    Events.add ('listItemSelected',this.text, data);
   }
 }
 //So just a normal button that carries fn.. which launches a other panel.
