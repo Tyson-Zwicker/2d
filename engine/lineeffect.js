@@ -16,6 +16,7 @@ export default class LineEffect {
     let screenPoint1 = Vec.add(Vec.scale(Vec.sub(this.endPoint, View.camera), View.camera.zoom), View.screenCenter);
     let opacity = Math.floor (15 * (this.life/ this.durationInSeconds));    
     let color = this.color + opacity.toString(16);
+    let oldstroke = View.context.strokeStyle;
     View.context.strokeStyle = color;
     View.context.lineWidth = this.thickness;
     View.context.beginPath();
@@ -24,6 +25,7 @@ export default class LineEffect {
     View.context.stroke();
     this.life -= Main.delta;
     let stillAlive = (this.life > 0 && opacity>0)
+    View.context.strokeStyle = oldstroke;
     return stillAlive;
   }
 }

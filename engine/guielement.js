@@ -10,7 +10,7 @@ export default class GUIElement {
   constructor(panel, text) {
     this.drawnBounds = {}//determined when draw..
     this.active = true;
-    this.text = text;
+    this.text = text;    
     this.processedText = GUIElement.#cutTextIntoLines(text, panel);
     this.size = GUIElement.#getSize(panel, this.processedText);
     this.panel = panel;
@@ -121,10 +121,6 @@ export default class GUIElement {
   }
 
   static attachListItemPanel(listElement) {
-    console.log('make a list out of:');
-    console.log(listElement.listItems);
-    console.log('in direction:' + listElement.itemPanelDirection);
-
     //Lets try just using the size of the listElement and see how it goes..
     let constraint = {
       max: { width: listElement.size.width, height: listElement.size.height },

@@ -13,8 +13,6 @@ export default class GUI {
     GUI.mien = mien;
     GUI.initialized = true;
     console.log('GUI initialized..');
-    console.log('Mien:');
-    console.log(GUI.mien);
   }
   static isMouseIn(element) {
     return (

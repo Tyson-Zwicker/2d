@@ -1,8 +1,10 @@
 import GUI from './gui.js';
+import View from './view.js';
+import GameObject from './gameobject.js';
 export default class GUIPanel {
   #position;
   constructor(position, direction, constraint) {
-    this.anchor = undefined;       //Assumed canvas upper-left corner (if undefined) or a GUIElement
+    this.anchor = undefined;       //Assumed canvas upper-left corner (if undefined) or a GUIElement or GameObject
     this.#position = position;
     this.direction = direction;
     this.constraint = constraint;
@@ -11,20 +13,30 @@ export default class GUIPanel {
   }
   get position() {
     if (!this.anchor) return this.#position
-    if (this.anchor.panel.direction === 'horizontal') {
-      return {
-        x: this.anchor.drawnBounds.x0,
-        y: this.anchor.drawnBounds.y1
-      };
+    if (this.anchor instanceof GUIPanel) {
+      if (this.anchor.panel.direction === 'horizontal') {
+        return {
+          x: this.anchor.drawnBounds.x0,
+          y: this.anchor.drawnBounds.y1
+        };
+      }
+      else if (this.anchor.panel.direction === 'vertical') {
+        return {
+          x: this.anchor.drawnBounds.x1,
+          y: this.anchor.drawnBounds.y0
+        };
+      }
     }
-    else if (this.anchor.panel.direction === 'vertical') {
-      return {
-        x: this.anchor.drawnBounds.x1,
-        y: this.anchor.drawnBounds.y0
-      };
+    if (this.anchor instanceof GameObject) {
+      let screenCoord = View.worldToScreen(
+        {
+          x: this.anchor.worldPosition.x - this.anchor.body.radius,
+          y: this.anchor.worldPosition.y + this.anchor.body.radius*2 +5
+        });
+      return screenCoord;
     }
   }
- 
+
   render() {
     let cursor = {};
     cursor.x = this.position.x;

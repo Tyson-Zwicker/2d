@@ -13,20 +13,18 @@ export default class Part {
   name = undefined;             //assigned by constructor
   parts = [];                   //added to by addPart();
   polygons = [];                   //assigned by constructor
-  particleGenParams = undefined;//assigned by constructor (optional)
-  particleGenState = false;     //turn particle generation on and off. Set by user.
   mass = undefined;             //assigned by constructor.
   radius = undefined;           //Calculated upon construction. (The radius of the smallest circle that can enclose this part). 
   depth = undefined;            //Calculated when addTo() parent object..
   button = undefined;           //a button can be assigned manually.
-  constructor(name, polygons, mass = 1, particleGenParams) {
+  
+    constructor(name, polygons, mass = 1) {
     if (!name || !polygons) throw Error('Missing parameter');
     this.name = name;
     this.mass = mass;
     if (Array.isArray(polygons)) this.polygons.push(...polygons);
     else if (typeof polygons === 'object') this.polygons = [polygons];
     else throw new Error(`polygons must be a polygon or an Array of polygons: [${JSON.stringify(polygons)}]`);
-    if (typeof particleGenParams === 'object') this.particleGenParams = particleGenParams;
     this.radius = this.#calcRadius();
   }
   #calcRadius() {

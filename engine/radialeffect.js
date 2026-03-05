@@ -1,7 +1,7 @@
 
 import View from './view.js';
 import Main from './main.js';
-import Vec from '../vec.js';
+import Vec from './vec.js';
 
 export default class RadialEffect {
   constructor(point, initialRadius, expansionRate, color, thickness, durationInSeconds, startAngle, endAngle) {

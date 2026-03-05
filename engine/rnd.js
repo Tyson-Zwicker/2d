@@ -1,4 +1,5 @@
 import Vec from './vec.js';
+import Line from './line.js';
 export default class Rnd {
   static bool() {
     return (Math.random() < 0.5);
@@ -52,6 +53,13 @@ export default class Rnd {
     let a = Rnd.float(minAngle, maxAngle);
     let m = Rnd.float(minMag, maxMag);
     return Vec.fromAngleAndMagnitude(a, m);
+  }
+  static ray (origin, minAngle, maxAngle, minStart, maxStart, minLength, maxLength){
+    let a = Rnd.float(minAngle, maxAngle);
+    let s = Rnd.float(minStart, maxStart);
+    let len = Rnd.float(minLength,maxLength)    
+    return Line.ray (origin, a, s, s+len);
+    
   }
   static color(min) {
     if (typeof min !== 'number') {

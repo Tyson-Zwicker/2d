@@ -132,7 +132,7 @@ export default class GameObject {
       for (let polygon of polygons) {
         //TODO: This is where you'd change the mien based on if its got a button, and that button's state
         let fillStyle = polygon.mien.normal.bgColor;
-        let strokeStyle = polygon.mien.normal.borderCololr;        
+        let strokeStyle = polygon.mien.normal.borderColor;        
         if (part.button){
           if (part.button.hovered){
             fillStyle = polygon.mien.hovered.bgColor;
