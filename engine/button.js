@@ -70,8 +70,7 @@ export default class Button {
   }
 
   #click() {
-
-    let data = { origin: 'unknown', type: 'click' };
+    let data = { origin: 'unknown', type: 'click', value: this.value };
     if (this.guiElement) {
       data.origin = this.guiElement.text;
       data.owner = this.guiElement;

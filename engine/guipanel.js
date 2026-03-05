@@ -24,7 +24,7 @@ export default class GUIPanel {
       };
     }
   }
-
+ 
   render() {
     let cursor = {};
     cursor.x = this.position.x;
