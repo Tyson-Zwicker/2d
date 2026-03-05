@@ -1,11 +1,11 @@
 export default class Events{
   static #occurences = [];
   static {;}
-  static make (type, origin){
-    return {type:type, origin:origin, when:Date.now()};
+  static make (type, origin, data){
+    return {type:type, origin:origin, data:data, when:Date.now()};
   }
-  static add (type,origin){
-    this.#occurences.push (Events.make (type, origin));
+  static add (type,origin, data){
+    this.#occurences.push (Events.make (type, origin,data));
   }
   static reset (){
     Events.#occurences.length = 0;

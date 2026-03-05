@@ -5,10 +5,10 @@ import View from './view.js';
 export default class Button {
   guiElement = undefined;
   gameObjectPart = undefined;
-  #owner  = undefined;
-  get owner(){
+  #owner = undefined;
+  get owner() {
     if (this.#owner) return this.#owner;
-    if (this.guiElement)  return this.guiElement;
+    if (this.guiElement) return this.guiElement;
     if (this.gameObjectPart) return this.gameObjectPart;
   }
   clicked = false;
@@ -56,7 +56,6 @@ export default class Button {
       else if (!View.mouse.buttonDown && this.pressed) {
         //they just let up on the button after pressing.. that is a click.
         this.#click();
-        Events.add('button-clicked', (this.guiElement ? this.guiElement : this.gameObjectPart));
         this.hovered = false;
         this.pressed = false;
         interaction = true;
@@ -69,16 +68,24 @@ export default class Button {
     }
     return interaction;
   }
-  
+
   #click() {
-    const owner = this.guiElement ?? this.gameObjectPart ?? null;
-    const r = { owner, value: this.value };
+
+    let data = { origin: 'unknown', type: 'click' };
+    if (this.guiElement) {
+      data.origin = this.guiElement.text;
+      data.owner = this.guiElement;
+    }
+    if (this.gameObjectPart) {
+      data.origin = this.gameObjectPart.name;
+      data.owner = this.gameObjectPart;
+    }
     this.clicked = false;
     if (this.toggle) {
       this.toggled = !this.toggled;
-      r.toggled = this.toggled;
+      data.toggled = this.toggled;
     }
-    if (this.clickFn) this.clickFn(r);
-    Events.add('click', owner);
+    if (this.clickFn) this.clickFn(data);
+    Events.add('click', data.origin, data);
   }
 }
