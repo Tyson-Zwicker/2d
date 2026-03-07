@@ -102,6 +102,12 @@ export default class StarInterface {
     GUI.removePanel(this.infoPanel);
     this.infoPanel = undefined;
   }
+  getInfoPanelForStar (starSystem){
+
+  }
+  getInfoPanelForPlanet (planet){
+    
+  }
   #makeGameObjectFor(star) {
     let radius = 40;
     let obj = new GameObject(star.name, true);
