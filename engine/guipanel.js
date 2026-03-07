@@ -9,7 +9,7 @@ export default class GUIPanel {
     this.direction = direction;
     this.constraint = constraint;
     this.elements = [];
-    GUI.panels.push(this);
+    GUI.panels.push(this);    
   }
   get position() {
     if (!this.anchor) return this.#position
@@ -35,6 +35,7 @@ export default class GUIPanel {
         });
       return screenCoord;
     }
+    console.log (this.anchor);
   }
 
   render() {

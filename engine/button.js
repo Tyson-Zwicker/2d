@@ -79,7 +79,7 @@ export default class Button {
       data.origin = this.gameObjectPart.name;
       data.owner = this.gameObjectPart;
     }
-    this.clicked = false;
+    this.clicked = false;    
     if (this.toggle) {
       this.toggled = !this.toggled;
       data.toggled = this.toggled;
