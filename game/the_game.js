@@ -11,18 +11,11 @@ import Polygon from '../engine/polygon.js';
 import Mien from '../engine/mien.js';
 
 import StarSystem from '../rules/starsystem.js';
+import GameEventHandler from '../rules/gameeventhandler.js';
 
-
-const starterStar = StarSystem.Starter();
-let infoPanelConstraint = {
-  min: { width: 50, height: 50 }, max: { width: 250, height: 100 }
-} 
-let planetInfoPanel = new GUIPanel(undefined, 'horizontal', infoPanelConstraint);
-let planetInfoElement = GUIElement.addText (planetInfoPanel,'zones:4 population:7');
-planetInfoPanel.anchor = starterStar.gameObject;
-
+GameEventHandler.initialize();
 Main.creatorsFunction = () => {
-  starterStar.interface.animate();
+  GameEventHandler.animate();
 }
 Main.run(100);
 
