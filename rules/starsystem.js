@@ -15,7 +15,7 @@ export default class StarSystem {
     this.interface = new StarInterface(this);        
   }
 
-  static Starter() {
+  static getStarter() {
     let planets = [Planet.getStarter('Terra', Mien.Blue), Planet.getStarterHelper('Other', Mien.Gray)];        
     let s = new StarSystem('Home',planets, StarInterface.StarMien);    
     return s;

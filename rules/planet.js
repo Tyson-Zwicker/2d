@@ -10,6 +10,8 @@ export default class Planet {
     for (let z of this.zones) {
       z.process();
     }
+    //TODO: planetary redistribution..
+    //FIXME: calculate planet wide stats from individual sectors (or add getters...)
   }
   static getRandom(star) {
     let p = new Planet();

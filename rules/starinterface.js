@@ -2,6 +2,8 @@ import Button from '../engine/button.js';
 import Game from '../engine/game.js';
 import GameObject from '../engine/gameobject.js';
 import GUI from '../engine/gui.js';
+import GUIPanel from '../engine/guipanel.js';
+import GUIElement from '../engine/guielement.js';
 import Mien from '../engine/mien.js';
 import Part from '../engine/part.js'
 import Polygon from '../engine/polygon.js';
@@ -43,8 +45,7 @@ export default class StarInterface {
   }
   constructor(starSystem) {
     this.starSystem = starSystem;
-    this.gameObject = this.#getGameObject(starSystem);
-    GameState.starSystems.put(starSystem.name, starSystem);
+    this.gameObject = this.#makeGameObjectFor(starSystem);   
   }
   animate() {
     let minAngle = 0; let maxAngle = 360;
@@ -85,21 +86,23 @@ export default class StarInterface {
   }
   showInfoPanel() {
     let infoPanelConstraint = {
-      min: { width: 50, height: 50 }, max: { width: 150, height: 100 }
+      min: { width: 0, height: 50 }, max: { width: 200, height: 50 }
     }
     let infoPanel = new GUIPanel(undefined, 'horizontal', infoPanelConstraint);
-    GUIElement.addText(infoPanel, `Name: ${this.starSystem.name} zones:4 population:7`);
+    infoPanel.anchor = this.gameObject;
+    this.infoPanel= infoPanel;
+    GUIElement.addText(infoPanel, `Name: ${this.starSystem.name} zones:4 population:7`);//TODO: Msg text
     for (let planet of this.starSystem.planets) {
-      GUIElement.addText(infoPanel,`Name: ${planet.name}`);      
+      GUIElement.addText(infoPanel, `Name: ${planet.name}`);      //TODO: Msg text
     }
-    infoPanel.anchor = this.starSystem.gameObject;
+    
 
   }
-  hideInfoPanel() {    
-    GUI.removePanel (this.infoPanel);
+  hideInfoPanel() {
+    GUI.removePanel(this.infoPanel);
     this.infoPanel = undefined;
   }
-  #getGameObject(star) {
+  #makeGameObjectFor(star) {
     let radius = 40;
     let obj = new GameObject(star.name, true);
     let starPart = new Part('Sol-0', Polygon.regular(21, radius, StarInterface.StarMien));
@@ -108,15 +111,14 @@ export default class StarInterface {
       let planet = new Part(star.name + '-' + i, Polygon.regular(12, 20, star.planets[i].mien));
       planet.addTo(starPart, { x: 250 + (i * 150), y: 0 });
     }
-    obj.finalize();
-    Game.add(obj, { x: 0, y: 0 }, 0);
+  
     let button = new Button('button-star-' + star.name, true,
       (data) => {
-        let systemName = data.values.split('-')[2];//skip button and star...
+        let systemName = data.value.split('-')[2];//skip button and star...
         let starSystem = GameState.starSystems.get(systemName);
-        if (data.toggle === true) {
+        if (data.toggled === true) {
           starSystem.interface.showInfoPanel();
-        } else if (data.toggle === false) {
+        } else if (data.toggled === false) {
           starSystem.interface.hideInfoPanel();
         } else {
           throw new Error('toggle expected.');
@@ -125,11 +127,14 @@ export default class StarInterface {
     );
     starPart.button = button;
     button.gameObjectPart = starPart;
+    obj.finalize();
+    Game.add(obj, { x: 0, y: 0 }, 0);
+    
     return obj;
   }
 }
 /*
-When handling events, I recieve data that tells the the owner is a GameObjectPart.
+When handling events, I receive data that tells the the owner is a GameObjectPart.
 Great.. this gameObject belongs to a star, I want to toggle its panel
 How do I find the starSystem? Given the gameObject.  
  
