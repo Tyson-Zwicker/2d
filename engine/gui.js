@@ -4,11 +4,17 @@ export default class GUI {
   static elements = [];
   static panels = [];
   static mien = undefined;  //set in constructor
-  static gap = 5;                 //set in constructor
+  static gap = 5;           //set in constructor - the gap between GUIElements.
   //set in constructor
   static initialized = false;
-  static initialize(gap = 5, mien = Mien.Green) {
+   //padding {w,h,g} 
+   // w = padding from left and right.
+   // h = padding from top and bottom.
+   // g = vertical space between text lines;
+   
+  static initialize(gap =5, lineSpace = 1,mien = Mien.Green) {
     GUI.gap = gap;
+    GUI.lineSpace = lineSpace;
     GUI.elements = [];
     GUI.mien = mien;
     GUI.initialized = true;
