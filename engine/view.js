@@ -10,8 +10,8 @@ export default class View {
   static mouse = { x: 0, y: 0, buttonDown: false }; //Screen coordinates
   static screenCenter = undefined;
   static zoomFactor = 10; //How much each zoom changes when the wheel is scrolled.
-
-  static initialize(){
+  
+  static initialize() {
     View.canvas = document.createElement('canvas');
     View.canvas.style.margin = 0;
     View.canvas.style.padding = 0;
@@ -33,12 +33,17 @@ export default class View {
     View.canvas.oncontextmenu = View.handleContextMenu;
     window.addEventListener('resize', View.resizeCanvas);
     View.calculateCameraBounds();
-    console.log ('View Initialized..');
+    console.log('View Initialized..');
   }
   static screenToWorld() {
     const centered = Vec.sub(View.mouse, View.screenCenter);
     const scaled = Vec.scale(centered, 1 / View.camera.zoom);
     return Vec.add(scaled, View.camera);
+  }
+  static worldToScreen(w) {    
+    let centerByCamera = Vec.sub(w, View.camera);
+    let scaled = Vec.scale(centerByCamera, View.camera.zoom)
+    return Vec.add(scaled, View.screenCenter);    
   }
   static canSee(point, radius) {
     let { x0, y0, x1, y1 } = View.cameraBounds;
@@ -67,7 +72,7 @@ export default class View {
     View.context.fillStyle = View.bgColor;
     View.context.fillRect(0, 0, View.canvas.width, View.canvas.height);
   }
-  static handleCameraDrag(mouseInteractedWithSomething) {    
+  static handleCameraDrag(mouseInteractedWithSomething) {
     if (!mouseInteractedWithSomething) {
       if (View.bgPressed && View.mouse.buttonDown) {        //drag occuring..         
         let drag;

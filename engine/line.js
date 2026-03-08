@@ -1,6 +1,15 @@
 import Vec from './vec.js';
 export default class Line {
-
+  p0 = { x: 0, y: 0 };
+  p1 = { x: 0, y: 0 };
+  static ray(origin, angle, startMagnitude, endMagnitude) {
+    let v0 = Vec.fromAngleAndMagnitude(angle, startMagnitude);
+    let v1 = Vec.fromAngleAndMagnitude(angle, endMagnitude);
+    return {
+      p0: Vec.add(origin, v0),
+      p1: Vec.add(origin, v1)
+    };
+  }
   static angleBetweenLines(lineAStart, lineAEnd, lineBStart, lineBEnd) {
     const v1 = { x: lineAEnd.x - lineAStart.x, y: lineAEnd.y - lineAStart.y };
     const v2 = { x: lineBEnd.x - lineBStart.x, y: lineBEnd.y - lineBStart.y };
