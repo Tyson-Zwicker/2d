@@ -45,7 +45,7 @@ export default class StarInterface {
   }
   constructor(starSystem) {
     this.starSystem = starSystem;
-    this.gameObject = this.#makeGameObjectFor(starSystem);   
+    this.gameObject = this.#makeGameObjectFor(starSystem);
   }
   animate() {
     let minAngle = 0; let maxAngle = 360;
@@ -85,28 +85,27 @@ export default class StarInterface {
     }
   }
   showInfoPanel() {
-    let infoPanelConstraint = {
-      min: { width: 0, height: 50 }, max: { width: 200, height: 50 }
-    }
+    let infoPanelConstraint = { width: 200, height: 50 };
+
     let infoPanel = new GUIPanel(undefined, 'horizontal', infoPanelConstraint);
     infoPanel.anchor = this.gameObject;
-    this.infoPanel= infoPanel;
+    this.infoPanel = infoPanel;
     GUIElement.addText(infoPanel, `Name: ${this.starSystem.name} zones:4 population:7`);//TODO: Msg text
     for (let planet of this.starSystem.planets) {
       GUIElement.addText(infoPanel, `Name: ${planet.name}`);      //TODO: Msg text
     }
-    
+
 
   }
   hideInfoPanel() {
     GUI.removePanel(this.infoPanel);
     this.infoPanel = undefined;
   }
-  getInfoPanelForStar (starSystem){
+  getInfoPanelForStar(starSystem) {
 
   }
-  getInfoPanelForPlanet (planet){
-    
+  getInfoPanelForPlanet(planet) {
+
   }
   #makeGameObjectFor(star) {
     let radius = 40;
@@ -117,7 +116,7 @@ export default class StarInterface {
       let planet = new Part(star.name + '-' + i, Polygon.regular(12, 20, star.planets[i].mien));
       planet.addTo(starPart, { x: 250 + (i * 150), y: 0 });
     }
-  
+
     let button = new Button('button-star-' + star.name, true,
       (data) => {
         let systemName = data.value.split('-')[2];//skip button and star...
@@ -135,7 +134,7 @@ export default class StarInterface {
     button.gameObjectPart = starPart;
     obj.finalize();
     Game.add(obj, { x: 0, y: 0 }, 0);
-    
+
     return obj;
   }
 }
