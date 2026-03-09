@@ -4,10 +4,11 @@ import View from './view.js';
 import GameObject from './gameobject.js';
 export default class GUIPanel {
   #position;
-  constructor(position, direction, constraint) {
+  constructor(position, direction, constraint, flex = false) {
 
-    this.anchor = undefined;       //Assumed canvas upper-left corner (if undefined) or a GUIElement or GameObject
+    this.anchor = undefined;       //Assumed canvas upper-  left corner (if undefined) or a GUIElement or GameObject
     this.#position = position;     //undefined if anchored..
+    this.flex = flex;
     this.direction = direction;
     this.constraint = constraint; //Constraint to apply to individual elements.
     this.elements = [];
@@ -24,7 +25,7 @@ export default class GUIPanel {
       else if (this.anchor.panel.direction === 'vertical') {
         return { x: this.anchor.drawnBounds.x1, y: this.anchor.drawnBounds.y0 };
       }
-      throw new Error ('invalid directinon:'+this.anchor.panel.direction);
+      throw new Error('invalid directinon:' + this.anchor.panel.direction);
     }
     if (this.anchor instanceof GameObject) {
       let screenCoord = View.worldToScreen(
@@ -58,8 +59,26 @@ export default class GUIPanel {
     let h = el.trimmedText.h;
     let x0 = cursor.x;
     let y0 = cursor.y;
-    if (this.direction === 'vertical' && w < this.constraint.width) w = this.constraint.width;
-    if (this.direction === 'horizontal' && h < this.constraint.height) h = this.constraint.height;
+    if (this.direction === 'vertical') {
+      if (w < this.constraint.width) {
+        w = this.constraint.width;
+      }
+      if (!this.flex) {
+        if (h < this.constraint.height) {
+          h = this.constraint.height;
+        }
+      }
+    }
+    if (this.direction === 'horizontal') {
+      if (h < this.constraint.height) {
+        h = this.constraint.height;
+      }
+      if (!this.flex) {
+        if (w < this.constraint.width) {
+          w = this.constraint.width;
+        }
+      }
+    }
     //calc bottom right..
     let x1 = x0 + w;
     let y1 = y0 + h;
