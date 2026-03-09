@@ -9,13 +9,13 @@ export default class Text {
 //    this.size = { w: 0, h: 0 };
  // }
   
-  static getTextFromArray(text, maxSize, fontName, fontSize, lineSpace) {
+  static getTextFromArray(text, maxSize, fontName, fontSize, lineSpace, margin) {
     View.context.font = `${fontSize}px ${fontName}`;
     let r = { lines: [], lineLengths:[], w: 0, h: 0 };
-    let h = fontSize+lineSpace;    
+    let h = fontSize+lineSpace+margin*2;    
     for (let line of text) {
       if (h  > maxSize.h) break;
-      let trunc = this.#truncateLine(line, maxSize.w);
+      let trunc = this.#truncateLine(line, maxSize.w, maxSize.m);
       r.lines.push(trunc.text);
       r.lineLengths.push (trunc.w);      
       if (r.w < trunc.w) r.w = trunc.w;
@@ -24,13 +24,13 @@ export default class Text {
     r.h = h - (fontSize + lineSpace);
     return r;
   }
-  static #truncateLine(text, maxWidth) {
+  static #truncateLine(text, maxWidth, margin) {
     let r = { text: '', w: 0 }
-    let naturalWidth = View.context.measureText(text).width
-    if (naturalWidth <= maxWidth) return { text: text, w: naturalWidth };
+    let naturalWidth = View.context.measureText(text).width + margin*2;
+    if (naturalWidth <= maxWidth) return { text: text, w: naturalWidth  };
     for (let i = text.length; i > 0; i--) {
       const candidate = text.slice(0, i) + Text.ellipsis;
-      let truncWidth = View.context.measureText(candidate).width;
+      let truncWidth = View.context.measureText(candidate).width +margin*2;
       if (truncWidth <= maxWidth) return { text: candidate, w: truncWidth };
     }
     return r;

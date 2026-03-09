@@ -83,7 +83,7 @@ export default class GUIPanel {
     let x1 = x0 + w;
     let y1 = y0 + h;
     //calc "centering" offsets..    
-    let verticalSpacer = (h - el.trimmedText.h) / 2;
+    let verticalSpacer = (h - el.trimmedText.h) / 2 +GUI.margin;//TODO: test margin
     //update the element with rendering size and outline..
     el.drawnBounds = { x0, y0, x1, y1 };
     el.size = { width: w, height: h };
@@ -106,11 +106,12 @@ export default class GUIPanel {
     View.context.textBaseline = 'top';
     View.context.textAlign = 'left';
     View.context.font = `${mien.fontSize}px ${mien.fontName}`;
-    let x = x0 + 1;
+    //TODO: test margin
+    let x = x0 + GUI.margin;
     let y = y0 + verticalSpacer;
     let i = 0;
     for (let line of el.trimmedText.lines) {
-      if (el.alignment === 'center') x = x0 + (w - el.trimmedText.lineLengths[i]) / 2;
+      if (el.alignment === 'center') x = x0 + (w - el.trimmedText.lineLengths[i]) / 2+GUI.margin;
       View.context.fillText(line, x, y);
       y += GUI.lineSpace + mien.fontSize;
       i++;

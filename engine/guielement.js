@@ -15,10 +15,11 @@ export default class GUIElement {
     // Use the correct font properties (fontName/fontSize) so text measurement matches rendering
     this.trimmedText = Text.getTextFromArray(
       textArray,
-      { w: panel.constraint.width, h: panel.constraint.height },
+      { w: panel.constraint.width, h: panel.constraint.height , m:GUI.margin},
       GUI.mien.normal.fontName,
       GUI.mien.normal.fontSize,
-      GUI.lineSpace
+      GUI.lineSpace,
+      GUI.margin
     );
     this.size = { width: this.trimmedText.w, height: this.trimmedText.h };
     this.panel = panel;

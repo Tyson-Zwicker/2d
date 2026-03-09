@@ -7,14 +7,11 @@ export default class GUI {
   static gap = 5;           //set in constructor - the gap between GUIElements.
   //set in constructor
   static initialized = false;
-   //padding {w,h,g} 
-   // w = padding from left and right.
-   // h = padding from top and bottom.
-   // g = vertical space between text lines;
    
-  static initialize(gap =5, lineSpace = 1,mien = Mien.Green) {
-    GUI.gap = gap;
-    GUI.lineSpace = lineSpace;
+  static initialize(gap =5, lineSpace = 1, margin = 5,mien = Mien.Green) {
+    GUI.gap = gap; //Gap between spaces. (px)
+    GUI.margin =margin; //Gap between border and inner text (px)
+    GUI.lineSpace = lineSpace; //vertical space between lines (px)
     GUI.elements = [];
     GUI.mien = mien;
     GUI.initialized = true;
