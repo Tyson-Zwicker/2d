@@ -14,51 +14,50 @@ export default class Planet {
     this.mien = mien;
     this.process(true);
   }
-  get population (){
+  get population() {
     let pop = 0;
-    for (let zone of this.zones) pop+=zone.population;
+    for (let zone of this.zones) pop += zone.population;
     return pop;
   }
-  get Industry(){
-    let ind =0;
-    for (let zone of this.zones) pop+=zone.industry;
+  get industry() {
+    let ind = 0;
+    for (let zone of this.zones) ind += zone.industry;
     return ind;
   }
-  get populationGrowth(){
-    let grw =0;
-    for (let zone of this.zones) pop+=zone.populationGrowth;
+  get populationGrowth() {
+    let grw = 0;
+    for (let zone of this.zones) grw += zone.populationGrowth;
     return grw;
   }
   redistributeFood() {
-    let food = 0;
-    let foodProducers = structuredClone(this.zones).sort(a, b) = (b.stores.food - a.stores.food);
-    let foodNeeders = structuredClone(this.zones).sort(a, b) = (b.stores.foodShortfall - a.stores.foodShortfall);
+    let foodProducers = structuredClone(this.zones);
+    foodProducers.sort((a, b) => { b.stores.food - a.stores.food });
+    let foodNeeders = structuredClone(this.zones);
+    foodNeeders.sort((a, b) => { b.stores.foodShortfall - a.stores.foodShortfall });
     let surplus = 0;
     for (let zone of foodProducers) {
       surplus = zone.food.producers.stores.food;
     }
     for (let needer of foodNeeders) {
-      if (needer.populationGrowth >= 0) break;      
+      if (needer.populationGrowth >= 0) break;
       let needed = needer.foodShortfall;
-      while (needed > 0 && surplus>0) {
+      while (needed > 0 && surplus > 0) {
         for (let haver of foodProducers) {
           if (haver.stores.food > 0) {
             haver.stores.food--;
             needer.stores.food++;
-            needed--;            
+            needed--;
             surplus--;
           }
         }
       }
-      if (surplus<=0) break;
+      if (surplus <= 0) break;
     }
   }
   process(firstRun) {
     if (firstRun !== true) {
       redistributeFood();
-    }    
-    this.resources.stores = 0;
-    this.store
+    }
     for (let zone of this.zones) {
       zone.process(firstRun);
     }
@@ -110,10 +109,7 @@ export default class Planet {
     }
   }
   static getStarter(starName, mien) {
-    let p = new Planet();
-    p.mien = StarInterface.TerranMien;
-    p.type = "terran"
-    p.name = starName.name;
+    let zones = [];
     for (let i = 0; i < 2; i++) {
       let z = new PlanetZone();
       z.resources.people = 6; //require 6 food.
@@ -124,7 +120,7 @@ export default class Planet {
       z.extractors.farms = 2;
       z.extractors.power = 2;
       z.extractors.mine = 1;
-      p.zones.push(z);
+      zones.push(z);
     }
     for (let i = 2; i < 4; i++) {
       let z = new PlanetZone();
@@ -132,17 +128,13 @@ export default class Planet {
       z.resources.food = 2;
       z.resources.power = 2;
       z.resources.ore = 2;
-      p.zones.push(z);
+      zones.push(z);
     }
+      let p = new Planet(starName, "Terran", zones, StarInterface.TerranMien);
     return p;
   }
   static getStarterHelper(starName, mien) {
-    let p = new Planet();
-    p.mien = mien;
-    p.type = "rocky"
-    p.mien = StarInterface.RockyMien;
-    p.name = starName;
-
+  let zones=[];
     for (let i = 0; i < 3; i++) {
       let z = new PlanetZone();
       z.resources.people = 0;
@@ -150,7 +142,9 @@ export default class Planet {
       z.resources.power = 2;
       z.resources.ore = 3;
       z.resources.gas = 3;
+      zones.push(z);
     }
+    let p = new Planet(starName, "Rocky", zones, StarInterface.RockyMien);
     return p;
   }
 }

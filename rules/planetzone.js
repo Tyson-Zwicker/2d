@@ -21,7 +21,7 @@ export default class PlanetZone {
   process(firstRun) {
     //Everything needs power, so its first, then food, then ore, then gas... until you run out of power and/or workds.
     let power = 0;
-    let workers = Math.floor(this.people); //IMPORTANT BECAUSE PEOPLE WILL BE A FLOAT AND 1/2 A PERSON CAN'T DO ANYTHING..
+    let workers = Math.floor(this.populaion); //IMPORTANT BECAUSE PEOPLE WILL BE A FLOAT AND 1/2 A PERSON CAN'T DO ANYTHING..
     for (let i = 0; (i < this.extractors.generators) && (workers > 0); i++) {
       power += this.resources.power;
       workers--;

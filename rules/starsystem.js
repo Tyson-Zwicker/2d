@@ -21,12 +21,12 @@ export default class StarSystem {
   }
   get industry() {
     let ind = 0;
-    for (let planet of this.planets) pop += planet.industry;
-    return industry;
+    for (let planet of this.planets) ind += planet.industry;
+    return ind;
   }
   get populationGrowth() {
     let grw = 0;
-    for (let planet of this.planets) grw += planet.industry;
+    for (let planet of this.planets) grw += planet.populationGrowth;
     return grw;
   }
   static getStarter() {

@@ -85,7 +85,7 @@ export default class StarInterface {
     }
   }
   showInfoPanel() {
-    let infoPanelConstraint = { width: 100, height: 100 };
+    let infoPanelConstraint = { width: 150, height: 100 };
     let infoPanel = new GUIPanel(undefined, 'horizontal', infoPanelConstraint);
     infoPanel.anchor = this.gameObject;
     this.infoPanel = infoPanel;
