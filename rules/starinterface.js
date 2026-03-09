@@ -85,14 +85,14 @@ export default class StarInterface {
     }
   }
   showInfoPanel() {
-    let infoPanelConstraint = { width: 200, height: 50 };
-
+    let infoPanelConstraint = { width: 100, height: 100 };
     let infoPanel = new GUIPanel(undefined, 'horizontal', infoPanelConstraint);
     infoPanel.anchor = this.gameObject;
     this.infoPanel = infoPanel;
-    GUIElement.addText(infoPanel, `Name: ${this.starSystem.name} zones:4 population:7`);//TODO: Msg text
+    GUIElement.addText(infoPanel,this.getInfoPanelForStar (this.starSystem),'left');
     for (let planet of this.starSystem.planets) {
-      GUIElement.addText(infoPanel, `Name: ${planet.name}`);      //TODO: Msg text
+      GUIElement.addText(infoPanel,this.getInfoPanelForPlanet (planet),'left');
+      
     }
 
 
@@ -101,11 +101,33 @@ export default class StarInterface {
     GUI.removePanel(this.infoPanel);
     this.infoPanel = undefined;
   }
-  getInfoPanelForStar(starSystem) {
-
+  getInfoPanelForStar(starSystem) {    
+    let r = [];
+    r.push (`${starSystem.name}`);
+    r.push (`Pop:${starSystem.population}`);
+    r.push (`Ind:${starSystem.industry}`);
+    if (starSystem.populationGrowth>0){
+      r.push ('Growing..');
+    }else if (starSystem.populationGrowth<0){
+      r.push ('Starving..');
+    } else {
+      r.push ('Stable'); 
+    }
+    return r;
   }
   getInfoPanelForPlanet(planet) {
-
+    let r = [];
+    r.push (`${planet.name}`);
+    r.push (`Pop:${planet.population}`);
+    r.push (`Ind:${planet.industry}`);
+    if (planet.populationGrowth>0){
+      r.push ('Growing..');
+    }else if (planet.populationGrowth<0){
+      r.push ('Starving..');
+    } else {
+      r.push ('Stable'); 
+    }
+    return r;
   }
   #makeGameObjectFor(star) {
     let radius = 40;

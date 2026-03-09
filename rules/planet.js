@@ -6,12 +6,62 @@ export default class Planet {
   type = '';
   name = 'unnamed';
   mien = undefined;
-  process() {
-    for (let z of this.zones) {
-      z.process();
+
+  constructor(name, type, zones, mien) {
+    this.name = name;
+    this.type = type;
+    this.zones = zones;
+    this.mien = mien;
+    this.process(true);
+  }
+  get population (){
+    let pop = 0;
+    for (let zone of this.zones) pop+=zone.population;
+    return pop;
+  }
+  get Industry(){
+    let ind =0;
+    for (let zone of this.zones) pop+=zone.industry;
+    return ind;
+  }
+  get populationGrowth(){
+    let grw =0;
+    for (let zone of this.zones) pop+=zone.populationGrowth;
+    return grw;
+  }
+  redistributeFood() {
+    let food = 0;
+    let foodProducers = structuredClone(this.zones).sort(a, b) = (b.stores.food - a.stores.food);
+    let foodNeeders = structuredClone(this.zones).sort(a, b) = (b.stores.foodShortfall - a.stores.foodShortfall);
+    let surplus = 0;
+    for (let zone of foodProducers) {
+      surplus = zone.food.producers.stores.food;
     }
-    //TODO: planetary redistribution..
-    //FIXME: calculate planet wide stats from individual sectors (or add getters...)
+    for (let needer of foodNeeders) {
+      if (needer.populationGrowth >= 0) break;      
+      let needed = needer.foodShortfall;
+      while (needed > 0 && surplus>0) {
+        for (let haver of foodProducers) {
+          if (haver.stores.food > 0) {
+            haver.stores.food--;
+            needer.stores.food++;
+            needed--;            
+            surplus--;
+          }
+        }
+      }
+      if (surplus<=0) break;
+    }
+  }
+  process(firstRun) {
+    if (firstRun !== true) {
+      redistributeFood();
+    }    
+    this.resources.stores = 0;
+    this.store
+    for (let zone of this.zones) {
+      zone.process(firstRun);
+    }
   }
   static getRandom(star) {
     let p = new Planet();
@@ -71,9 +121,9 @@ export default class Planet {
       z.resources.power = 2; //2 of them make enough for 4 farms..
       z.resources.ore = 1; //1 left and 1 power
       z.resources.gas = 0;
-      z.infrastructure.farms = 2;
-      z.infrastructure.power = 2;
-      z.infrastructure.mine = 1;
+      z.extractors.farms = 2;
+      z.extractors.power = 2;
+      z.extractors.mine = 1;
       p.zones.push(z);
     }
     for (let i = 2; i < 4; i++) {
@@ -92,7 +142,7 @@ export default class Planet {
     p.type = "rocky"
     p.mien = StarInterface.RockyMien;
     p.name = starName;
-    
+
     for (let i = 0; i < 3; i++) {
       let z = new PlanetZone();
       z.resources.people = 0;
