@@ -1,5 +1,4 @@
 import RectBounds from './rectbounds.js';
-import Vec from './vec.js';
 import Game from './game.js';
 
 export default class Collision {

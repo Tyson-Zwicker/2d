@@ -11,7 +11,7 @@ export default class Keyboard {
     Keyboard.status.set (e.key,'down');  
     Events.add ('key-down',e.key);  
   }
-
+  
   static #keyUp(e) {
     Keyboard.status.set (e.key, 'up');    
     Events.add ('key-up',e.key);

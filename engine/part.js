@@ -1,9 +1,9 @@
 import Vec from './vec.js';
 import View from './view.js';
-import GameObject from './gameobject.js';
+import SimObject from './simobject.js';
 
 export default class Part {
-  root = undefined;             //assigned when added (refers to a GameObject)
+  root = undefined;             //assigned when added (refers to a SimObject)
   ownPosition = undefined;      //assigned when added
   ownRotation = undefined;      //assigned when added
   parent = undefined;           //assigned when added
@@ -61,11 +61,11 @@ export default class Part {
     if (!offset) throw new Error('Missing parameter (offset): ' + this.name);
     if (isNaN(rotation)) throw new Error('Missing parameter (rotation): ' + this.name);
     /*
-    A part can have as many parts added to it as you want, but if your adding this to a GameObject 
-    it will overwrite the existing (if any) body.  Because GameObjects can only have one part as 
+    A part can have as many parts added to it as you want, but if your adding this to a SimObject 
+    it will overwrite the existing (if any) body.  Because SimObjects can only have one part as 
     their "body".
     */
-    if (parent instanceof GameObject) {
+    if (parent instanceof SimObject) {
       this.root = parent;
       parent.body = this;
     } else {

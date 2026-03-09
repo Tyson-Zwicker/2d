@@ -1,5 +1,5 @@
 import Events from './events.js';
-import GameObject from './gameobject.js';
+import SimObject from './simobject.js';
 import GUI from './gui.js';
 import View from './view.js';
 export default class Button {
@@ -30,7 +30,7 @@ export default class Button {
       return this.#doButton(inside);
     }
     if (this.gameObjectPart) {
-      const inside = GameObject.isMouseIn(this.gameObjectPart);
+      const inside = SimObject.isMouseIn(this.gameObjectPart);
       return this.#doButton(inside);
     }
     return false;

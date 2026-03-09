@@ -1,4 +1,4 @@
-import GameObject from './gameobject.js';
+import SimObject from './simobject.js';
 import QuadTree from './quadtree.js';
 import RectBounds from './rectbounds.js';
 export default class Game {
@@ -15,8 +15,8 @@ export default class Game {
   static dynamicQuadtree = new QuadTree(RectBounds.make(-50000, -50000, 50000, 50000));
   static add(obj, position, rotation = 0) {
     if (!obj || !position || isNaN(rotation)) throw new Error('Bad or missing parameter(s)');
-    if (obj instanceof GameObject) {
-      if (!obj.finalized) throw new Error(`Game Object not finalized: ${obj.name}`);
+    if (obj instanceof SimObject) {
+      if (!obj.finalized) throw new Error(`SimObject not finalized: ${obj.name}`);
       Game.gameObjects.set(obj.name, obj);
       obj.worldPosition = position;
       obj.worldRotation = rotation;
@@ -30,7 +30,7 @@ export default class Game {
         Game.staticQuadTreeInvalidated = true;  
       }      
     }
-    else throw new Error('Only Game Objects can be added to the Game.');
+    else throw new Error('Only SimObjects can be added to the Game.');
   };
   static get(name) {
     if (Game.gameObjects.has(name)) return Game.gameObjects.get(name);

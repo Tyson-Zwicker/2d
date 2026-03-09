@@ -1,12 +1,12 @@
 import GUI from './gui.js';
 import GUIElement from './guielement.js';
 import View from './view.js';
-import GameObject from './gameobject.js';
+import SimObject from './simobject.js';
 export default class GUIPanel {
   #position;
   constructor(position, direction, constraint, flex = false) {
 
-    this.anchor = undefined;       //Assumed canvas upper-  left corner (if undefined) or a GUIElement or GameObject
+    this.anchor = undefined;       //Assumed canvas upper-  left corner (if undefined) or a GUIElement or SimObject
     this.#position = position;     //undefined if anchored..
     this.flex = flex;
     this.direction = direction;
@@ -27,7 +27,7 @@ export default class GUIPanel {
       }
       throw new Error('invalid directinon:' + this.anchor.panel.direction);
     }
-    if (this.anchor instanceof GameObject) {
+    if (this.anchor instanceof SimObject) {
       let screenCoord = View.worldToScreen(
         {
           x: this.anchor.worldPosition.x - this.anchor.body.radius,
