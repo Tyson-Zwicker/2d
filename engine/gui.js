@@ -24,7 +24,6 @@ export default class GUI {
       View.mouse.y > element.drawnBounds.y0 &&
       View.mouse.y < element.drawnBounds.y1);
   }
-
   static render() {
     for (let p of this.panels) p.render();
   }

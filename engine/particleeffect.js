@@ -19,7 +19,6 @@ export default class ParticleEffect {
     let screenPoint = Vec.add(Vec.scale(Vec.sub(this.position, View.camera), View.camera.zoom), View.screenCenter);    
     View.context.fillRect(screenPoint.x - this.thickness / 2, screenPoint.y - this.thickness / 2, this.thickness, this.thickness);
     this.life -= Main.delta;
-
     this.position = Vec.add(this.position, Vec.scale(this.velocity, Main.delta));    
     let stillAlive = (this.life > 0 && opacity>0)
     return stillAlive;

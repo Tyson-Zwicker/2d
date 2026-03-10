@@ -9,10 +9,8 @@ export default class GUIElement {
     if (alignment === 'center' || alignment === 'left') {
       this.alignment = alignment;
     } else throw new Error('invalid alignment: ' + alignment);
-
-    this.drawnBounds = {}//determined when draw..
+    this.drawnBounds = {} //determined when drawn..
     this.active = true;
-    // Use the correct font properties (fontName/fontSize) so text measurement matches rendering
     this.trimmedText = Text.getTextFromArray(
       textArray,
       { w: panel.constraint.width, h: panel.constraint.height , m:GUI.margin},
@@ -26,7 +24,6 @@ export default class GUIElement {
     panel.elements.push(this);
     GUI.elements.push(this);
   }
-
   static addText(panel, textArray, alignment) {
     let textElement = new GUIElement(panel, textArray, alignment);
     textElement.type = 'text';
@@ -40,13 +37,11 @@ export default class GUIElement {
     buttonElement.button = button;
     return buttonElement;
   }
-  //listItems: [textArray], value
   static addList(panel, textArray, alignment, listItems, defaultValue, itemPanelDirection) {
     let listElement = new GUIElement(panel, textArray, alignment);
     listElement.type = 'list';
     listElement.itemPanelDirection = itemPanelDirection;
     listElement.listItems = listItems;
-
     let button = new Button(defaultValue, false, (r) => { GUIElement.attachListItemPanel(r.owner) });
     button.guiElement = listElement;
     listElement.button = button;
@@ -56,8 +51,6 @@ export default class GUIElement {
   static attachListItemPanel(listElement) {
     //Lets try just using the size of the listElement and see how it goes..
     let constraint = { width: listElement.size.width, height: listElement.size.height };
-
-
     let listItemPanel = new GUIPanel(undefined, listElement.itemPanelDirection, constraint);
     for (let item of listElement.listItems) {
       GUIElement.addButton(

@@ -81,7 +81,7 @@ export default class SimObject {
     return maxDistance;
   }
   static isMouseIn(simObjectPart) {
-    const mouseWorld = View.screenToWorld();
+    const mouseWorld = View.screenToWorld();    
     const bounds = RectBounds.make(
       simObjectPart.worldPosition.x - simObjectPart.radius,
       simObjectPart.worldPosition.y - simObjectPart.radius,
@@ -107,37 +107,41 @@ export default class SimObject {
     if (this.allParts.length === 0) {
       throw new Error('No Parts found to render.  SimObject has no body, or it has not been finalized.');
     }
-    for (let part of this.allParts) {      
-      let polygons = part.getWorldPolygons();
-      for (let polygon of polygons) {
-        let fillStyle = polygon.mien.normal.bgColor;
-        let strokeStyle = polygon.mien.normal.borderColor;
-        if (part.button) {
-          if (part.button.hovered) {
-            fillStyle = polygon.mien.hovered.bgColor;
-            strokeStyle = polygon.mien.hovered.borderColor;
+    for (let part of this.allParts) {
+      try {
+        let polygons = part.getWorldPolygons();
+         for (let polygon of polygons) {
+          let fillStyle = polygon.mien.normal.bgColor;
+          let strokeStyle = polygon.mien.normal.borderColor;
+          if (part.button) {
+            if (part.button.hovered) {
+              fillStyle = polygon.mien.hovered.bgColor;
+              strokeStyle = polygon.mien.hovered.borderColor;
+            }
+            else if (part.button.pressed) {
+              fillStyle = polygon.mien.pressed.bgColor;
+              strokeStyle = polygon.mien.pressed.borderColor;
+            }
           }
-          else if (part.button.pressed) {
-            fillStyle = polygon.mien.pressed.bgColor;
-            strokeStyle = polygon.mien.pressed.borderColor;
+          View.context.fillStyle = fillStyle;
+          View.context.strokeStyle = strokeStyle;
+          let path = new Path2D();
+          let points = polygon.points;
+          if (points.length === 0) continue;
+          path.moveTo(points[0].x, points[0].y);
+          for (let i = 1; i < points.length; i++) {
+            path.lineTo(points[i].x, points[i].y);
           }
+          path.closePath();
+          View.context.fill(path);
+          View.context.stroke(path);
         }
-        View.context.fillStyle = fillStyle;
-        View.context.strokeStyle = strokeStyle;
-        let path = new Path2D();
-        let points = polygon.points;
-        if (points.length === 0) continue;
-        path.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-          path.lineTo(points[i].x, points[i].y);
+        if (part.particleGenParams !== undefined && part.particleGenState) {
+          let pram = part.particleGeneratorParams;
+          ParticleEffect.generateGroup(part.worldPosition, part.worldRotation, pram.angleSpan, pram.velMin, pram.velMax, pram.thickness, pram.color, pram.groupSize, pram.durMin, pram.durMax);
         }
-        path.closePath();
-        View.context.fill(path);
-        View.context.stroke(path);
-      }
-      if (part.particleGenParams !== undefined && part.particleGenState) {
-        let pram = part.particleGeneratorParams;
-        ParticleEffect.generateGroup(part.worldPosition, part.worldRotation, pram.angleSpan, pram.velMin, pram.velMax, pram.thickness, pram.color, pram.groupSize, pram.durMin, pram.durMax);
+      } catch (e) {
+        throw new Error('Rendering Part [' + part.name + ']:' + e.message + ' : ' + e.stack);
       }
     }
   }

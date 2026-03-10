@@ -17,8 +17,6 @@ export default class Button {
   pressed = false;
   toggled = false;
   toggle = false;
-  //Must be bound by an actor or Element to do anything..
-  //They must bind the actor OR guiElement property.
   constructor(value, toggle = false, clickFn) {
     this.clickFn = clickFn;
     this.toggle = toggle;
@@ -38,7 +36,6 @@ export default class Button {
   #doButton(insideBounds) {
     let interaction = false;
     if (insideBounds) {
-
       if (View.mouse.buttonDown && !this.hovered) {
         //*Must* be checked first.. mouse went down somewhere else, but not here.. doesn't affect this actor..
         return false;
@@ -68,7 +65,6 @@ export default class Button {
     }
     return interaction;
   }
-
   #click() {
     let data = { origin: 'unknown', type: 'click', value: this.value };
     if (this.guiElement) {

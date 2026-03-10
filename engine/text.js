@@ -2,13 +2,6 @@ import View from './view.js';
 
 export default class Text {
   static ellipsis = '...';
-
-//  constructor() {
-//    this.lines = [];
-//    this.lineLengths = [];
-//    this.size = { w: 0, h: 0 };
- // }
-  
   static getTextFromArray(text, maxSize, fontName, fontSize, lineSpace, margin) {
     View.context.font = `${fontSize}px ${fontName}`;
     let r = { lines: [], lineLengths:[], w: 0, h: 0 };

@@ -22,8 +22,6 @@ export default class Line {
     const cosTheta = Math.max(-1, Math.min(1, dot / (mag1 * mag2)));
     return Math.acos(cosTheta);
   }
-
-
   static lineIntersection(lineAStart, lineAEnd, lineBStart, lineBEnd) {
     const r = { x: lineAEnd.x - lineAStart.x, y: lineAEnd.y - lineAStart.y };
     const s = { x: lineBEnd.x - lineBStart.x, y: lineBEnd.y - lineBStart.y };
@@ -65,5 +63,4 @@ export default class Line {
       y: segmentStart.y + segmentVector.y * clamped,
     };
   }
-
 }

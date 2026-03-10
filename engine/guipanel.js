@@ -5,7 +5,6 @@ import SimObject from './simobject.js';
 export default class GUIPanel {
   #position;
   constructor(position, direction, constraint, flex = false) {
-
     this.anchor = undefined;       //Assumed canvas upper-  left corner (if undefined) or a GUIElement or SimObject
     this.#position = position;     //undefined if anchored..
     this.flex = flex;
@@ -14,7 +13,6 @@ export default class GUIPanel {
     this.elements = [];
     GUI.panels.push(this);
   }
-
   //Either (x,y) from upperleft, or based on its anchor...
   get position() {
     if (!this.anchor) return this.#position
@@ -36,7 +34,6 @@ export default class GUIPanel {
       return screenCoord;
     }
   }
-
   render() {
     let cursor = {};
     cursor.x = this.position.x;
@@ -53,7 +50,6 @@ export default class GUIPanel {
     }
   }
   #renderElement(el, cursor) {
-
     let w = el.trimmedText.w;
     let h = el.trimmedText.h;
     let x0 = cursor.x;
@@ -82,7 +78,7 @@ export default class GUIPanel {
     let x1 = x0 + w;
     let y1 = y0 + h;
     //calc "centering" offsets..    
-    let verticalSpacer = (h - el.trimmedText.h) / 2 +GUI.margin;//TODO: test margin
+    let verticalSpacer = (h - el.trimmedText.h) / 2 +GUI.margin;
     //update the element with rendering size and outline..
     el.drawnBounds = { x0, y0, x1, y1 };
     el.size = { width: w, height: h };
@@ -104,8 +100,7 @@ export default class GUIPanel {
     View.context.fillStyle = mien.textColor;
     View.context.textBaseline = 'top';
     View.context.textAlign = 'left';
-    View.context.font = `${mien.fontSize}px ${mien.fontName}`;
-    //TODO: test margin
+    View.context.font = `${mien.fontSize}px ${mien.fontName}`;    
     let x = x0 + GUI.margin;
     let y = y0 + verticalSpacer;
     let i = 0;

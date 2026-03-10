@@ -17,7 +17,6 @@ export default class Collision {
     if (!candidates.length) return; // No possible collisions.
     Collision.#narrowPhase(simObject, candidates);
   }
-
   static #broadPhase(simObject) {
     if (!simObject?.worldPosition) return [];
     const { x, y } = simObject.worldPosition;
@@ -56,7 +55,6 @@ export default class Collision {
       const dy = candidate.worldPosition.y - simObject.worldPosition.y;
       const distance = Math.hypot(dx, dy);
       let collisionDetected = false;
-
       if (distance < candidate.radius + simObject.radius) {
         // Within enclosing radii, so check individual parts.
         const parts1 = simObject.allParts;
@@ -76,7 +74,6 @@ export default class Collision {
           if (collisionDetected) break;
         }
       }
-
       if (collisionDetected) {
         const collisionID = Collision.#getCollisionID(simObject, candidate);
         Collision.collisions.set(collisionID, { object1: simObject, object2: candidate});

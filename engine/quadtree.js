@@ -6,7 +6,6 @@ export default class QuadTree {
     this.pool = [];
     this.init(bounds, capacity, minimumSize);
   }
-
   acquire(bounds, capacity= this.capacity, minimumSize = this.minimumSize) {
     const node = this.pool.length ? this.pool.pop() : new QuadTree(bounds, capacity, minimumSize);
     node.init(bounds, capacity, minimumSize);
@@ -31,7 +30,6 @@ export default class QuadTree {
       this.divided = false;
     }
   }
-
   init(bounds, capacity, minimumSize) {
     if (!RectBounds.isValidRectBound(bounds)) throw new Error(`Quadtree boundary was not valid: ${JSON.stringify(bounds)}`);
     this.bounds = bounds;
@@ -46,7 +44,6 @@ export default class QuadTree {
     this.southwest = undefined;
     this.hasReachedMinimumSize = RectBounds.width(bounds) <= minimumSize || RectBounds.height(bounds) <= minimumSize;
   }
-
   findInRange(rectBounds, found = []) {
     const touchesThisBoundary = RectBounds.touches(rectBounds, this.bounds);
     if (!touchesThisBoundary) return found; // Safely ignore this whole quadrant
@@ -88,12 +85,10 @@ export default class QuadTree {
     //  the quadrant cannot be reduced because it is at minimum allowed size
     //  or the object would not fit in a subdivision of this quadrant
     const rules = toBigToSplit || this.objects.length < this.capacity || this.hasReachedMinimumSize;
-
     if (rules) {
       this.objects.push(object);
       return true;
     }
-
     // The quadrant is full, but the object will fit in a subquadrant, and there is space for another subdivision so find one for it...
     if (!this.divided) this.subdivide();
     if (!this.northeast) throw new Error('subdivision failed NE.');
@@ -110,7 +105,6 @@ export default class QuadTree {
     const { x0, y0, x1, y1 } = this.bounds;
     const midX = (x0 + x1) / 2;
     const midY = (y0 + y1) / 2;
-
     this.northwest = this.acquire(
       RectBounds.make(x0, y0, midX, midY),
       this.capacity,
@@ -131,28 +125,23 @@ export default class QuadTree {
       this.capacity,
       this.minimumSize
     );
-
     this.divided = true;
   }
-
   draw(context, offsetX = 0, offsetY = 0, currentColorIndex = 0) {
     const colors = ['#d00', '#090', '#00f'];
     const { x0, y0, x1, y1 } = this.bounds;
     const width = RectBounds.width(this.bounds);
     const height = RectBounds.height(this.bounds);
-
     context.save();
     context.strokeStyle = colors[currentColorIndex % colors.length];
     context.lineWidth = 1;
     context.strokeRect(x0 + offsetX, y0 + offsetY, width, height);
     context.restore();
-
     const nextColorIndex = (currentColorIndex + 1) % colors.length;
     if (this.northeast) this.northeast.draw(context, offsetX, offsetY, nextColorIndex);
     if (this.southeast) this.southeast.draw(context, offsetX, offsetY, nextColorIndex);
     if (this.northwest) this.northwest.draw(context, offsetX, offsetY, nextColorIndex);
     if (this.southwest) this.southwest.draw(context, offsetX, offsetY, nextColorIndex);
-
     context.save();
     context.strokeStyle = '#fff';
     for (const object of this.objects) {
