@@ -33,6 +33,9 @@ export default class RectBounds {
   static height(bounds) {
     return bounds.y1 - bounds.y0;
   }
+  static area (bounds){
+    return this.width(bounds)*this.height(bounds);
+  }
   static isValidRectBound(bounds) {
     return (bounds.x1 > bounds.x0) && (bounds.y1 > bounds.y0) && (!isNaN(bounds.x0 + bounds.x1 + bounds.y0 + bounds.y1));
   }

@@ -35,7 +35,6 @@ export default class GUIPanel {
         });
       return screenCoord;
     }
-    console.log(this.anchor);
   }
 
   render() {

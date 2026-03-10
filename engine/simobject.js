@@ -107,7 +107,7 @@ export default class SimObject {
     if (this.allParts.length === 0) {
       throw new Error('No Parts found to render.  SimObject has no body, or it has not been finalized.');
     }
-    for (let part of this.allParts) {
+    for (let part of this.allParts) {      
       let polygons = part.getWorldPolygons();
       for (let polygon of polygons) {
         let fillStyle = polygon.mien.normal.bgColor;
