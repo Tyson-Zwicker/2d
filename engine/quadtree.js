@@ -1,51 +1,29 @@
 import RectBounds from './rectbounds.js';
 
-export default class QuadTree {
-  //TODO: This can't be static.. because we have two quadtrees now...
-  static {
-    /**
-     * To prevent garbage collection we want to create a pool of QuadTree objects that can be reused instead of creating new ones every time we subdivide. This is because subdivision can happen frequently and creating new QuadTree objects can lead to a lot of garbage collection overhead.
-     * The pool will be a simple array that we can push QuadTree objects onto when they are cleared and pop them off when we need to create new ones. This way we can reuse QuadTree objects instead of creating new ones, which can help improve performance.
-        
-    */
-    let capacity = 100; // Define the capacity for each quadrant
-    let minimumSize = 100; // Define the minimum size for each quadrant (world units)
-    let maxX = 50000, maxY = 50000; // Define the maximum world size for the quadtree
-    let minY = -50000, minX = -50000; // Define the minimum world size for the quadtree
-    QuadTree.bounds = RectBounds.make(minX, minY, maxX, maxY);
-    //minY and MinX must be negative to allow for objects to be placed in the negative world space. This allows for a more flexible and realistic representation of the world, as objects can exist in any quadrant of the quadtree, including those that extend into negative coordinates.
-    let size = (maxX-minX * maxY-minY) / 10000; // Define the size of each quadrant (e.g., 10,000 world units)
-    QuadTree.capacity = capacity;
-    QuadTree.minimumSize = minimumSize;
-    QuadTree.pool = [];
-    //console.log (`Initializing QuadTree pool with ${size} objects...`);
-    for (let i =0; i<size; i++) {
-      QuadTree.pool.push(new QuadTree(RectBounds.make(0, 0, 1, 1))); // Create dummy QuadTree objects to fill the pool
-      //if (i % 10000 === 0) console.log(`Created ${i} QuadTree objects... ${Math.ceil(100*i/size)}%`);
-    }
-    console.log ('QuadTree initialized..');
-  }
-  constructor(bounds = QuadTree.bounds, capacity = QuadTree.capacity, minimumSize = QuadTree.minimumSize) {
-    this.init(bounds ?? QuadTree.bounds, capacity ?? QuadTree.capacity, minimumSize ?? QuadTree.minimumSize);
+export default class QuadTree {  
+  constructor(bounds, capacity = 4, minimumSize = 4) {
+    // Keep a small, empty pool; nodes are created lazily via acquire to avoid recursive explosions.
+    this.pool = [];
+    this.init(bounds, capacity, minimumSize);
   }
 
-  static acquire(bounds, capacity = QuadTree.capacity, minimumSize = QuadTree.minimumSize) {
-    const node = QuadTree.pool.length ? QuadTree.pool.pop() : new QuadTree(bounds, capacity, minimumSize);
+  acquire(bounds, capacity= this.capacity, minimumSize = this.minimumSize) {
+    const node = this.pool.length ? this.pool.pop() : new QuadTree(bounds, capacity, minimumSize);
     node.init(bounds, capacity, minimumSize);
     return node;
   }
-  static release(node) {
+  release(node) {
     if (!node) return;
     node.clear();
-    QuadTree.pool.push(node);
+    this.pool.push(node);
   }
   clear() {
     this.objects.length = 0;
     if (this.divided) {
-      QuadTree.release(this.northeast);
-      QuadTree.release(this.northwest);
-      QuadTree.release(this.southeast);
-      QuadTree.release(this.southwest);
+      this.release(this.northeast);
+      this.release(this.northwest);
+      this.release(this.southeast);
+      this.release(this.southwest);
       this.northeast = undefined;
       this.northwest = undefined;
       this.southeast = undefined;
@@ -68,7 +46,7 @@ export default class QuadTree {
     this.southwest = undefined;
     this.hasReachedMinimumSize = RectBounds.width(bounds) <= minimumSize || RectBounds.height(bounds) <= minimumSize;
   }
-  
+
   findInRange(rectBounds, found = []) {
     const touchesThisBoundary = RectBounds.touches(rectBounds, this.bounds);
     if (!touchesThisBoundary) return found; // Safely ignore this whole quadrant
@@ -133,22 +111,22 @@ export default class QuadTree {
     const midX = (x0 + x1) / 2;
     const midY = (y0 + y1) / 2;
 
-    this.northwest = QuadTree.acquire(
+    this.northwest = this.acquire(
       RectBounds.make(x0, y0, midX, midY),
       this.capacity,
       this.minimumSize
     );
-    this.northeast = QuadTree.acquire(
+    this.northeast = this.acquire(
       RectBounds.make(midX, y0, x1, midY),
       this.capacity,
       this.minimumSize
     );
-    this.southwest = QuadTree.acquire(
+    this.southwest = this.acquire(
       RectBounds.make(x0, midY, midX, y1),
       this.capacity,
       this.minimumSize
     );
-    this.southeast = QuadTree.acquire(
+    this.southeast = this.acquire(
       RectBounds.make(midX, midY, x1, y1),
       this.capacity,
       this.minimumSize
