@@ -135,4 +135,13 @@ export default class Mien {
     mien.setColors('#f6f', '#f6f', '#222', 'highlighted');
     return mien;
   };
+  static get Transparent(){
+    let mien = new Mien();
+    mien.setColors('#0000', '#0000', '#0000', 'normal');
+    mien.setColors('#0000', '#0000', '#0000', 'hovered');
+    mien.setColors('#0000', '#0000', '#0000', 'pressed');
+    mien.setColors('#0000', '#0000', '#0000', 'shadowed');
+    mien.setColors('#0000', '#0000', '#0000', 'highlighted');
+    return mien;
+  }
 }

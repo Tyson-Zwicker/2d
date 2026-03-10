@@ -17,8 +17,8 @@ export default class Part {
   radius = undefined;           //Calculated upon construction. (The radius of the smallest circle that can enclose this part). 
   depth = undefined;            //Calculated when addTo() parent object..
   button = undefined;           //a button can be assigned manually.
-  
-    constructor(name, polygons, mass = 1) {
+
+  constructor(name, polygons, mass = 1) {
     if (!name || !polygons) throw Error('Missing parameter');
     this.name = name;
     this.mass = mass;

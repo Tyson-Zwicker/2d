@@ -1,6 +1,6 @@
 import Effects from './effects.js';
 import Events from './events.js';
-import Game from './game.js';
+import Sim from './sim.js';
 import GUI from './gui.js';
 import View from './view.js';
 export default class Main {
@@ -47,12 +47,12 @@ export default class Main {
     let t = Date.now();
     try {
       Events.reset();
-      Game.rebuildQuadTrees();
+      Sim.rebuildQuadTrees();
       View.clear();
-      for (let gameObject of Game.dynamicObjects.values()) gameObject.move();
+      for (let simObject of Sim.dynamicObjects.values()) simObject.move();
       Effects.renderBackground();
-      for (let gameObject of Game.staticObjects.values()) gameObject.render();
-      for (let gameObject of Game.dynamicObjects.values()) gameObject.render();
+      for (let simObject of Sim.staticObjects.values()) simObject.render();
+      for (let simObject of Sim.dynamicObjects.values()) simObject.render();
       Effects.renderForeground();
       GUI.render();
       Main.checkMouse();
@@ -72,7 +72,7 @@ export default class Main {
         if (element.button.checkForMouse()) interactionOccured = true;
       }
     }
-    for (let object of Game.gameObjects.values()) {
+    for (let object of Sim.simObjects.values()) {
       if (object.buttons && object.buttons.length > 0) {
         for (let button of object.buttons) {
           if (button.checkForMouse()) interactionOccured = true;

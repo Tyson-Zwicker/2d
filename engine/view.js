@@ -1,5 +1,4 @@
 import Vec from './vec.js';
-import GUI from './gui.js';
 export default class View {
   static bgPressed = false;
   static bgPressCoord = null;

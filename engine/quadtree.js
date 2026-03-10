@@ -1,6 +1,7 @@
 import RectBounds from './rectbounds.js';
 
 export default class QuadTree {
+  //TODO: This can't be static.. because we have two quadtrees now...
   static {
     /**
      * To prevent garbage collection we want to create a pool of QuadTree objects that can be reused instead of creating new ones every time we subdivide. This is because subdivision can happen frequently and creating new QuadTree objects can lead to a lot of garbage collection overhead.
@@ -12,7 +13,7 @@ export default class QuadTree {
     let maxX = 50000, maxY = 50000; // Define the maximum world size for the quadtree
     let minY = -50000, minX = -50000; // Define the minimum world size for the quadtree
     QuadTree.bounds = RectBounds.make(minX, minY, maxX, maxY);
-    //minY and MinX must be negative to allow for objects to be placed in the negative world space, which is common in many games and simulations. This allows for a more flexible and realistic representation of the world, as objects can exist in any quadrant of the quadtree, including those that extend into negative coordinates.
+    //minY and MinX must be negative to allow for objects to be placed in the negative world space. This allows for a more flexible and realistic representation of the world, as objects can exist in any quadrant of the quadtree, including those that extend into negative coordinates.
     let size = (maxX-minX * maxY-minY) / 10000; // Define the size of each quadrant (e.g., 10,000 world units)
     QuadTree.capacity = capacity;
     QuadTree.minimumSize = minimumSize;

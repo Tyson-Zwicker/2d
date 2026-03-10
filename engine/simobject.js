@@ -1,5 +1,4 @@
 import Main from './main.js';
-import Button from './button.js';
 import Vec from './vec.js';
 import View from './view.js';
 import ParticleEffect from './particleeffect.js';
@@ -14,8 +13,8 @@ export default class SimObject {
   get localRotation() {
     return this.#localRotation;
   }
-  worldPosition = undefined;          //assigned when added to Game.
-  worldRotation = undefined;          //assigned when added to Game.
+  worldPosition = undefined;          //assigned when added to Sim.
+  worldRotation = undefined;          //assigned when added to Sim.
   velocity = { x: 0, y: 0 };          //Is changed by application of linear acceleration.
   spin = 0;                           //Is changed by application of angular acceleration.
   name = undefined;                   //assigned by constructor  
@@ -27,7 +26,7 @@ export default class SimObject {
   momentOfInertia = undefined;        //Calculated in "finalize" step.
   radius = undefined;                //Calculated in "finalize" step. (The radius of the smallest circle that can enclose all parts).
   canMove = true;                     //Determines which QuadTree this object is added to.
-  finalized = false;                  //Set to true, when "finalized". (Game will not allow unfinalized objects to be added).
+  finalized = false;                  //Set to true, when "finalized". (Sim will not allow unfinalized objects to be added).
   depth = 0;                           //used to sort part rendering order.  (low #'s render first)
   buttons = [];                       //Set in finalize (if any parts have a button, its added to this.)
   constructor(name, canMove = true) {
@@ -81,13 +80,13 @@ export default class SimObject {
     }
     return maxDistance;
   }
-  static isMouseIn(gameObjectPart) {
+  static isMouseIn(simObjectPart) {
     const mouseWorld = View.screenToWorld();
     const bounds = RectBounds.make(
-      gameObjectPart.worldPosition.x - gameObjectPart.radius,
-      gameObjectPart.worldPosition.y - gameObjectPart.radius,
-      gameObjectPart.worldPosition.x + gameObjectPart.radius,
-      gameObjectPart.worldPosition.y + gameObjectPart.radius
+      simObjectPart.worldPosition.x - simObjectPart.radius,
+      simObjectPart.worldPosition.y - simObjectPart.radius,
+      simObjectPart.worldPosition.x + simObjectPart.radius,
+      simObjectPart.worldPosition.y + simObjectPart.radius
     );
     return RectBounds.isPointInside(mouseWorld.x, mouseWorld.y, bounds);
   }

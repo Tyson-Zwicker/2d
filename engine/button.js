@@ -4,12 +4,12 @@ import GUI from './gui.js';
 import View from './view.js';
 export default class Button {
   guiElement = undefined;
-  gameObjectPart = undefined;
+  simObjectPart = undefined;
   #owner = undefined;
   get owner() {
     if (this.#owner) return this.#owner;
     if (this.guiElement) return this.guiElement;
-    if (this.gameObjectPart) return this.gameObjectPart;
+    if (this.simObjectPart) return this.simObjectPart;
   }
   clicked = false;
   clickFn = undefined;
@@ -29,8 +29,8 @@ export default class Button {
       const inside = GUI.isMouseIn(this.guiElement);
       return this.#doButton(inside);
     }
-    if (this.gameObjectPart) {
-      const inside = SimObject.isMouseIn(this.gameObjectPart);
+    if (this.simObjectPart) {
+      const inside = SimObject.isMouseIn(this.simObjectPart);
       return this.#doButton(inside);
     }
     return false;
@@ -75,9 +75,9 @@ export default class Button {
       data.origin = this.guiElement.text;
       data.owner = this.guiElement;
     }
-    if (this.gameObjectPart) {
-      data.origin = this.gameObjectPart.name;
-      data.owner = this.gameObjectPart;
+    if (this.simObjectPart) {
+      data.origin = this.simObjectPart.name;
+      data.owner = this.simObjectPart;
     }
     this.clicked = false;    
     if (this.toggle) {

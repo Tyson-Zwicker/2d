@@ -1,35 +1,35 @@
 import RectBounds from './rectbounds.js';
-import Game from './game.js';
+import Sim from './sim.js';
 
 export default class Collision {
   static collisions = new Map();
-  static #getCollisionID(gameObject1, gameObject2) {
-    return `${gameObject1.name}|${gameObject2.name}`;
+  static #getCollisionID(simObject1, simObject2) {
+    return `${simObject1.name}|${simObject2.name}`;
   }
-  static #getaltCollisionID(gameObject1, gameObject2) {
-    return `${gameObject2.name}|${gameObject1.name}`;
+  static #getaltCollisionID(simObject1, simObject2) {
+    return `${simObject2.name}|${simObject1.name}`;
   }
   static reset(){
     this.collisions.clear();
   }
-  static check(gameObject) {
-    const candidates = Collision.#broadPhase(gameObject);
+  static check(simObject) {
+    const candidates = Collision.#broadPhase(simObject);
     if (!candidates.length) return; // No possible collisions.
-    Collision.#narrowPhase(gameObject, candidates);
+    Collision.#narrowPhase(simObject, candidates);
   }
 
-  static #broadPhase(gameObject) {
-    if (!gameObject?.worldPosition) return [];
-    const { x, y } = gameObject.worldPosition;
+  static #broadPhase(simObject) {
+    if (!simObject?.worldPosition) return [];
+    const { x, y } = simObject.worldPosition;
     const bounds = RectBounds.make(
-      x - gameObject.radius,
-      y - gameObject.radius,
-      x + gameObject.radius,
-      y + gameObject.radius
+      x - simObject.radius,
+      y - simObject.radius,
+      x + simObject.radius,
+      y + simObject.radius
     );
-    // Returned objects are qtObject's: { ref: gameObject, position: obj.worldPosition, radius: obj.radius }.
+    // Returned objects are qtObject's: { ref: simObject, position: obj.worldPosition, radius: obj.radius }.
     const possibleCollisions = [];
-    const quadTrees = [Game.dynamicQuadtree, Game.staticQuadtree, Game.quadTree];
+    const quadTrees = [Sim.dynamicQuadtree, Sim.staticQuadtree, Sim.quadTree];
     for (const tree of quadTrees) {
       if (tree?.findInRange) tree.findInRange(bounds, possibleCollisions);
     }
@@ -37,9 +37,9 @@ export default class Collision {
     const seenNames = new Set();
     for (const candidate of possibleCollisions) {
       const gObj = candidate?.ref ?? candidate;
-      if (!gObj?.name || gObj.name === gameObject.name) continue; // Skip self or invalid entries.
-      const collisionID = Collision.#getCollisionID(gameObject, gObj);
-      const altCollisionID = Collision.#getaltCollisionID(gameObject, gObj);
+      if (!gObj?.name || gObj.name === simObject.name) continue; // Skip self or invalid entries.
+      const collisionID = Collision.#getCollisionID(simObject, gObj);
+      const altCollisionID = Collision.#getaltCollisionID(simObject, gObj);
       if (Collision.collisions.has(collisionID) || Collision.collisions.has(altCollisionID)) continue; // Already tracked.
       if (seenNames.has(gObj.name)) continue; // Prevent duplicate candidates when querying multiple quadtrees.
       candidates.push(gObj);
@@ -48,18 +48,18 @@ export default class Collision {
     return candidates;
   }
 
-  static #narrowPhase(gameObject, candidates) {
+  static #narrowPhase(simObject, candidates) {
     // Check the candidates more thoroughly to determine if they are actually colliding.
     for (const candidate of candidates) {
-      const collisionData = { object1: gameObject, object2: candidate };
-      const dx = candidate.worldPosition.x - gameObject.worldPosition.x;
-      const dy = candidate.worldPosition.y - gameObject.worldPosition.y;
+      const collisionData = { object1: simObject, object2: candidate };
+      const dx = candidate.worldPosition.x - simObject.worldPosition.x;
+      const dy = candidate.worldPosition.y - simObject.worldPosition.y;
       const distance = Math.hypot(dx, dy);
       let collisionDetected = false;
 
-      if (distance < candidate.radius + gameObject.radius) {
+      if (distance < candidate.radius + simObject.radius) {
         // Within enclosing radii, so check individual parts.
-        const parts1 = gameObject.allParts;
+        const parts1 = simObject.allParts;
         const parts2 = candidate.allParts;
         for (const part1 of parts1) {
           for (const part2 of parts2) {
@@ -78,8 +78,8 @@ export default class Collision {
       }
 
       if (collisionDetected) {
-        const collisionID = Collision.#getCollisionID(gameObject, candidate);
-        Collision.collisions.set(collisionID, { object1: gameObject, object2: candidate});
+        const collisionID = Collision.#getCollisionID(simObject, candidate);
+        Collision.collisions.set(collisionID, { object1: simObject, object2: candidate});
         break;
       }
     }
