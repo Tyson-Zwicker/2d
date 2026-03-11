@@ -13,7 +13,7 @@ export default class Main {
   static {
     View.initialize();
     GUI.initialize();
-    console.log('Main initialized..');
+    console.log('Main initialized...');
   }
   static run(fps = 0) {
     let startTime = Date.now();
@@ -81,6 +81,7 @@ export default class Main {
     View.handleCameraDrag(interactionOccured);
   }
   static showDelta() {
+    console.log ('hello');
     View.context.textBaseline = 'top';
     View.context.fillStyle = '#FFFFFF';
     View.context.strokeStyle = '#FFFFFF';
@@ -91,6 +92,7 @@ export default class Main {
     let loopTimeStr = 'Σ ' + String(Main.loopTime).padStart(4, '0');
     let maxLoopTimeStr = 'Ω ' + String(Main.maxLoopTime).padStart(4, '0');
     View.context.fillText(frameStr, 20, 8);
+    View.context.fillText(`Z ${View.camera.zoom}`,20,30);
     View.context.fillText(deltaStr, 20, View.canvas.height - 20);
     View.context.fillText(loopTimeStr, View.canvas.width - 70, 8);
     View.context.fillText(maxLoopTimeStr, View.canvas.width - 70, View.canvas.height - 20);

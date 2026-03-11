@@ -11,8 +11,8 @@ export default class Sim {
   static staticObjects = new Map(); //Objects that don't move, are added to this map and the static quadtree.
   static dynamicObjects = new Map(); //Objects that do move, are added to this map and the dynamic quadtree.
   static staticQuadTreeInvalidated = false;
-  static staticQuadtree = new QuadTree(RectBounds.make(-50000, -50000, 50000, 50000));
-  static dynamicQuadtree = new QuadTree(RectBounds.make(-50000, -50000, 50000, 50000));
+  static staticQuadtree = new QuadTree(RectBounds.make(-500000, -500000, 500000, 500000));
+  static dynamicQuadtree = new QuadTree(RectBounds.make(-500000, -500000, 500000, 500000));
   static add(obj, position, rotation = 0) {
     if (!obj || !position || isNaN(rotation)) throw new Error('Bad or missing parameter(s)');
     if (obj instanceof SimObject) {
