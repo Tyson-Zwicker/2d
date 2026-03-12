@@ -19,7 +19,7 @@ export default class Part {
   button = undefined;           //a button can be assigned manually.
 
   constructor(name, polygons, mass = 1) {
-    if (!name || !polygons) throw Error('Missing parameter');
+    if (!name || !polygons) throw Error(`Missing parameter. name=${name} polygons =${polygons}`);
     this.name = name;
     this.mass = mass;
     if (Array.isArray(polygons)) this.polygons.push(...polygons);
