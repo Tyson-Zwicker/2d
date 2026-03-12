@@ -14,7 +14,7 @@ export default class Sim {
   static staticQuadtree = new QuadTree(RectBounds.make(-500000, -500000, 500000, 500000));
   static dynamicQuadtree = new QuadTree(RectBounds.make(-500000, -500000, 500000, 500000));
   static add(obj, position, rotation = 0) {
-    if (!obj || !position || isNaN(rotation)) throw new Error('Bad or missing parameter(s)');
+    if (!obj || !position || isNaN(rotation)) throw new Error('Bad or missing parameter(s). Parameters: obj,position,[rotation]');
     if (obj instanceof SimObject) {
       if (!obj.finalized) throw new Error(`SimObject not finalized: ${obj.name}`);
       Sim.simObjects.set(obj.name, obj);
