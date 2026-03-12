@@ -5,10 +5,10 @@ export default class View {
   static bgColor = "#555";
   static cameraBounds = undefined;        //World Coordinates
   static camera = { x: 0, y: 0, zoom: 1 };//World Coordinates.. update this to keep view on a particular thing/place otherwise mouse moves it around.
-  static minimumZoom = 0.01;
+  static minimumZoom = 0.02;
   static mouse = { x: 0, y: 0, buttonDown: false }; //Screen coordinates
   static screenCenter = undefined;
-  static zoomFactor = 100; //How much each zoom changes when the wheel is scrolled.
+  static zoomFactor = 3; //How much each zoom changes when the wheel is scrolled.
   
   static initialize() {
     View.canvas = document.createElement('canvas');
@@ -137,6 +137,7 @@ export default class View {
     View.camera.x += xchange;
     View.camera.y += ychange;
     View.camera.zoom = Math.max(View.minimumZoom, View.camera.zoom);
+    if (View.camera.zoom >1) View.camera.zoom =1;
     View.calculateCameraBounds();
   }
   static resizeCanvas() {
