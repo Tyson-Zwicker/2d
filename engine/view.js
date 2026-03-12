@@ -4,8 +4,10 @@ export default class View {
   static bgPressCoord = null;
   static bgColor = "#555";
   static cameraBounds = undefined;        //World Coordinates
-  static camera = { x: 0, y: 0, zoom: 1 };//World Coordinates.. update this to keep view on a particular thing/place otherwise mouse moves it around.
-  static minimumZoom = 0.02;
+  static minimumZoom = 0.005;
+  static maxZoom = 0.25
+  static camera = { x: 0, y: 0, zoom: View.maxZoom };//World Coordinates.. update this to keep view on a particular thing/place otherwise mouse moves it around.
+ 
   static mouse = { x: 0, y: 0, buttonDown: false }; //Screen coordinates
   static screenCenter = undefined;
   static zoomFactor = 3; //How much each zoom changes when the wheel is scrolled.
@@ -137,6 +139,7 @@ export default class View {
     View.camera.x += xchange;
     View.camera.y += ychange;
     View.camera.zoom = Math.max(View.minimumZoom, View.camera.zoom);
+    View.camera.zoom = Math.min(View.maxZoom, View.camera.zoom); 
     if (View.camera.zoom >1) View.camera.zoom =1;
     View.calculateCameraBounds();
   }
