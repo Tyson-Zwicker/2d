@@ -81,7 +81,7 @@ export default class SimObject {
     return maxDistance;
   }
   static isMouseIn(simObjectPart) {
-    const mouseWorld = View.screenToWorld();    
+    const mouseWorld = View.screenToWorld();
     const bounds = RectBounds.make(
       simObjectPart.worldPosition.x - simObjectPart.radius,
       simObjectPart.worldPosition.y - simObjectPart.radius,
@@ -91,9 +91,11 @@ export default class SimObject {
     return RectBounds.isPointInside(mouseWorld.x, mouseWorld.y, bounds);
   }
   move() {
-    this.worldPosition = Vec.add(this.worldPosition, Vec.scale(this.velocity, Main.delta));
-    this.worldRotation = this.worldRotation + this.spin * Main.delta;
-    this.moveParts(this.body);
+    if (this.canMove) {
+      this.worldPosition = Vec.add(this.worldPosition, Vec.scale(this.velocity, Main.delta));
+      this.worldRotation = this.worldRotation + this.spin * Main.delta;
+      this.moveParts(this.body);
+    }
   }
   moveParts(part) {
     part.ownRotation = (part.ownRotation + part.spin) % 360;
@@ -110,7 +112,7 @@ export default class SimObject {
     for (let part of this.allParts) {
       try {
         let polygons = part.getWorldPolygons();
-         for (let polygon of polygons) {
+        for (let polygon of polygons) {
           let fillStyle = polygon.mien.normal.bgColor;
           let strokeStyle = polygon.mien.normal.borderColor;
           if (part.button) {
