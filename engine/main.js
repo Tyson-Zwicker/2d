@@ -81,7 +81,7 @@ export default class Main {
     View.handleCameraDrag(interactionOccured);
   }
   static showDelta() {
-    console.log ('hello');
+    
     View.context.textBaseline = 'top';
     View.context.fillStyle = '#FFFFFF';
     View.context.strokeStyle = '#FFFFFF';
