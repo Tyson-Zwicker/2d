@@ -1,9 +1,11 @@
+import View from './view.js';
 export default class Camera {
   static #x = 0;
   static #y = 0;
-  static #zoom = 0;
+  
   static #maxZoom = 0.25;
   static #minZoom = 0.005;
+  static #zoom = Camera.#maxZoom;
   static #zoomFactor = 3;
   static #anchor = undefined;
   static #bounds = undefined;

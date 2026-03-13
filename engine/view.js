@@ -3,7 +3,7 @@ import Camera from './camera.js';
 
 export default class View {
   static bgPressed = false;
-  static bgPressCoord = null;
+  static bgPressCoord = undefined;
   static bgColor = "#555";
   static mouse = { x: 0, y: 0, buttonDown: false }; //Screen coordinates
   static screenCenter = undefined;  //Screen coordinates: offset from top left of the canvas.
@@ -29,6 +29,9 @@ export default class View {
     View.canvas.onmousedown = View.handleMouseDown;
     View.canvas.onmouseup = View.handleMouseUp;
     View.canvas.oncontextmenu = View.handleContextMenu;
+    View.canvas.addEventListener('mouseleave', View.cancelDrag);
+    View.canvas.addEventListener('mouseenter', View.cancelDrag);
+
     window.addEventListener('resize', View.resizeCanvas);
     Camera.setCameraBounds();
     console.log('View Initialized..');
@@ -77,7 +80,7 @@ export default class View {
           drag = Vec.add(drag, inverseMouse);
           drag = Vec.scale(drag, 1 / Camera.zoom);
           Vec.addInPlace(Camera, drag); //If you don't add in place it will give back a new Vec and it won't have zoom anymore!
-          View.setCameraBounds();
+          Camera.setCameraBounds();
           View.bgPressCoord = { x: View.mouse.x, y: View.mouse.y };
         }
         else if (View.bgPressed && !View.mouse.buttonDown) {
@@ -98,6 +101,11 @@ export default class View {
         View.bgPressCoord = undefined;
       }
     }
+  }
+  static cancelDrag() {    
+    View.bgPressed = false;
+    View.bgPressCoord = undefined;
+    View.mouse.buttonDown = false;
   }
   static handleContextMenu = function (event) {
     event.preventDefault();
@@ -129,16 +137,14 @@ export default class View {
       let yratio = (View.mouse.y - (View.canvas.height / 2)) / View.canvas.height;
       let xchange = xdiff * xratio;
       let ychange = ydiff * yratio;
-      Camera.x += xchange;
-      Camera.y += ychange;
-      Camera.zoom = Math.max(View.minimumZoom, Camera.zoom);
-      Camera.zoom = Math.min(View.maxZoom, Camera.zoom);            
+      Camera.x = Camera.x + xchange;
+      Camera.y = Camera.y + ychange;
     }
   }
   static resizeCanvas() {
     View.canvas.width = window.innerWidth;
     View.canvas.height = window.innerHeight;
     View.screenCenter = { x: View.canvas.width / 2, y: View.canvas.height / 2 };
-    View.calculateCameraBounds();
+    Camera.setCameraBounds();
   }
 }
