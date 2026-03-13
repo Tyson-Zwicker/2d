@@ -19,6 +19,7 @@ export default class GUI {
   }
   static isMouseIn(element) {
     return (
+      element.active &&
       View.mouse.x > element.drawnBounds.x0 &&
       View.mouse.x < element.drawnBounds.x1 &&
       View.mouse.y > element.drawnBounds.y0 &&

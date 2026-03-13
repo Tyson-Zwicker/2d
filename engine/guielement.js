@@ -9,8 +9,9 @@ export default class GUIElement {
     if (alignment === 'center' || alignment === 'left') {
       this.alignment = alignment;
     } else throw new Error('invalid alignment: ' + alignment);
-    this.drawnBounds = {} //determined when drawn..
+    this.drawnBounds = {} //determined when drawn..    
     this.active = true;
+    this.highlighted = false;  
     this.trimmedText = Text.getTextFromArray(
       textArray,
       { w: panel.constraint.width, h: panel.constraint.height , m:GUI.margin},
