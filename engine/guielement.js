@@ -19,10 +19,13 @@ export default class GUIElement {
       GUI.lineSpace,
       GUI.margin
     );
-    this.size = { width: this.trimmedText.w, height: this.trimmedText.h };
+    this.size = { width: this.trimmedText.w, height: this.trimmedText.h };    
     this.panel = panel;
     panel.elements.push(this);
     GUI.elements.push(this);
+  }
+  get drawnSize (){
+    return {width:this.drawnBounds.x1-this.drawnBounds.x0, height:this.drawnBounds.y1-this.drawnBounds.y0};
   }
   static addText(panel, textArray, alignment) {
     let textElement = new GUIElement(panel, textArray, alignment);
