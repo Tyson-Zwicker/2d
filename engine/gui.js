@@ -7,10 +7,10 @@ export default class GUI {
   static gap = 5;           //set in constructor - the gap between GUIElements.
   //set in constructor
   static initialized = false;
-   
-  static initialize(gap =5, lineSpace = 1, margin = 5,mien = Mien.Green) {
+
+  static initialize(gap = 5, lineSpace = 1, margin = 5, mien = Mien.Green) {
     GUI.gap = gap; //Gap between spaces. (px)
-    GUI.margin =margin; //Gap between border and inner text (px)
+    GUI.margin = margin; //Gap between border and inner text (px)
     GUI.lineSpace = lineSpace; //vertical space between lines (px)
     GUI.elements = [];
     GUI.mien = mien;
@@ -28,7 +28,20 @@ export default class GUI {
     for (let p of this.panels) p.render();
   }
   static removePanel(panel) {
-    //remove of all its elements..
+    /* TODO: 
+    WHen a panel is removed from the gui, 
+    the gui should look through all the panels and also discard 
+    any that were attached to the removed one's elements - RECURSIVELY.
+    */
+
+    //First: For each element in the panel, check every panel to see if the element is acting as an anchor.
+    //       If its, call removePanel for THAT panel. this should recursively get rid of all children..
+    for (let el of panel.elements){
+      for (let pnl of this.panels){
+        if (pnl.anchor === el ) GUI.removePanel (pnl);
+      }
+    }
+    //Next: Remove all the elements of this panel from the elements list.
     let keep = [];
     for (let el of GUI.elements) {
       let found = false;
@@ -38,7 +51,7 @@ export default class GUI {
       if (!found) keep.push(el);
     }
     GUI.elements = keep;
-    //now remove the panel..
+    //Finally remove the panel itself..
     let keeppanels = [];
     for (let p of GUI.panels) {
       if (p !== panel) keeppanels.push(p);
