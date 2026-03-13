@@ -39,8 +39,7 @@ export default class SimObject {
     this.allParts.sort((a, b) => a.depth - b.depth);
     for (let part of this.allParts) {
       if (part.button) this.buttons.push(part.button);
-    }
-    console.log(`Finalizing SimObject [${this.name}].  Found ${this.allParts.length} parts, ${this.buttons.length} button(s).`);
+    }    
     this.radius = this.#calcRadius();
     this.spinningParts = this.#getSpinningParts();
     this.finalized = true;
