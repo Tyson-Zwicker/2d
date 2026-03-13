@@ -86,7 +86,7 @@ export default class Mien {
     mien.setColors('#060', '#2f4', '#fff', 'normal');
     mien.setColors('#5f5', '#5f5', '#042', 'hovered');
     mien.setColors('#030', '#6f6', '#fff', 'pressed');
-    mien.setColors('#090', '#090', '#777', 'shadowed');
+    mien.setColors('#090', '#090', '#444', 'shadowed');
     mien.setColors('#6f6', '#6f6', '#222', 'highlighted');
     return mien;
   }
