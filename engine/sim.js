@@ -21,14 +21,14 @@ export default class Sim {
       obj.worldPosition = position;
       obj.worldRotation = rotation;
       let qtObject = { ref: obj, position: obj.worldPosition, radius: obj.radius };
-      if (obj.canMove) {
+      if (obj.canMove==='always' || obj.canMove==='onscreen') {
         Sim.dynamicQuadtree.insert(qtObject);
         Sim.dynamicObjects.set(obj.name, obj);
-      } else {
+      } else if(obj.canMove==='never') {
         Sim.staticQuadtree.insert(qtObject);
         Sim.staticObjects.set(obj.name, obj);
         Sim.staticQuadTreeInvalidated = true;  
-      }      
+      } else throw new Error (`unexpected canMove property ${obj.canMove}`);
     }
     else throw new Error('Only SimObjects can be added to the Sim.');
   };
@@ -45,7 +45,7 @@ export default class Sim {
       Sim.staticQuadTreeInvalidated = false;
       Sim.staticQuadtree.clear();
       for (let simObject of Sim.simObjects.values()) {
-        if (!simObject.canMove) {
+        if (simObject.canMove==='never') {
           let qtObject = { ref: simObject, position: simObject.worldPosition, radius: simObject.radius };
           Sim.staticQuadtree.insert(qtObject);
         }
@@ -53,7 +53,7 @@ export default class Sim {
     }
     Sim.dynamicQuadtree.clear();
     for (let simObject of Sim.simObjects.values()) {
-      if (simObject.canMove) {
+      if (simObject.canMove==='onscreen' || simObject.canMove==='always') {
         let qtObject = { ref: simObject, position: simObject.worldPosition, radius: simObject.radius };
         Sim.dynamicQuadtree.insert(qtObject);
       }

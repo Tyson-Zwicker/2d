@@ -28,7 +28,7 @@ export default class Main {
       Main.continue = true;
       Main.fpsMillis = 1000 / fps;
     }
-    Main.loop(startTime)
+    Main.loop(startTime);
   }
   static loop(startTime) {
     if (startTime) Main.oldTime = startTime;
@@ -49,10 +49,26 @@ export default class Main {
       Events.reset();
       Sim.rebuildQuadTrees();
       View.clear();
-      for (let simObject of Sim.dynamicObjects.values()) simObject.move();
+      if (Camera.isPanning) Camera.move();
+      let dynamicOnScreen = Sim.dynamicQuadtree.findInRange (Camera.cameraBounds);
+      let staticOnScreen = Sim.staticQuadtree.findInRange (Camera.cameraBounds);     
+      //console.log (dynamicOnScreen);
+      //throw new Error ('above should be array of SimObjects');
+      for (let candidate of dynamicOnScreen){
+        candidate.ref.move();
+      }
+      for (let simObject of Sim.dynamicObjects.values()){
+        if (simObject.canMove==='always'){ 
+          simObject.move();
+        }
+      }
       Effects.renderBackground();
-      for (let simObject of Sim.staticObjects.values()) simObject.render();
-      for (let simObject of Sim.dynamicObjects.values()) simObject.render();
+      for (let candidate of staticOnScreen){
+        candidate.ref.render();  
+      }
+      for (let candidate of dynamicOnScreen){
+         candidate.ref.render();      
+      }
       Effects.renderForeground();
       GUI.render();
       Main.checkMouse();

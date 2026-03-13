@@ -25,11 +25,13 @@ export default class SimObject {
   centerOfMass = undefined;           //Calculated in "finalize" step. (Local Coordinate Space)
   momentOfInertia = undefined;        //Calculated in "finalize" step.
   radius = undefined;                //Calculated in "finalize" step. (The radius of the smallest circle that can enclose all parts).
-  canMove = true;                     //Determines which QuadTree this object is added to.
+  canMove = 'always';                 //Determines which QuadTree this object is added to.
   finalized = false;                  //Set to true, when "finalized". (Sim will not allow unfinalized objects to be added).
   depth = 0;                           //used to sort part rendering order.  (low #'s render first)
   buttons = [];                       //Set in finalize (if any parts have a button, its added to this.)
-  constructor(name, canMove = true) {
+  static moveStates = ['always','never','onscreen'];
+  constructor(name, canMove = 'always') {
+    if (!name || (!SimObject.moveStates.includes (canMove))) throw new Error (`Bad parameters: name [${name}] canMove [${canMove}]`); 
     this.name = name;
     this.canMove = canMove;
   }
@@ -90,7 +92,7 @@ export default class SimObject {
     return RectBounds.isPointInside(mouseWorld.x, mouseWorld.y, bounds);
   }
   move() {
-    if (this.canMove) {
+    if (this.canMove!=='never') {
       this.worldPosition = Vec.add(this.worldPosition, Vec.scale(this.velocity, Main.delta));
       this.worldRotation = this.worldRotation + this.spin * Main.delta;
       this.moveParts(this.body);
