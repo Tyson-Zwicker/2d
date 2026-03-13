@@ -9,16 +9,11 @@ export default class Camera {
   static #zoomFactor = 3;
   static #anchor = undefined;
   static #bounds = undefined;
-  static #panSpeed = 5000; //milliseconds to perform pan..
-  static #panTime = 0; //millseconds left to do the pan..
-  static #lastPanTime = 0; //timestamp since last move..
-  static #panDestinationX = 0; //Destination x coordinate for pan completion..
-  static #panDestinationY = 0; //Destination y coordinate for pan complettion..
-  static #panDelX = 0;
-  static #panDelY = 0;
-  static #panDelZoom = 0;
-  static #panDestinationZoom = 0; //Destination zoom level for pan completion..
-
+  static #panTimer = 0;
+  static #panTimeSpan = 1000;//milliseconds.
+  static #panStart = { x: 0, y: 0, zoom: Camera.#maxZoom };
+  static #panTarget = { x: 0, y: 0, zoom: Camera.#maxZoom };
+  static #panStartTime = 0;
   static get zoom() {
     return Camera.#zoom;
   }
@@ -54,60 +49,67 @@ export default class Camera {
     };
   }
   static get cameraBounds() {
-    if (Camera.#bounds === undefined) setCameraBounds();
+    if (Camera.#bounds === undefined) Camera.setCameraBounds();
     return Camera.#bounds;
   }
   static get canMove() {
-    if (Camera.#panTime > 0 || Camera.#anchor !== undefined) return false;
+    if (Camera.#panTimer > 0 || Camera.#anchor !== undefined) return false;
     return true;
   }
   static anchorTo(simObject) {
-    if (Camera.#panTime > 0) Camera.cancelPan();
+    if (Camera.#panTimer > 0) Camera.cancelPan();
     Camera.#anchor = simObject;
     Camera.panTo(simObject.worldPosition.x, simObject.worldPosition.y, Camera.#maxZoom);
   }
-  static freeAnchor() {    
+  static freeAnchor() {
     Camera.#anchor = undefined;
-    Camera.#panTime = 0;
+    Camera.#panTimer = 0;
   }
-  static isPanning() {
-    return (Camera.#panTime > 0);
+  static get isPanning() {
+    return (Camera.#panTimer > 0);
   }
   static panTo(x, y, zoom) {
-    Camera.#panTime = Camera.#panSpeed;    
-    Camera.#lastPanTime = Date.now();
-    Camera.#panDestinationX = x;
-    Camera.#panDestinationY = y;
-    Camera.#panDestinationZoom = zoom;
-    Camera.#panDelX = (x - Camera.#x) / Camera.#panSpeed;
-    Camera.#panDelY = (y - Camera.#y) / Camera.#panSpeed;
-    Camera.#panDelZoom = (zoom - Camera.#zoom) / Camera.#panSpeed;
-    
+    const targetZoom = Math.min(Camera.#maxZoom, Math.max(Camera.#minZoom, zoom ?? Camera.#zoom));
+    Camera.#panStart = { x: Camera.#x, y: Camera.#y, zoom: Camera.#zoom };
+    Camera.#panTarget = { x, y, zoom: targetZoom };
+    if (Camera.#panTimeSpan <= 0) {
+      Camera.#x = x;
+      Camera.#y = y;
+      Camera.zoom = targetZoom;
+      Camera.#panTimer = 0;
+      Camera.#panStartTime = 0;
+      return;
+    }
+    Camera.#panStartTime = Date.now();
+    Camera.#panTimer = Camera.#panTimeSpan;
   }
   static cancelPan() {
-    Camera.#panTime = 0;
+    //TODO: leave the camera where it is..
+    Camera.#panTimer=0;
   }
   static move() {
-    if (Camera.#panTime > 0) {
-      let now = Date.now();
-      let del = now - Camera.#lastPanTime;
-      Camera.#x += Camera.#panDelX * del;
-      Camera.#y += Camera.#panDelY * del;
-      Camera.#zoom += Camera.#panDelZoom * del;
-      Camera.#panTime -= del;
-      Camera.#lastPanTime = now;
-      if (Camera.#panTime < 1) {
-        Camera.#panTime = 0;
-        Camera.#x = Camera.#panDestinationX;
-        Camera.#y = Camera.#panDestinationY;
-        Camera.#zoom = Camera.#panDestinationZoom;
-      }
-      Camera.setCameraBounds();
-    } else if (Camera.#anchor !== undefined) {
-      this.#x = Camera.#anchor.worldPosition.x;
-      this.#y = Camera.#anchor.worldPosition.y;
-      Camera.setCameraBounds();
-    }
+    if (Camera.#panTimer <= 0) return;
+    const elapsed = Date.now() - Camera.#panStartTime;
+    const t = Math.min(1, elapsed / Camera.#panTimeSpan);
+    const lerp = (a, b) => a + (b - a) * t;
+    const nextZoom = lerp(Camera.#panStart.zoom, Camera.#panTarget.zoom, t);
 
+    // Keep the target point moving toward the screen center even while zooming.
+    const target = Camera.#panTarget;
+    const s0x = (target.x - Camera.#panStart.x) * Camera.#panStart.zoom + View.screenCenter.x;
+    const s0y = (target.y - Camera.#panStart.y) * Camera.#panStart.zoom + View.screenCenter.y;
+    const sx = lerp(s0x, View.screenCenter.x, t);
+    const sy = lerp(s0y, View.screenCenter.y, t);
+
+    Camera.#x = target.x - (sx - View.screenCenter.x) / nextZoom;
+    Camera.#y = target.y - (sy - View.screenCenter.y) / nextZoom;
+    Camera.zoom = nextZoom;
+    Camera.setCameraBounds();
+    if (t >= 1) {
+      Camera.#panTimer = 0;
+      Camera.#panStartTime = 0;
+    } else {
+      Camera.#panTimer = Math.max(0, Camera.#panTimeSpan - elapsed);
+    }
   }
 }
