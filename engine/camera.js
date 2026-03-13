@@ -2,16 +2,16 @@ import View from './view.js';
 export default class Camera {
   static #x = 0;
   static #y = 0;
-  
+
   static #maxZoom = 0.25;
   static #minZoom = 0.005;
   static #zoom = Camera.#maxZoom;
   static #zoomFactor = 3;
   static #anchor = undefined;
   static #bounds = undefined;
-  static #panSpeed = 500; //milliseconds to perform pan..
+  static #panSpeed = 5000; //milliseconds to perform pan..
   static #panTime = 0; //millseconds left to do the pan..
-  static #lastPanTime =0; //timestamp since last move..
+  static #lastPanTime = 0; //timestamp since last move..
   static #panDestinationX = 0; //Destination x coordinate for pan completion..
   static #panDestinationY = 0; //Destination y coordinate for pan complettion..
   static #panDelX = 0;
@@ -28,7 +28,7 @@ export default class Camera {
     Camera.#zoom = newZoom;
     Camera.setCameraBounds();
   }
-  static get zoomFactor (){
+  static get zoomFactor() {
     return this.#zoomFactor;
   }
   static get x() {
@@ -37,11 +37,11 @@ export default class Camera {
   static get y() {
     return Camera.#y;
   }
-  static set x (val){
+  static set x(val) {
     Camera.#x = val;
     Camera.setCameraBounds();
   }
-  static set y (val){
+  static set y(val) {
     Camera.#y = val;
     Camera.setCameraBounds();
   }
@@ -57,25 +57,32 @@ export default class Camera {
     if (Camera.#bounds === undefined) setCameraBounds();
     return Camera.#bounds;
   }
-  static get canMove(){
-    if (Camera.#panTime > 0 || Camera.#anchor!==undefined) return false;
+  static get canMove() {
+    if (Camera.#panTime > 0 || Camera.#anchor !== undefined) return false;
     return true;
-  } 
+  }
   static anchorTo(simObject) {
     if (Camera.#panTime > 0) Camera.cancelPan();
-    Camera.#anchor = simObject;    
+    Camera.#anchor = simObject;
+    Camera.panTo(simObject.worldPosition.x, simObject.worldPosition.y, Camera.#maxZoom);
   }
-  static freeAnchor() {
+  static freeAnchor() {    
     Camera.#anchor = undefined;
+    Camera.#panTime = 0;
+  }
+  static isPanning() {
+    return (Camera.#panTime > 0);
   }
   static panTo(x, y, zoom) {
-    Camera.#panTime = Camera.#panSpeed;
+    Camera.#panTime = Camera.#panSpeed;    
+    Camera.#lastPanTime = Date.now();
     Camera.#panDestinationX = x;
     Camera.#panDestinationY = y;
+    Camera.#panDestinationZoom = zoom;
     Camera.#panDelX = (x - Camera.#x) / Camera.#panSpeed;
     Camera.#panDelY = (y - Camera.#y) / Camera.#panSpeed;
     Camera.#panDelZoom = (zoom - Camera.#zoom) / Camera.#panSpeed;
-    Camera.#panDestinationZoom = zoom;
+    
   }
   static cancelPan() {
     Camera.#panTime = 0;
@@ -101,5 +108,6 @@ export default class Camera {
       this.#y = Camera.#anchor.worldPosition.y;
       Camera.setCameraBounds();
     }
+
   }
 }
