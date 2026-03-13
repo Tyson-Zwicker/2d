@@ -10,7 +10,7 @@ export default class Camera {
   static #anchor = undefined;
   static #bounds = undefined;
   static #panTimer = 0;
-  static #panTimeSpan = 1000;//milliseconds.
+  static #panTimeSpan = 300;//milliseconds.
   static #panStart = { x: 0, y: 0, zoom: Camera.#maxZoom };
   static #panTarget = { x: 0, y: 0, zoom: Camera.#maxZoom };
   static #panStartTime = 0;
@@ -111,5 +111,9 @@ export default class Camera {
     } else {
       Camera.#panTimer = Math.max(0, Camera.#panTimeSpan - elapsed);
     }
+  }
+  static moveToUpperLeftScreen (){
+    let wcoord = View.screenToWorld (0,0);
+    Camera.panTo (wcoord,Camera.zoom);
   }
 }

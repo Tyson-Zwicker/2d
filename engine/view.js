@@ -36,7 +36,12 @@ export default class View {
     Camera.setCameraBounds();
     console.log('View Initialized..');
   }
-  static screenToWorld() {
+  static screenToWorld(x, y) {
+    if (typeof x === 'number' && typeof y === 'number') {
+      const centered = Vec.sub({ x, y }, View.screenCenter);
+      const scaled = Vec.scale(centered, 1 / Camera.zoom);
+      return Vec.add(scaled, Camera);
+    }
     const centered = Vec.sub(View.mouse, View.screenCenter);
     const scaled = Vec.scale(centered, 1 / Camera.zoom);
     return Vec.add(scaled, Camera);
@@ -102,7 +107,7 @@ export default class View {
       }
     }
   }
-  static cancelDrag() {    
+  static cancelDrag() {
     View.bgPressed = false;
     View.bgPressCoord = undefined;
     View.mouse.buttonDown = false;
