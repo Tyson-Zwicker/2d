@@ -1,4 +1,5 @@
 
+import Camera from './camera.js';
 import View from './view.js';
 import Rnd from './rnd.js';
 import Main from './main.js';
@@ -16,7 +17,7 @@ export default class ParticleEffect {
     let opacity = Math.floor (15 * (this.life/ this.durationInSeconds));
     let color = this.color + opacity.toString(16);
     View.context.fillStyle = color;
-    let screenPoint = Vec.add(Vec.scale(Vec.sub(this.position, View.camera), View.camera.zoom), View.screenCenter);    
+    let screenPoint = Vec.add(Vec.scale(Vec.sub(this.position, Camera), Camera.zoom), View.screenCenter);    
     View.context.fillRect(screenPoint.x - this.thickness / 2, screenPoint.y - this.thickness / 2, this.thickness, this.thickness);
     this.life -= Main.delta;
     this.position = Vec.add(this.position, Vec.scale(this.velocity, Main.delta));    

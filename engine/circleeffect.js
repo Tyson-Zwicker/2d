@@ -1,4 +1,5 @@
 
+import Camera from './camera.js';
 import View from './view.js';
 import Main from './main.js';
 import Vec from '../vec.js';
@@ -28,8 +29,8 @@ export default class CircleEffect {
   render() {
     let opacity = Math.floor(15 * (this.life / this.durationInSeconds));
     let color = this.color + opacity.toString(16);    
-    let screenPoint = Vec.add(Vec.scale(Vec.sub(this.point, View.camera), View.camera.zoom), View.screenCenter);
-    let zoomedRadius = this.radius * View.camera.zoom;
+    let screenPoint = Vec.add(Vec.scale(Vec.sub(this.point, Camera), Camera.zoom), View.screenCenter);
+    let zoomedRadius = this.radius * Camera.zoom;
     View.context.fillStyle = color;
     View.context.beginPath();
     View.context.ellipse(screenPoint.x, screenPoint.y, zoomedRadius, zoomedRadius, 0, this.startAngleRadians, this.endAngleRadians);

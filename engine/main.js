@@ -1,3 +1,4 @@
+import Camera from './camera.js';
 import Effects from './effects.js';
 import Events from './events.js';
 import Sim from './sim.js';
@@ -91,10 +92,10 @@ export default class Main {
     let deltaStr = 'Δ ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0');
     let loopTimeStr = 'Σ ' + String(Main.loopTime).padStart(4, '0');
     let maxLoopTimeStr = 'Ω ' + String(Main.maxLoopTime).padStart(4, '0');
-    View.context.fillText(frameStr, 20, 8);
-    View.context.fillText(`Z ${View.camera.zoom}`,20,30);
-    View.context.fillText(deltaStr, 20, View.canvas.height - 20);
+    View.context.fillText(frameStr, 20, 8);    
+    View.context.fillText(deltaStr, 20, View.canvas.height - 20);    
     View.context.fillText(loopTimeStr, View.canvas.width - 70, 8);
+    View.context.fillText(`ζ ${Camera.zoom}`,View.canvas.width - 70,25);
     View.context.fillText(maxLoopTimeStr, View.canvas.width - 70, View.canvas.height - 20);
     View.context.font = oldfont;
   }

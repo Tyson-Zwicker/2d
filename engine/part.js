@@ -1,3 +1,4 @@
+import Camera from './camera.js';
 import Vec from './vec.js';
 import View from './view.js';
 import SimObject from './simobject.js';
@@ -99,8 +100,8 @@ export default class Part {
         p = Vec.add(p, this.localPosition);
         p = Vec.rotate(p, this.root.worldRotation);
         p = Vec.add(p, this.root.worldPosition);
-        p = Vec.sub(p, View.camera);  //Camera can be a Vec because it has an x and y.
-        p = Vec.scale(p, View.camera.zoom);
+        p = Vec.sub(p, Camera);  //Camera can be a Vec because it has an x and y.
+        p = Vec.scale(p, Camera.zoom);
         p = Vec.add(p, View.screenCenter);
         worldPolygon.points.push(p);
       }

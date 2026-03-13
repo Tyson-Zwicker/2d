@@ -1,3 +1,4 @@
+import Camera from './camera.js';
 import View from './view.js';
 import Vec from './vec.js';
 import Main from './main.js';
@@ -12,8 +13,8 @@ export default class LineEffect {
     this.life = durationInSeconds;    
   }
   render() {
-    let screenPoint0 = Vec.add(Vec.scale(Vec.sub(this.startPoint, View.camera), View.camera.zoom), View.screenCenter);
-    let screenPoint1 = Vec.add(Vec.scale(Vec.sub(this.endPoint, View.camera), View.camera.zoom), View.screenCenter);
+    let screenPoint0 = Vec.add(Vec.scale(Vec.sub(this.startPoint, Camera), Camera.zoom), View.screenCenter);
+    let screenPoint1 = Vec.add(Vec.scale(Vec.sub(this.endPoint, Camera), Camera.zoom), View.screenCenter);
     let opacity = Math.floor (15 * (this.life/ this.durationInSeconds));    
     let color = this.color + opacity.toString(16);
     let oldstroke = View.context.strokeStyle;
