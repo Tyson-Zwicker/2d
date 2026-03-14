@@ -50,24 +50,24 @@ export default class Main {
       Sim.rebuildQuadTrees();
       View.clear();
       if (Camera.isPanning) Camera.move();
-      let dynamicOnScreen = Sim.dynamicQuadtree.findInRange (Camera.cameraBounds);
-      let staticOnScreen = Sim.staticQuadtree.findInRange (Camera.cameraBounds);     
+      let dynamicOnScreen = Sim.dynamicQuadtree.findInRange(Camera.cameraBounds);
+      let staticOnScreen = Sim.staticQuadtree.findInRange(Camera.cameraBounds);
       //console.log (dynamicOnScreen);
       //throw new Error ('above should be array of SimObjects');
-      for (let candidate of dynamicOnScreen){
+      for (let candidate of dynamicOnScreen) {
         candidate.ref.move();
       }
-      for (let simObject of Sim.dynamicObjects.values()){
-        if (simObject.canMove==='always'){ 
+      for (let simObject of Sim.dynamicObjects.values()) {
+        if (simObject.canMove === 'always') {
           simObject.move();
         }
       }
       Effects.renderBackground();
-      for (let candidate of staticOnScreen){
-        candidate.ref.render();  
+      for (let candidate of staticOnScreen) {
+        candidate.ref.render();
       }
-      for (let candidate of dynamicOnScreen){
-         candidate.ref.render();      
+      for (let candidate of dynamicOnScreen) {
+        candidate.ref.render();
       }
       Effects.renderForeground();
       GUI.render();
@@ -83,7 +83,7 @@ export default class Main {
   }
   static checkMouse() {
     let interactionOccured = false;
-    for (let element of GUI.elements) {      
+    for (let element of GUI.elements) {
       if (element.button) {
         if (element.button.checkForMouse()) interactionOccured = true;
       }
@@ -98,20 +98,20 @@ export default class Main {
     View.handleCameraDrag(interactionOccured);
   }
   static showDelta() {
-    
+
     View.context.textBaseline = 'top';
     View.context.fillStyle = '#FFFFFF';
     View.context.strokeStyle = '#FFFFFF';
     let oldfont = View.context.font;
     View.context.font = "bold 14px Arial"
-    let frameStr = String(Main.currentFrame).padStart(6, '0');
+    let frameStr = 'Φ ' + String(Main.currentFrame).padStart(4, '0');
     let deltaStr = 'Δ ' + String(Math.trunc(Main.delta * 1000)).padStart(4, '0');
     let loopTimeStr = 'Σ ' + String(Main.loopTime).padStart(4, '0');
     let maxLoopTimeStr = 'Ω ' + String(Main.maxLoopTime).padStart(4, '0');
-    View.context.fillText(frameStr, 20, 8);    
-    View.context.fillText(deltaStr, 20, View.canvas.height - 20);    
+    View.context.fillText(frameStr, 20, 8);
+    View.context.fillText(deltaStr, 20, View.canvas.height - 20);
     View.context.fillText(loopTimeStr, View.canvas.width - 70, 8);
-    View.context.fillText(`ζ ${Camera.zoom}`,View.canvas.width - 70,25);
+    View.context.fillText(`ζ ${Camera.zoom}`, View.canvas.width - 70, 25);
     View.context.fillText(maxLoopTimeStr, View.canvas.width - 70, View.canvas.height - 20);
     View.context.font = oldfont;
   }
