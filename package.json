@@ -1,0 +1,17 @@
+{
+  "name": "ts-template",
+  "version": "1.0.0",
+  "description": "TypeScript conversion project: origin (JS) -> conv (TS) -> src (JS)",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf src/*"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
