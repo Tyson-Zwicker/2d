@@ -1,0 +1,105 @@
+import Camera from './camera.js';
+import Vec from './vec.js';
+import View from './view.js';
+import SimObject from './simobject.js';
+
+export default class Part {
+  root = undefined;             //assigned when added (refers to a SimObject)
+  ownPosition = undefined;      //assigned when added
+  ownRotation = undefined;      //assigned when added
+  parent = undefined;           //assigned when added
+  localPosition = undefined;    //calculated when added and when parent moves.
+  localRotation = undefined;    //calculated when added and when parent moves.
+  spin = 0;                     //should by 0 for anything but a leaf node or Root.
+  name = undefined;             //assigned by constructor
+  parts = [];                   //added to by addPart();
+  polygons = [];                //assigned by constructor
+  radius = undefined;           //Calculated upon construction. (The radius of the smallest circle that can enclose this part). 
+  depth = undefined;            //Calculated when addTo() parent object..
+  button = undefined;           //a button can be assigned manually.
+
+  constructor(name, polygons) {
+    if (!name || !polygons) throw Error(`Missing parameter. name=${name} polygons =${polygons}`);
+    this.name = name;
+    if (Array.isArray(polygons)) this.polygons.push(...polygons);
+    else if (typeof polygons === 'object') this.polygons = [polygons];
+    else throw new Error(`polygons must be a polygon or an Array of polygons: [${JSON.stringify(polygons)}]`);
+    this.radius = this.#calcRadius();
+  }
+  #calcRadius() {
+    // Calculate the radius of the smallest circle that can enclose this part    
+    let maxDistance = 0;
+    for (let polygon of this.polygons) {
+      for (let point of polygon.points) {
+        const distance = Math.sqrt(point.x * point.x + point.y * point.y);
+        maxDistance = Math.max(maxDistance, distance);
+      }
+    }
+    return maxDistance;
+  }
+  clone() {
+    return new Part(this.name, this.polygons);
+  }
+  get worldPosition() {
+    return Vec.add(this.root.worldPosition, this.localPosition)
+  }
+  get worldRotation() {
+    return (this.root.worldRotation + this.localRotation) % 360;
+  };
+  calculateLocals() {
+    this.localRotation = (this.ownRotation + this.parent.localRotation) % 360;
+    this.localPosition = Vec.add(this.parent.localPosition, Vec.rotate(this.ownPosition, this.parent.localRotation));
+  }
+  addTo(parent, offset, rotation = 0, depthModifier = 0) {
+    if (!parent) throw new Error('Missing parameter (parent): ' + this.name);
+    if (!offset) throw new Error('Missing parameter (offset): ' + this.name);
+    if (isNaN(rotation)) throw new Error('Missing parameter (rotation): ' + this.name);
+    /*
+    A part can have as many parts added to it as you want, but if your adding this to a SimObject 
+    it will overwrite the existing (if any) body.  Because SimObjects can only have one part as 
+    their "body".
+    */
+    if (parent instanceof SimObject) {
+      this.root = parent;
+      parent.body = this;
+    } else {
+      if (parent.root === undefined) throw new Error('Cannot attach to an unattached object. Attach objects in parent first order.');
+      this.root = parent.root;
+      parent.parts.push(this);
+    }
+    this.parent = parent;
+    this.ownPosition = offset;
+    this.ownRotation = rotation;
+    this.depth = parent.depth + 1 + depthModifier; //This is ONLY used when rendering. Higher numbers render last.
+    this.calculateLocals();
+  }
+  get(name) {
+    if (this.name == name) {
+      return this;
+    }
+    for (let part of this.parts) {
+      let result = part.get(name);
+      if (result) return result;
+    }
+    throw new Error(`Part [${name}] not found.`);
+  }
+  getWorldPolygons() {                                     //The "rendering pipeline"
+    let worldPolygons = [];
+    for (let polygon of this.polygons) {
+      let worldPolygon = { mien: polygon.mien, points: [] };
+      for (let point of polygon.points) {
+        let p = structuredClone(point);
+        p = Vec.rotate(p, this.localRotation);
+        p = Vec.add(p, this.localPosition);
+        p = Vec.rotate(p, this.root.worldRotation);
+        p = Vec.add(p, this.root.worldPosition);
+        p = Vec.sub(p, Camera);  //Camera can be a Vec because it has an x and y.
+        p = Vec.scale(p, Camera.zoom);
+        p = Vec.add(p, View.screenCenter);
+        worldPolygon.points.push(p);
+      }
+      worldPolygons.push(worldPolygon);
+    }
+    return worldPolygons;
+  }
+}
