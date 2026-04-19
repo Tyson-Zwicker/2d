@@ -1,4 +1,4 @@
-back.sh
-starciv/
-test/
-
+node_modules/
+src/
+*.log
+.DS_Store
