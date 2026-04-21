@@ -1,6 +1,18 @@
+import { Point } from './geometry.js';
+import { SimObject } from './simobject.js';
+
 /** Base interface for all effects */
 export interface Effect {
   render(): boolean;
+}
+
+export type EffectAnchor = Point | SimObject;
+
+export function resolveEffectAnchor(anchor: EffectAnchor): Point {
+  if (anchor instanceof SimObject) {
+    return anchor.worldPosition;
+  }
+  return anchor;
 }
 
 export class Effects {
