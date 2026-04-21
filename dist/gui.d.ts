@@ -26,14 +26,15 @@ interface ListItem {
 }
 type PanelDirection = 'vertical' | 'horizontal';
 type ElementAlignment = 'center' | 'left';
-type ElementType = 'text' | 'button' | 'list';
+type ElementType = 'text' | 'button' | 'list' | 'graph';
 export declare class GUIElement {
     name: string;
     alignment: ElementAlignment;
     drawnBounds: DrawnBounds;
     active: boolean;
     highlighted: boolean;
-    trimmedText: Text;
+    mien: Mien | undefined;
+    trimmedText: Text | undefined;
     size: {
         width: number;
         height: number;
@@ -44,7 +45,8 @@ export declare class GUIElement {
     itemPanelDirection: PanelDirection;
     listItems: ListItem[];
     attachedPanel: GUIPanel | undefined;
-    constructor(panel: GUIPanel, textArray: string[], alignment: ElementAlignment);
+    graphValue: number;
+    constructor(panel: GUIPanel, textArray: string[] | undefined, alignment: ElementAlignment, mien?: Mien);
     get drawnSize(): {
         width: number;
         height: number;
@@ -63,8 +65,9 @@ export declare class GUIPanel {
     flex: boolean;
     direction: PanelDirection;
     constraint: Constraint;
+    mien: Mien | undefined;
     elements: GUIElement[];
-    constructor(anchor: Point | GUIElement | SimObject, direction: PanelDirection, constraint: Constraint, flex?: boolean, visible?: boolean);
+    constructor(anchor: Point | GUIElement | SimObject, direction: PanelDirection, constraint: Constraint, flex?: boolean, visible?: boolean, mien?: Mien);
     show(): void;
     isVisible(): boolean;
     hide(): void;
@@ -74,9 +77,10 @@ export declare class GUIPanel {
         height: number;
     }, direction: PanelDirection): void;
     render(): void;
-    addText(textArray: string[], alignment: ElementAlignment): GUIElement;
-    addButton(textArray: string[], alignment: ElementAlignment, value: unknown, toggle: boolean, fn?: (data: EventData) => void): GUIElement;
-    addList(textArray: string[], alignment: ElementAlignment, listItems: ListItem[], defaultValue: unknown, itemPanelDirection: PanelDirection): GUIElement;
+    addText(textArray: string[], alignment: ElementAlignment, mien?: Mien): GUIElement;
+    addButton(textArray: string[], alignment: ElementAlignment, value: unknown, toggle: boolean, fn?: (data: EventData) => void, mien?: Mien): GUIElement;
+    addList(textArray: string[], alignment: ElementAlignment, listItems: ListItem[], defaultValue: unknown, itemPanelDirection: PanelDirection, mien?: Mien): GUIElement;
+    addGraph(value?: number, mien?: Mien): GUIElement;
 }
 export declare class GUI {
     static elements: GUIElement[];
@@ -86,7 +90,7 @@ export declare class GUI {
     static margin: number;
     static lineSpace: number;
     static initialized: boolean;
-    static initialize(gap?: number, lineSpace?: number, margin?: number, mien?: Mien): void;
+    static initialize(lineSpace?: number, margin?: number, mien?: Mien): void;
     static isMouseIn(element: GUIElement): boolean;
     static render(): void;
     static removePanel(panel: GUIPanel): void;

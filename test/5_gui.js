@@ -41,7 +41,6 @@ panel2.addButton(['This', 'Button'], 'center', 'val1', true, (data) => {
 });
 console.log (subPanel1);
 
-
 let object1 = new SimObject('magenta', 'never');
 new Part('mp', Polygon.regular(3, 400, Mien.Magenta)).addTo(object1, { x: 0, y: 0 }, 0);
 let object2 = new SimObject('cyan', 'never');

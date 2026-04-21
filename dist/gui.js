@@ -13,7 +13,8 @@ export class GUIElement {
     drawnBounds = { x0: 0, y0: 0, x1: 0, y1: 0 };
     active = true;
     highlighted = false;
-    trimmedText;
+    mien = undefined;
+    trimmedText = undefined;
     size;
     panel;
     button = undefined;
@@ -21,13 +22,21 @@ export class GUIElement {
     itemPanelDirection = 'vertical';
     listItems = [];
     attachedPanel = undefined;
-    constructor(panel, textArray, alignment) {
+    graphValue = 0.5;
+    constructor(panel, textArray, alignment, mien) {
         if (alignment !== 'center' && alignment !== 'left') {
             throw new Error('invalid alignment: ' + alignment);
         }
         this.alignment = alignment;
-        this.trimmedText = Text.getTextFromArray(textArray, { w: panel.constraint.width, h: panel.constraint.height, m: GUI.margin }, GUI.mien.normal.fontName, GUI.mien.normal.fontSize, GUI.lineSpace, GUI.margin);
-        this.size = { width: this.trimmedText.w, height: this.trimmedText.h };
+        this.mien = mien;
+        const appearanceMien = this.mien ?? panel.mien ?? GUI.mien;
+        if (textArray !== undefined) {
+            this.trimmedText = Text.getTextFromArray(textArray, { w: panel.constraint.width, h: panel.constraint.height, m: GUI.margin }, appearanceMien.normal.fontName, appearanceMien.normal.fontSize, GUI.lineSpace, GUI.margin);
+            this.size = { width: this.trimmedText.w, height: this.trimmedText.h };
+        }
+        else {
+            this.size = { width: panel.constraint.width, height: panel.constraint.height };
+        }
         this.panel = panel;
         panel.elements.push(this);
         GUI.elements.push(this);
@@ -40,7 +49,8 @@ export class GUIElement {
     }
     attachListItemPanel(listElement, direction) {
         const constraint = { width: listElement.size.width, height: listElement.size.height };
-        const listItemPanel = new GUIPanel(listElement, direction, constraint);
+        const inheritedMien = listElement.mien ?? listElement.panel.mien;
+        const listItemPanel = new GUIPanel(listElement, direction, constraint, false, true, inheritedMien);
         for (const item of listElement.listItems) {
             listItemPanel.addButton(item.textArray, 'center', item.value, false, (data) => {
                 const anchor = data.owner;
@@ -77,8 +87,9 @@ export class GUIPanel {
     flex;
     direction;
     constraint;
+    mien = undefined;
     elements = [];
-    constructor(anchor, direction, constraint, flex = false, visible = true) {
+    constructor(anchor, direction, constraint, flex = false, visible = true, mien) {
         if (!constraint || !constraint.width || !constraint.height) {
             throw new Error('Constraint must define a width and height.');
         }
@@ -105,6 +116,7 @@ export class GUIPanel {
         }
         this.direction = direction;
         this.constraint = constraint;
+        this.mien = mien;
         GUI.panels.push(this);
     }
     show() {
@@ -144,7 +156,8 @@ export class GUIPanel {
         return this.#screenPosition;
     }
     drawConnector(corner, size, direction) {
-        View.context.fillStyle = GUI.mien.highlighted.bgColor;
+        const connectorMien = this.mien ?? GUI.mien;
+        View.context.fillStyle = connectorMien.highlighted.bgColor;
         if (direction === 'vertical') {
             View.context.fillRect(corner.x, corner.y, size.width, GUI.gap);
         }
@@ -176,8 +189,10 @@ export class GUIPanel {
         }
     }
     #renderElement(el, cursor) {
-        let w = el.trimmedText.w;
-        let h = el.trimmedText.h;
+        const textWidth = el.trimmedText?.w ?? 0;
+        const textHeight = el.trimmedText?.h ?? 0;
+        let w = textWidth;
+        let h = textHeight;
         const x0 = cursor.x;
         const y0 = cursor.y;
         if (this.direction === 'vertical') {
@@ -194,22 +209,23 @@ export class GUIPanel {
         }
         const x1 = x0 + w;
         const y1 = y0 + h;
-        const verticalSpacer = (h - el.trimmedText.h) / 2 + GUI.margin;
+        const verticalSpacer = el.trimmedText ? (h - el.trimmedText.h) / 2 + GUI.margin : 0;
         el.drawnBounds = { x0, y0, x1, y1 };
         el.size = { width: w, height: h };
-        let mien = GUI.mien.normal;
+        const baseMien = el.mien ?? this.mien ?? GUI.mien;
+        let mien = baseMien.normal;
         if (!el.active) {
-            mien = GUI.mien.shadowed;
+            mien = baseMien.shadowed;
         }
         else {
             if (el.highlighted)
-                mien = GUI.mien.highlighted;
+                mien = baseMien.highlighted;
             if (el.button?.hovered)
-                mien = GUI.mien.hovered;
+                mien = baseMien.hovered;
             if (el.button?.pressed)
-                mien = GUI.mien.pressed;
+                mien = baseMien.pressed;
             if (el.button?.toggled)
-                mien = GUI.mien.highlighted;
+                mien = baseMien.highlighted;
         }
         View.context.lineWidth = mien.borderWidth;
         View.context.strokeStyle = mien.borderColor;
@@ -218,6 +234,31 @@ export class GUIPanel {
         View.context.rect(x0, y0, w, h);
         View.context.fill();
         View.context.stroke();
+        if (el.type === 'graph') {
+            this.#renderGraph(el, x0, y0, w, h, mien);
+        }
+        else if (el.trimmedText) {
+            this.#renderTextElement(el, x0, y0, w, h, verticalSpacer, mien);
+        }
+    }
+    #renderGraph(el, x0, y0, w, h, mien) {
+        const baseMien = el.mien ?? this.mien ?? GUI.mien;
+        const graphMien = el.active ? baseMien.highlighted : baseMien.shadowed;
+        // Filled bar (shows graphValue percentage from bottom up)
+        const barHeight = h - 2 * GUI.margin;
+        const fillHeight = barHeight * Math.max(0, Math.min(1, el.graphValue));
+        const filledY = y0 + h - GUI.margin - fillHeight;
+        View.context.fillStyle = graphMien.bgColor;
+        View.context.fillRect(x0 + GUI.margin, filledY, w - 2 * GUI.margin, fillHeight);
+        // Percentage text centered
+        const percentText = Math.round(el.graphValue * 100) + '%';
+        View.context.fillStyle = graphMien.textColor;
+        View.context.textBaseline = 'middle';
+        View.context.textAlign = 'center';
+        View.context.font = `${mien.fontSize}px ${mien.fontName}`;
+        View.context.fillText(percentText, x0 + w / 2, y0 + h / 2);
+    }
+    #renderTextElement(el, x0, y0, w, h, verticalSpacer, mien) {
         View.context.fillStyle = mien.textColor;
         View.context.textBaseline = 'top';
         View.context.textAlign = 'left';
@@ -234,19 +275,19 @@ export class GUIPanel {
             i++;
         }
     }
-    addText(textArray, alignment) {
-        const textElement = new GUIElement(this, textArray, alignment);
+    addText(textArray, alignment, mien) {
+        const textElement = new GUIElement(this, textArray, alignment, mien);
         textElement.type = 'text';
         return textElement;
     }
-    addButton(textArray, alignment, value, toggle, fn) {
-        const buttonElement = new GUIElement(this, textArray, alignment);
+    addButton(textArray, alignment, value, toggle, fn, mien) {
+        const buttonElement = new GUIElement(this, textArray, alignment, mien);
         buttonElement.type = 'button';
         new Button(value, toggle, buttonElement, fn);
         return buttonElement;
     }
-    addList(textArray, alignment, listItems, defaultValue, itemPanelDirection) {
-        const listElement = new GUIElement(this, textArray, alignment);
+    addList(textArray, alignment, listItems, defaultValue, itemPanelDirection, mien) {
+        const listElement = new GUIElement(this, textArray, alignment, mien);
         listElement.type = 'list';
         listElement.itemPanelDirection = itemPanelDirection;
         listElement.listItems = listItems;
@@ -254,6 +295,12 @@ export class GUIPanel {
             listElement.attachListItemPanel(r.owner, itemPanelDirection);
         });
         return listElement;
+    }
+    addGraph(value = 0.5, mien) {
+        const graphElement = new GUIElement(this, undefined, 'center', mien);
+        graphElement.type = 'graph';
+        graphElement.graphValue = Math.max(0, Math.min(1, value));
+        return graphElement;
     }
 }
 // ============================================================================
@@ -263,12 +310,11 @@ export class GUI {
     static elements = [];
     static panels = [];
     static mien = Mien.Green;
-    static gap = 5;
+    static gap = 3;
     static margin = 5;
     static lineSpace = 1;
     static initialized = false;
-    static initialize(gap = 5, lineSpace = 1, margin = 5, mien = Mien.Green) {
-        GUI.gap = gap;
+    static initialize(lineSpace = 1, margin = 3, mien = Mien.Green) {
         GUI.margin = margin;
         GUI.lineSpace = lineSpace;
         GUI.elements = [];

@@ -7,6 +7,17 @@ export class Polygon {
         this.points = points;
         this.mien = mien;
     }
+    static fromArray(points, mien = Mien.Gray) {
+        const r = [];
+        for (let p = 0; p < points.length; p++) {
+            if (points[p].length === 2) {
+                r.push({ x: points[p][0], y: points[p][1] });
+            }
+            else
+                throw new Error(`Polygon.fromArray: bad element at [${p}]`);
+        }
+        return new Polygon(r, mien);
+    }
     static translate(polygon, vector) {
         const pts = [];
         for (const p of polygon.points) {

@@ -46,7 +46,8 @@ for (let x = -300; x <= 300; x += 300) {
   let anchorPart = new Part('anchor-part', anchorPoly);
   anchorPart.addTo(greenArrowPart, { x: -50, y: 0 }, 0);
 
-  let orbiterPoly = Polygon.regular(5, 15, Mien.Cyan);
+  let orbiterPoly = Polygon.fromArray ([[-15,-15],[15,-15],[15,15],[-15,15]],Mien.Cyan);
+  //let orbiterPoly = Polygon.regular(5, 15, Mien.Cyan);
   let orbiterPart = new Part('orbiter-part', orbiterPoly);
   orbiterPart.addTo(anchorPart, { x: -100, y: 0 }, 0);
 
