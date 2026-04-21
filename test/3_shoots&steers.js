@@ -5,7 +5,7 @@ import { Polygon } from '../dist/polygon.js';
 import { Mien } from '../dist/mien.js';
 import { Vec } from '../dist/geometry.js';
 import { Effects } from '../dist/effects.js';
-import { RadialEffect } from '../dist/radialeffect.js';
+import { RadialEffect } from '../dist/radial-effect.js';
 
 //Testing collisions... and Steering..
 
@@ -17,24 +17,24 @@ let arrow = [{ x: -50, y: -15 }, { x: 5, y: -15 }, { x: 5, y: -50 }, { x: 50, y:
 let greenRateOfTurn = 10;
 let greenTurnFrequency = 10000;
 let greenLastTurnTime = 0;
-let greenSpeed = 10;
+let greenSpeed = 100;
 let green = makeGreen();
 
 //Yellow chases Green, it is slower, but always seeks the direct path...
 let yellowRateOfTurn = 1;
 let yellowTurnFrequency = 1000;
 let yellowLastTurnedTime = 0;
-let yellowSpeed = 5;
+let yellowSpeed = 50;
 let yellow = makeYellow();
 
 // Make Missile
 
 let nextMissileName = () => { return 'missile'; }//return 'missile ' + (missiles.length) }
 let missile = undefined;
-let missileTurnFrequency = 300;
+let missileTurnFrequency = 30;
 let missileLastTurnTime = 0;
-let missileSpeed = 20;
-let missileRateOfTurn = 15;
+let missileSpeed = 200;
+let missileRateOfTurn = 35;
 let missileFired = false;
 
 Main.creatorsFunction = () => {

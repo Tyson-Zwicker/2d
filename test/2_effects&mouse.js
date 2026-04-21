@@ -5,10 +5,10 @@ import { Sim } from '../dist/sim.js';
 import { SimObject, Part } from '../dist/simobject.js';
 import { Polygon } from '../dist/polygon.js';
 import { Mien } from '../dist/mien.js';
-import { CircleEffect } from '../dist/circleeffect.js';
-import { ParticleEffect } from '../dist/particleeffect.js';
-import { RadialEffect } from '../dist/radialeffect.js';
-import { LineEffect } from '../dist/lineeffect.js';
+import { CircleEffect } from '../dist/circle-effect.js';
+import { ParticleEffect } from '../dist/particle-effect.js';
+import { RadialEffect } from '../dist/radial-effect.js';
+import { LineEffect } from '../dist/line-effect.js';
 import { Effects } from '../dist/effects.js';
 
 let lastSecond = 0;
