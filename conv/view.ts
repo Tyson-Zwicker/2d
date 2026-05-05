@@ -28,7 +28,7 @@ export class Camera {
   static #x: number = 0;
   static #y: number = 0;
 
-  static #maxZoom: number = 4;
+  static #maxZoom: number = 8;
   static #minZoom: number = 0.005;
   static #zoom: number = 1;
   static #zoomFactor: number = 2; // MUST BE > 2

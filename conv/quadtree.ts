@@ -8,7 +8,6 @@ import { SimObject } from './simobject.js';
 export class QuadTree {
   bounds: RectBounds;
   capacity: number;
-  minimumSize: number;
   objects: SimObject[];
   divided: boolean;
   hasReachedMinimumSize: boolean;
@@ -21,25 +20,23 @@ export class QuadTree {
   // Shared pool across all QuadTree instances
   private static pool: QuadTree[] = [];
 
-  constructor(bounds: RectBounds, capacity: number = 4, minimumSize: number = 4) {
+  constructor(bounds: RectBounds, capacity: number = 4) {
     this.bounds = bounds;
     this.capacity = capacity;
-    this.minimumSize = minimumSize;
     this.objects = [];
     this.divided = false;
     this.hasReachedMinimumSize = false;
-    this.init(bounds, capacity, minimumSize);
+    this.init(bounds, capacity);
   }
 
   private acquire(
     bounds: RectBounds,
     capacity: number = this.capacity,
-    minimumSize: number = this.minimumSize
   ): QuadTree {
     const node = QuadTree.pool.length
       ? QuadTree.pool.pop()!
-      : new QuadTree(bounds, capacity, minimumSize);
-    node.init(bounds, capacity, minimumSize);
+      : new QuadTree(bounds, capacity);
+    node.init(bounds, capacity);
     return node;
   }
 
@@ -64,13 +61,12 @@ export class QuadTree {
     }
   }
 
-  init(bounds: RectBounds, capacity: number, minimumSize: number): void {
+  init(bounds: RectBounds, capacity: number): void {
     if (!bounds.isValid) {
       throw new Error(`Quadtree boundary was not valid: ${JSON.stringify(bounds)}`);
     }
     this.bounds = bounds;
     this.capacity = capacity;
-    this.minimumSize = minimumSize;
     this.objects = this.objects || [];
     this.objects.length = 0;
     this.divided = false;
@@ -78,8 +74,6 @@ export class QuadTree {
     this.northwest = undefined;
     this.southeast = undefined;
     this.southwest = undefined;
-    this.hasReachedMinimumSize =
-      bounds.width <= minimumSize || bounds.height <= minimumSize;
   }
 
   findInRange(rectBounds: RectBounds, found: SimObject[] = []): SimObject[] {
@@ -123,9 +117,7 @@ export class QuadTree {
     const objectTouchesThisBoundary = this.bounds.touches(objectBoundary);
     if (!objectTouchesThisBoundary) return false;
 
-    const width = this.bounds.width;
-    const height = this.bounds.height;
-    const tooBigToSplit = object.radius >= Math.min(width / 2, height / 2);
+    const tooBigToSplit = object.radius >= Math.min(this.bounds.width / 2, this.bounds.height / 2);
 
     const rules =
       tooBigToSplit ||
@@ -159,24 +151,16 @@ export class QuadTree {
 
     this.northwest = this.acquire(
       new RectBounds(x0, y0, midX, midY),
-      this.capacity,
-      this.minimumSize
-    );
+      this.capacity);
     this.northeast = this.acquire(
       new RectBounds(midX, y0, x1, midY),
-      this.capacity,
-      this.minimumSize
-    );
+      this.capacity);
     this.southwest = this.acquire(
       new RectBounds(x0, midY, midX, y1),
-      this.capacity,
-      this.minimumSize
-    );
+      this.capacity);
     this.southeast = this.acquire(
       new RectBounds(midX, midY, x1, y1),
-      this.capacity,
-      this.minimumSize
-    );
+      this.capacity);
 
     this.divided = true;
   }

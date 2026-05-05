@@ -14,6 +14,7 @@ export class Main {
   static currentFrame: number = 0;
   static maxLoopTime: number = 0;
   static continue: boolean = false;
+  static pauseSim: boolean = false;
   static fpsMillis: number = 0;
   static loopTime: number = 0;
   static collisions: Map<string, SimObject[]> = new Map();
@@ -21,12 +22,17 @@ export class Main {
   static {
     View.initialize();
     GUI.initialize();
+    GUI.configurePauseHandlers(
+      () => Main.pauseSim,
+      (paused: boolean) => Main.setPaused(paused)
+    );
     console.log('Main initialized...');
   }
 
   static run(fps: number = 0): void {
     const startTime = Date.now();
     Main.loopTime = 0;
+    Main.pauseSim = false;
     if (fps === 0) {
       View.bgColor = '#302';
       Main.continue = false;
@@ -57,65 +63,18 @@ export class Main {
     const t = Date.now();
     try {
       Events.reset();
-      Sim.rebuildQuadTrees();
       View.clear();
-      if (Camera.isPanning) Camera.move();
-      const dynamicOnScreen = Sim.dynamicQuadtree.findInRange(Camera.cameraBounds);
-      const staticOnScreen = Sim.staticQuadtree.findInRange(Camera.cameraBounds);
-
-      for (const candidate of dynamicOnScreen) {
-        if (candidate.canMove === 'onscreen') {
-          candidate.move(Main.delta);
-        }
+      if (!Main.pauseSim) {
+        Sim.rebuildQuadTrees();
+        const dynamicOnScreen = Sim.dynamicQuadtree.findInRange(Camera.cameraBounds);
+        const staticOnScreen = Sim.staticQuadtree.findInRange(Camera.cameraBounds);
+        Main.moveCameraAndSimObjects(dynamicOnScreen, staticOnScreen);
+        Main.renderSimAndEffects(dynamicOnScreen, staticOnScreen);
+        if (Main.creatorsFunction) Main.creatorsFunction();
       }
-      for (const simObject of Sim.dynamicObjects.values()) {
-        if (simObject.canMove === 'always') {
-          simObject.move(Main.delta);
-        }
-      }
-
-      Effects.renderBackground();
-      for (const candidate of staticOnScreen) {
-        candidate.render();
-      }
-      for (const candidate of dynamicOnScreen) {
-        candidate.render();
-      }
-      Effects.renderForeground();
       GUI.render();
-
-      // Collisions
-      Main.collisions = new Map();
-      for (const simObject of Sim.dynamicObjects.values()) {
-        if (simObject.collides) {
-          const bounds = new RectBounds(
-            simObject.worldPosition.x - simObject.radius,
-            simObject.worldPosition.y - simObject.radius,
-            simObject.worldPosition.x + simObject.radius,
-            simObject.worldPosition.y + simObject.radius
-          );
-          const dynamicCandidates = Sim.dynamicQuadtree.findInRange(bounds);
-          for (const candidate of dynamicCandidates) {
-            if (candidate.collides) {
-              const r = candidate.radius + simObject.radius;
-              const d = Math.hypot(
-                candidate.position.x - simObject.position.x,
-                candidate.position.y - simObject.position.y
-              );
-              if (r <= d) {
-                if (!Main.collisions.has(simObject.name)) {
-                  Main.collisions.set(simObject.name, []);
-                }
-                Main.collisions.get(simObject.name)!.push(candidate);
-              }
-            }
-          }
-        }
-      }
-
       Main.checkMouse();
       Main.showDelta();
-      if (Main.creatorsFunction) Main.creatorsFunction();
       Main.loopTime = Date.now() - t;
       if (Main.loopTime > Main.maxLoopTime && Main.currentFrame > 10) {
         Main.maxLoopTime = Main.loopTime;
@@ -125,24 +84,82 @@ export class Main {
       throw error;
     }
   }
-
-  static checkMouse(): void {
-    let interactionOccured = false;
-    for (const panel of GUI.panels) {
-      if (panel.isVisible()) {
-        for (const element of panel.elements) {
-          if (element.button) {
-            if (element.button.checkForMouse()) interactionOccured = true;
+  static moveCameraAndSimObjects(dynamicOnScreen: SimObject[], staticOnScreen: SimObject[]) {
+    if (Camera.isPanning) Camera.move();
+    for (const candidate of dynamicOnScreen) {
+      if (candidate.canMove === 'onscreen') {
+        candidate.move(Main.delta);
+      }
+    }
+    for (const simObject of Sim.dynamicObjects.values()) {
+      if (simObject.canMove === 'always') {
+        simObject.move(Main.delta);
+      }
+    }
+  }
+  static renderSimAndEffects(dynamicOnScreen: SimObject[], staticOnScreen: SimObject[]) {
+    //Render sim and effects.
+    Effects.renderBackground();
+    for (const candidate of staticOnScreen) {
+      candidate.render();
+    }
+    for (const candidate of dynamicOnScreen) {
+      candidate.render();
+    }
+    Effects.renderForeground();
+    Main.checkCollisions();
+  }
+  static checkCollisions() {
+    // Collisions
+    Main.collisions = new Map();
+    for (const simObject of Sim.dynamicObjects.values()) {
+      if (simObject.collides) {
+        const bounds = new RectBounds(
+          simObject.worldPosition.x - simObject.radius,
+          simObject.worldPosition.y - simObject.radius,
+          simObject.worldPosition.x + simObject.radius,
+          simObject.worldPosition.y + simObject.radius
+        );
+        const dynamicCandidates = Sim.dynamicQuadtree.findInRange(bounds);
+        for (const candidate of dynamicCandidates) {
+          if (candidate.collides) {
+            const r = candidate.radius + simObject.radius;
+            const d = Math.hypot(
+              candidate.position.x - simObject.position.x,
+              candidate.position.y - simObject.position.y
+            );
+            if (r <= d) {
+              if (!Main.collisions.has(simObject.name)) {
+                Main.collisions.set(simObject.name, []);
+              }
+              Main.collisions.get(simObject.name)!.push(candidate);
+            }
           }
         }
       }
     }
-    for (const object of Sim.simObjects.values()) {
-      if (object.button && object.button.checkForMouse()) {
-        interactionOccured = true;
+  }
+  static checkMouse(): void {
+    let interactionOccured = false;
+    const modalActive = GUI.hasModal();
+
+    for (const panel of GUI.getInteractivePanels()) {
+      for (const element of panel.elements) {
+        if (element.button) {
+          if (element.button.checkForMouse()) interactionOccured = true;
+        }
       }
     }
-    View.handleCameraDrag(interactionOccured);
+
+    if (!modalActive) {
+      for (const object of Sim.simObjects.values()) {
+        if (object.button && object.button.checkForMouse()) {
+          interactionOccured = true;
+        }
+      }
+    }
+
+    View.handleCameraDrag(modalActive || interactionOccured);
   }
 
   static showDelta(): void {
@@ -161,5 +178,10 @@ export class Main {
     View.context.fillText(maxLoopTimeStr, View.canvas.width - 70, 25);
     View.context.fillText(`ζ ${Camera.zoom}`, View.canvas.width - 70, View.canvas.height - 20);
     View.context.font = oldfont;
+  }
+
+  static setPaused(paused: boolean): boolean {
+    Main.pauseSim = paused;
+    return Main.pauseSim;
   }
 }

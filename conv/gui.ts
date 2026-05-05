@@ -38,6 +38,7 @@ interface ListItem {
 type PanelDirection = 'vertical' | 'horizontal';
 type ElementAlignment = 'center' | 'left';
 type ElementType = 'text' | 'button' | 'list' | 'graph';
+type ModalResolver = (value: unknown) => void;
 
 // ============================================================================
 // GUIElement
@@ -139,6 +140,10 @@ export class GUIPanel {
   elements: GUIElement[] = [];
 
   constructor(
+    //FIXME: Anchor should be a getter/setter and removed from here.
+    //Because it makes "pre-baking" gui components unworkable... you
+    //might not know what, or how, your going to anchor it to when
+    //you make it..
     anchor: Point | GUIElement | SimObject,
     direction: PanelDirection,
     constraint: Constraint,
@@ -398,6 +403,13 @@ export class GUI {
   static margin: number = 5;
   static lineSpace: number = 1;
   static initialized: boolean = false;
+  static modalPanel: GUIPanel | undefined = undefined;
+  static modalResolver: ModalResolver | undefined = undefined;
+  static modalOwnsPause: boolean = false;
+  static modalOverlayEnabled: boolean = true;
+  static modalOverlayColor: string = 'rgba(0, 0, 0, 0.80)';
+  static getPaused: () => boolean = () => false;
+  static setPaused: (paused: boolean) => boolean = () => false;
 
   static initialize(
     
@@ -414,6 +426,56 @@ export class GUI {
     console.log('GUI initialized..');
   }
 
+  static configurePauseHandlers(
+    getPaused: () => boolean,
+    setPaused: (paused: boolean) => boolean
+  ): void {
+    GUI.getPaused = getPaused;
+    GUI.setPaused = setPaused;
+  }
+
+  static hasModal(): boolean {
+    return GUI.modalPanel !== undefined;
+  }
+
+  static getInteractivePanels(): GUIPanel[] {
+    if (GUI.modalPanel?.isVisible()) {
+      return [GUI.modalPanel];
+    }
+    return GUI.panels.filter((panel) => panel.isVisible());
+  }
+
+  static showModal(panel: GUIPanel, onResolve: ModalResolver): void {
+    if (GUI.modalPanel) {
+      throw new Error('Only one modal panel can be active at a time.');
+    }
+    GUI.modalOwnsPause = !GUI.getPaused();
+    GUI.modalPanel = panel;
+    GUI.modalResolver = onResolve;
+    panel.show();
+    GUI.setPaused(true);
+  }
+
+  static resolveModal(value: unknown): void {
+    if (!GUI.modalPanel) {
+      throw new Error('No active modal panel to resolve.');
+    }
+
+    const modalPanel = GUI.modalPanel;
+    const resolver = GUI.modalResolver;
+    const shouldResume = GUI.modalOwnsPause;
+
+    GUI.modalPanel = undefined;
+    GUI.modalResolver = undefined;
+    GUI.modalOwnsPause = false;
+
+    GUI.removePanel(modalPanel);
+    if (shouldResume) {
+      GUI.setPaused(false);
+    }
+    resolver?.(value);
+  }
+
   static isMouseIn(element: GUIElement): boolean {
     return (
       element.active &&
@@ -425,10 +487,27 @@ export class GUI {
   }
 
   static render(): void {
-    for (const p of this.panels) p.render();
+    for (const panel of this.panels) {
+      if (panel !== GUI.modalPanel) {
+        panel.render();
+      }
+    }
+
+    if (GUI.modalOverlayEnabled && GUI.modalPanel?.isVisible()) {
+      View.context.fillStyle = GUI.modalOverlayColor;
+      View.context.fillRect(0, 0, View.canvas.width, View.canvas.height);
+    }
+
+    GUI.modalPanel?.render();
   }
 
   static removePanel(panel: GUIPanel): void {
+    if (GUI.modalPanel === panel) {
+      GUI.modalPanel = undefined;
+      GUI.modalResolver = undefined;
+      GUI.modalOwnsPause = false;
+    }
+
     // Recursively remove panels anchored to elements in this panel
     for (const el of panel.elements) {
       for (const pnl of this.panels) {
