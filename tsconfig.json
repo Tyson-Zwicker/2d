@@ -13,6 +13,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["conv/**/*"],
+  "include": ["conv/**/*", "play"],
   "exclude": ["node_modules", "src", "origin"]
 }
