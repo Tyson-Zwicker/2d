@@ -9,7 +9,7 @@ import { RectBounds } from '../dist/geometry.js';
 
 let collisionBoxRadius = 10;
 let mapSize = 10000;
-let numObjects = Math.pow(2, 12);
+let numObjects = Math.pow(2, 7);
 for (let i = 0; i < numObjects; i++) {
   let obj = new SimObject('obj' + i, 'always');
   new Part('op' + i, Polygon.regular(3 + i, collisionBoxRadius, Mien.Yellow)).addTo(obj, { x: 0, y: 0 }, 0);
