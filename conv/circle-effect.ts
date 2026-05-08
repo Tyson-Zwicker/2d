@@ -19,6 +19,8 @@ export class CircleEffect implements Effect {
   endAngleRadians: number;
   life: number;
   id: number;
+  private _lastOpacity: number = -1;
+  private _cachedColor: string = '';
 
   constructor(
     anchor: EffectAnchor,
@@ -48,18 +50,21 @@ export class CircleEffect implements Effect {
   render(): boolean {
     const worldPosition = resolveEffectAnchor(this.anchor);
     const opacity = Math.floor(this.life * this.opacityScale);
-    const color = this.color + opacity.toString(16);
-    const screenPoint = Vec.add(
-      Vec.scale(Vec.sub(worldPosition, Camera), Camera.zoom),
-      View.screenCenter
-    );
+    if (opacity !== this._lastOpacity) {
+      this._cachedColor = this.color + opacity.toString(16);
+      this._lastOpacity = opacity;
+    }
+    const p: Point = { x: worldPosition.x, y: worldPosition.y };
+    Vec.subInPlace(p, Camera);
+    Vec.scaleInPlace(p, Camera.zoom);
+    Vec.addInPlace(p, View.screenCenter);
     const zoomedRadius = this.radiusNow * Camera.zoom;
 
-    View.context.fillStyle = color;
+    View.context.fillStyle = this._cachedColor;
     View.context.beginPath();
     View.context.ellipse(
-      screenPoint.x,
-      screenPoint.y,
+      p.x,
+      p.y,
       zoomedRadius,
       zoomedRadius,
       0,

@@ -13,6 +13,8 @@ export class ParticleEffect implements Effect {
   maxLife: number;
   opacityScale: number;
   life: number;
+  private _lastOpacity: number = -1;
+  private _cachedColor: string = '';
 
   constructor(
     anchor: EffectAnchor,
@@ -33,24 +35,27 @@ export class ParticleEffect implements Effect {
 
   render(): boolean {
     const anchorWorldPosition = resolveEffectAnchor(this.anchor);
-    const worldPosition = Vec.add(anchorWorldPosition, this.offset);
     const opacity = Math.floor(this.life * this.opacityScale);
-    const color = this.color + opacity.toString(16);
-    View.context.fillStyle = color;
+    if (opacity !== this._lastOpacity) {
+      this._cachedColor = this.color + opacity.toString(16);
+      this._lastOpacity = opacity;
+    }
+    View.context.fillStyle = this._cachedColor;
 
-    const screenPoint = Vec.add(
-      Vec.scale(Vec.sub(worldPosition, Camera), Camera.zoom),
-      View.screenCenter
-    );
+    const p: Point = { x: anchorWorldPosition.x + this.offset.x, y: anchorWorldPosition.y + this.offset.y };
+    Vec.subInPlace(p, Camera);
+    Vec.scaleInPlace(p, Camera.zoom);
+    Vec.addInPlace(p, View.screenCenter);
     View.context.fillRect(
-      screenPoint.x - this.thickness / 2,
-      screenPoint.y - this.thickness / 2,
+      p.x - this.thickness / 2,
+      p.y - this.thickness / 2,
       this.thickness,
       this.thickness
     );
 
     this.life -= Main.delta;
-    this.offset = Vec.add(this.offset, Vec.scale(this.velocity, Main.delta));
+    this.offset.x += this.velocity.x * Main.delta;
+    this.offset.y += this.velocity.y * Main.delta;
     const stillAlive = this.life > 0 && opacity > 0;
     return stillAlive;
   }

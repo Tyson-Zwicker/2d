@@ -11,6 +11,8 @@ export class LineEffect implements Effect {
   maxLife: number;
   opacityScale: number;
   life: number;
+  private _lastOpacity: number = -1;
+  private _cachedColor: string = '';
 
   constructor(
     startAnchor: EffectAnchor,
@@ -32,28 +34,29 @@ export class LineEffect implements Effect {
   render(): boolean {
     const worldStartPoint: Point = resolveEffectAnchor(this.startAnchor);
     const worldEndPoint: Point = resolveEffectAnchor(this.endAnchor);
-    const screenPoint0 = Vec.add(
-      Vec.scale(Vec.sub(worldStartPoint, Camera), Camera.zoom),
-      View.screenCenter
-    );
-    const screenPoint1 = Vec.add(
-      Vec.scale(Vec.sub(worldEndPoint, Camera), Camera.zoom),
-      View.screenCenter
-    );
     const opacity = Math.floor(this.life * this.opacityScale);
-    const color = this.color + opacity.toString(16);
-    const oldstroke = View.context.strokeStyle;
+    if (opacity !== this._lastOpacity) {
+      this._cachedColor = this.color + opacity.toString(16);
+      this._lastOpacity = opacity;
+    }
+    const p0: Point = { x: worldStartPoint.x, y: worldStartPoint.y };
+    Vec.subInPlace(p0, Camera);
+    Vec.scaleInPlace(p0, Camera.zoom);
+    Vec.addInPlace(p0, View.screenCenter);
+    const p1: Point = { x: worldEndPoint.x, y: worldEndPoint.y };
+    Vec.subInPlace(p1, Camera);
+    Vec.scaleInPlace(p1, Camera.zoom);
+    Vec.addInPlace(p1, View.screenCenter);
 
-    View.context.strokeStyle = color;
+    View.context.strokeStyle = this._cachedColor;
     View.context.lineWidth = this.thickness;
     View.context.beginPath();
-    View.context.moveTo(screenPoint0.x, screenPoint0.y);
-    View.context.lineTo(screenPoint1.x, screenPoint1.y);
+    View.context.moveTo(p0.x, p0.y);
+    View.context.lineTo(p1.x, p1.y);
     View.context.stroke();
 
     this.life -= Main.delta;
     const stillAlive = this.life > 0 && opacity > 0;
-    View.context.strokeStyle = oldstroke;
     return stillAlive;
   }
 }
