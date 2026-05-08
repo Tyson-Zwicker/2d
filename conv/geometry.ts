@@ -98,8 +98,8 @@ export class Vec {
   }
 
   static equal(p0: Point, p1: Point, fixed: number = 0): boolean {
-    return p0.x.toFixed(fixed) === p1.x.toFixed(fixed)
-      && p0.y.toFixed(fixed) === p1.y.toFixed(fixed);
+    const epsilon = fixed === 0 ? 0 : 0.5 * 10 ** -fixed;
+    return Math.abs(p0.x - p1.x) <= epsilon && Math.abs(p0.y - p1.y) <= epsilon;
   }
 
   static fromAngleAndMagnitude(θ: number, magnitude: number): Point {
@@ -283,7 +283,9 @@ export class RectBounds {
       throw new Error(`Invalid boundary (${x0},${y0},${x1},${y1})`);
     }
   }
-
+  trustedCreate (x0:number, y0:number, x1:number, y1:number){
+    return {x0,y0,x1,y1} as RectBounds;
+  }
   get width(): number {
     return this.x1 - this.x0;
   }
