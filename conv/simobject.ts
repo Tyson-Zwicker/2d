@@ -144,14 +144,14 @@ export class Part implements PartParent {
     for (const polygon of this.polygons) {
       const worldPolygon: WorldPolygon = { mien: polygon.mien, points: [] };
       for (const point of polygon.points) {
-        let p: Point = { x: point.x, y: point.y };
-        p = Vec.rotate(p, this.localRotation);
-        p = Vec.add(p, this.localPosition);
-        p = Vec.rotate(p, this.root.worldRotation);
-        p = Vec.add(p, this.root.worldPosition);
-        p = Vec.sub(p, Camera);
-        p = Vec.scale(p, Camera.zoom);
-        p = Vec.add(p, View.screenCenter);
+        const p: Point = { x: point.x, y: point.y };
+        Vec.rotateInPlace(p, this.localRotation);
+        Vec.addInPlace(p, this.localPosition);
+        Vec.rotateInPlace(p, this.root.worldRotation);
+        Vec.addInPlace(p, this.root.worldPosition);
+        Vec.subInPlace(p, Camera);
+        Vec.scaleInPlace(p, Camera.zoom);
+        Vec.addInPlace(p, View.screenCenter);
         worldPolygon.points.push(p);
       }
       worldPolygons.push(worldPolygon);
@@ -285,10 +285,8 @@ export class SimObject implements PartParent {
           Math.sin(this.worldRotation * Vec.radians) * this.speed * delta;
         this.worldRotation += this.rudder * delta;
       } else {
-        this.worldPosition = Vec.add(
-          this.worldPosition,
-          Vec.scale(this.velocity, delta)
-        );
+        this.worldPosition.x += this.velocity.x * delta;
+        this.worldPosition.y += this.velocity.y * delta;
         this.worldRotation = this.worldRotation + this.spin * delta;
       }
       if (this.body) {
@@ -337,20 +335,21 @@ export class SimObject implements PartParent {
             }
           }
 
+          const points = polygon.points;
+          if (points.length === 0) continue;
+
           View.context.fillStyle = fillStyle;
           View.context.strokeStyle = strokeStyle;
           View.context.lineWidth = lineWidth;
 
-          const path = new Path2D();
-          const points = polygon.points;
-          if (points.length === 0) continue;
-          path.moveTo(points[0].x, points[0].y);
+          View.context.beginPath();
+          View.context.moveTo(points[0].x, points[0].y);
           for (let i = 1; i < points.length; i++) {
-            path.lineTo(points[i].x, points[i].y);
+            View.context.lineTo(points[i].x, points[i].y);
           }
-          path.closePath();
-          View.context.fill(path);
-          View.context.stroke(path);
+          View.context.closePath();
+          View.context.fill();
+          View.context.stroke();
         }
       } catch (e) {
         const err = e as Error;
