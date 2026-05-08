@@ -18,6 +18,7 @@ export class Main {
   static fpsMillis: number = 0;
   static loopTime: number = 0;
   static collisions: Map<string, SimObject[]> = new Map();
+  private static readonly _scratchBounds: RectBounds = new RectBounds(0, 0, 1, 1);
 
   static {
     View.initialize();
@@ -111,24 +112,25 @@ export class Main {
   }
   static checkCollisions() {
     // Collisions
-    Main.collisions = new Map();
+    Main.collisions.clear();
     for (const simObject of Sim.dynamicObjects.values()) {
       if (simObject.collides) {
-        const bounds = new RectBounds(
-          simObject.worldPosition.x - simObject.radius,
-          simObject.worldPosition.y - simObject.radius,
-          simObject.worldPosition.x + simObject.radius,
-          simObject.worldPosition.y + simObject.radius
-        );
-        const dynamicCandidates = Sim.dynamicQuadtree.findInRange(bounds);
+        const sb = Main._scratchBounds;
+        const pos = simObject.worldPosition;
+        const r = simObject.radius;
+        sb.x0 = pos.x - r;
+        sb.y0 = pos.y - r;
+        sb.x1 = pos.x + r;
+        sb.y1 = pos.y + r;
+        const dynamicCandidates = Sim.dynamicQuadtree.findInRange(sb);
         for (const candidate of dynamicCandidates) {
           if (candidate.collides) {
-            const r = candidate.radius + simObject.radius;
+            const rc = candidate.radius + simObject.radius;
             const d = Math.hypot(
               candidate.position.x - simObject.position.x,
               candidate.position.y - simObject.position.y
             );
-            if (r <= d) {
+            if (rc <= d) {
               if (!Main.collisions.has(simObject.name)) {
                 Main.collisions.set(simObject.name, []);
               }
