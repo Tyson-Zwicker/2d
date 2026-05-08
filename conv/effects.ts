@@ -36,18 +36,14 @@ export class Effects {
   }
 
   static renderForeground(): void {
-    const survivors: Effect[] = [];
-    for (const effect of this.foreground) {
-      if (effect.render()) survivors.push(effect);
+    for (let i = this.foreground.length - 1; i >= 0; i--) {
+      if (!this.foreground[i].render()) this.foreground.splice(i, 1);
     }
-    this.foreground = survivors;
   }
 
   static renderBackground(): void {
-    const survivors: Effect[] = [];
-    for (const effect of this.background) {
-      if (effect.render()) survivors.push(effect);
+    for (let i = this.background.length - 1; i >= 0; i--) {
+      if (!this.background[i].render()) this.background.splice(i, 1);
     }
-    this.background = survivors;
   }
 }
