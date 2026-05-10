@@ -7,6 +7,7 @@ import { SimObject } from './simobject.js';
 
 export class QuadTree {
   bounds: RectBounds;
+  static _scratchBounds: RectBounds = new RectBounds (0,0,1,1);
   capacity: number;
   objects: SimObject[];
   divided: boolean;
@@ -81,13 +82,11 @@ export class QuadTree {
     if (!touchesThisBoundary) return found;
 
     for (const object of this.objects) {
-      const objectBoundary = new RectBounds(
-        object.position.x - object.radius,
-        object.position.y - object.radius,
-        object.position.x + object.radius,
-        object.position.y + object.radius
-      );
-      if (rectBounds.touches(objectBoundary)) {
+      const ox = object.position.x;
+      const oy = object.position.y;
+      const r = object.radius;
+      if (rectBounds.x0 <= ox + r && rectBounds.x1 >= ox - r &&
+          rectBounds.y0 <= oy + r && rectBounds.y1 >= oy - r) {
         found.push(object);
       }
     }
@@ -106,15 +105,14 @@ export class QuadTree {
     if (isNaN(object.radius)) {
       throw new Error(`Sim Object ${object.name} has bad radius: ${object.radius}`);
     }
-
-    const objectBoundary = new RectBounds(
+    QuadTree._scratchBounds.setWithTrust (
       object.position.x - object.radius,
       object.position.y - object.radius,
       object.position.x + object.radius,
       object.position.y + object.radius
     );
 
-    const objectTouchesThisBoundary = this.bounds.touches(objectBoundary);
+    const objectTouchesThisBoundary = this.bounds.touches(QuadTree._scratchBounds);
     if (!objectTouchesThisBoundary) return false;
 
     const tooBigToSplit = object.radius >= Math.min(this.bounds.width / 2, this.bounds.height / 2);

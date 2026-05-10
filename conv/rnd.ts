@@ -1,8 +1,14 @@
 import { Point, Vec, LineSeg, RectBounds } from './geometry.js';
 
-/**
- * Random number utilities
- */
+/* SUPER IMPORTANT 
+ * Every time you try to do a refactor on this Project, this is the place within the 
+ * Project you will discover all the weird interdependencies/assumptions/not-conventions/
+ * and errors made in the haste to make a test work.
+*/
+
+/* 
+* Random number utilities
+*/
 export class Rnd {
   static bool(): boolean {
     return Math.random() < 0.5;
@@ -67,6 +73,10 @@ export class Rnd {
     const a = Rnd.float(minAngle, maxAngle);
     const m = Rnd.float(minMag, maxMag);
     return Vec.fromAngleAndMagnitude(a, m);
+  }
+
+  static bound(x: number, y: number, w: number = 1, h: number = 1) {
+    return { x0: x - w, y0: y - h, x1: x + w, y1: y + h } as RectBounds;
   }
 
   static ray(

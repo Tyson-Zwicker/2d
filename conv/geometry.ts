@@ -283,8 +283,11 @@ export class RectBounds {
       throw new Error(`Invalid boundary (${x0},${y0},${x1},${y1})`);
     }
   }
-  trustedCreate (x0:number, y0:number, x1:number, y1:number){
-    return {x0,y0,x1,y1} as RectBounds;
+  static fromCenterAndSize(x: number, y: number, width: number, height: number) {
+    return { x0: x - width / 2, y0: y - height / 2, x1: x + width / 2, y1: y + height / 2 } as RectBounds;
+  }
+  setWithTrust(x0: number, y0: number, x1: number, y1: number) {
+    return { x0, y0, x1, y1 } as RectBounds;
   }
   get width(): number {
     return this.x1 - this.x0;
