@@ -1,5 +1,7 @@
 // Geometry Library - Unified TypeScript Module
 
+import type { SimObject } from './simobject.js';
+
 // ============================================================================
 // Interfaces
 // ============================================================================
@@ -144,6 +146,80 @@ export class Vec {
     delta = ((delta + Math.PI) % (2 * Math.PI)) - Math.PI;
     if (delta <= -Math.PI) delta += 2 * Math.PI;
     return delta / Vec.radians;
+  }
+
+  /**
+   * Calculate collision response for two SimObjects using elastic collision physics.
+   * @param objA First SimObject
+   * @param objB Second SimObject
+   * @param elasticity Coefficient of restitution (0=perfectly inelastic, 1=perfectly elastic)
+   * @returns Object containing new velocities and position corrections for both objects
+   */
+  static collisionResponse(
+    objA: SimObject,
+    objB: SimObject,
+    elasticity: number
+  ): {
+    velocityA: Point;
+    velocityB: Point;
+    correctionA: Point;
+    correctionB: Point;
+  } {
+    // Calculate collision normal (from A to B)
+    const delta = Vec.sub(objB.worldPosition, objA.worldPosition);
+    const distance = Vec.magnitude(delta);
+    
+    if (distance === 0) {
+      // Objects are at exact same position, apply small random separation
+      const randomAngle = Math.random() * 360;
+      const normal = Vec.fromAngleAndMagnitude(randomAngle, 1);
+      const overlap = objA.radius + objB.radius;
+      return {
+        velocityA: { x: objA.velocity.x, y: objA.velocity.y },
+        velocityB: { x: objB.velocity.x, y: objB.velocity.y },
+        correctionA: Vec.scale(normal, -overlap * (objB.mass / (objA.mass + objB.mass))),
+        correctionB: Vec.scale(normal, overlap * (objA.mass / (objA.mass + objB.mass))),
+      };
+    }
+
+    const normal = Vec.scale(delta, 1 / distance);
+    const tangent = Vec.perp(normal);
+
+    // Calculate overlap
+    const overlap = objA.radius + objB.radius - distance;
+
+    // Calculate position corrections (inversely proportional to mass)
+    const totalMass = objA.mass + objB.mass;
+    const correctionA = Vec.scale(normal, -overlap * (objB.mass / totalMass));
+    const correctionB = Vec.scale(normal, overlap * (objA.mass / totalMass));
+
+    // Project velocities onto normal and tangent
+    const vA_normal = Vec.dot(objA.velocity, normal);
+    const vA_tangent = Vec.dot(objA.velocity, tangent);
+    const vB_normal = Vec.dot(objB.velocity, normal);
+    const vB_tangent = Vec.dot(objB.velocity, tangent);
+
+    // Apply elastic collision formula for normal components
+    const vA_normal_new =
+      ((objA.mass - elasticity * objB.mass) * vA_normal +
+        objB.mass * (1 + elasticity) * vB_normal) /
+      totalMass;
+    const vB_normal_new =
+      ((objB.mass - elasticity * objA.mass) * vB_normal +
+        objA.mass * (1 + elasticity) * vA_normal) /
+      totalMass;
+
+    // Recombine normal and tangent components
+    const velocityA = Vec.add(
+      Vec.scale(normal, vA_normal_new),
+      Vec.scale(tangent, vA_tangent)
+    );
+    const velocityB = Vec.add(
+      Vec.scale(normal, vB_normal_new),
+      Vec.scale(tangent, vB_tangent)
+    );
+
+    return { velocityA, velocityB, correctionA, correctionB };
   }
 }
 

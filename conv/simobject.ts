@@ -195,6 +195,7 @@ export class SimObject implements PartParent {
   steerable: boolean = false;
   rudder: number = 0;
   speed: number = 0;
+  mass: number;
 
   // For QuadTree compatibility
   get position(): Point {
@@ -206,7 +207,7 @@ export class SimObject implements PartParent {
     return this.body?.parts ?? [];
   }
 
-  constructor(name: string, canMove: MoveState = 'always') {
+  constructor(name: string, canMove: MoveState = 'always', mass: number = 1) {
     if (!name || !SimObject.moveStates.includes(canMove)) {
       throw new Error(
         `Bad parameters: name [${name}] canMove [${canMove}] must be 'never', 'onscreen' or 'always.'`
@@ -214,6 +215,7 @@ export class SimObject implements PartParent {
     }
     this.name = name;
     this.canMove = canMove;
+    this.mass = mass;
   }
 
   finalize(): void {
