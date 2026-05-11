@@ -7,9 +7,57 @@ import { Effects } from '../dist/effects.js';
 import { LineEffect } from '../dist/line-effect.js';
 import { RectBounds, LineSeg, Vec } from '../dist/geometry.js';
 
-const BOUNDARY_SIZE = 520;
+const BOUNDARY_SIZE = 5020;
 const MAX_OCCLUDER_RADIUS = 130;
 const OCCLUDER_SIZE_SCALE = 0.2;
+const LOS_LINE_WIDTH = 4;
+const LOS_LINE_DURATION = 0.04;
+const BLOCKED_LINE_COLOR = '#ff3344';
+const VISIBLE_LINE_COLOR = '#33ff88';
+const NUM_DETECTORS = 1;
+const NUM_OCCLUDERS = 1000;
+const DETECTOR_RING_RADIUS = 340;
+const DETECTOR_RING_STEP = 170;
+
+const DETECTOR_TEMPLATES = [
+  {
+    name: 'los-detector-1',
+    sides: 3,
+    radius: 34,
+    mien: Mien.Green,
+    startPos: { x: -360, y: -140 },
+    velocity: { x: 118, y: 74 },
+    spin: 60,
+  },
+  {
+    name: 'los-detector-2',
+    sides: 4,
+    radius: 28,
+    mien: Mien.Yellow,
+    startPos: { x: -300, y: 180 },
+    velocity: { x: 104, y: -58 },
+    spin: -45,
+  },
+  {
+    name: 'los-detector-3',
+    sides: 6,
+    radius: 24,
+    mien: Mien.Magenta,
+    startPos: { x: -180, y: -280 },
+    velocity: { x: 86, y: 92 },
+    spin: 35,
+  },
+];
+
+const TARGET_CONFIG = {
+  name: 'los-target',
+  sides: 5,
+  radius: 30,
+  mien: Mien.Cyan,
+  startPos: { x: 320, y: 210 },
+  velocity: { x: -96, y: -68 },
+  spin: -50,
+};
 
 const EFFECTIVE_MAX_OCCLUDER_RADIUS = Math.round(
   MAX_OCCLUDER_RADIUS * OCCLUDER_SIZE_SCALE
@@ -18,21 +66,8 @@ const EFFECTIVE_MAX_OCCLUDER_RADIUS = Math.round(
 const QUERY_PADDING = EFFECTIVE_MAX_OCCLUDER_RADIUS + 40;
 const OCCLUDER_PLACEMENT_SCALE = BOUNDARY_SIZE * 0.9;
 
-const seeker = makeMover(
-  'los-seeker',
-  Polygon.regular(3, 34, Mien.Green),
-  { x: -360, y: -140 },
-  { x: 118, y: 74 },
-  60
-);
-
-const target = makeMover(
-  'los-target',
-  Polygon.regular(5, 30, Mien.Cyan),
-  { x: 320, y: 210 },
-  { x: -96, y: -68 },
-  -50
-);
+const detectors = buildDetectors(NUM_DETECTORS).map(makeMover);
+const target = makeMover(TARGET_CONFIG);
 
 const OCCLUDER_LAYOUT = [
   { nx: -0.78, ny: -0.66, size: 0.73, mien: Mien.Gray },
@@ -47,47 +82,105 @@ const OCCLUDER_LAYOUT = [
   { nx: -0.84, ny: 0.56, size: 0.69, mien: Mien.Gray },
 ];
 
-const occluders = OCCLUDER_LAYOUT.map((item, index) => ({
-  name: `los-occluder-${index + 1}`,
-  position: {
-    x: Math.round(item.nx * OCCLUDER_PLACEMENT_SCALE),
-    y: Math.round(item.ny * OCCLUDER_PLACEMENT_SCALE),
-  },
-  radius: Math.round(item.size * EFFECTIVE_MAX_OCCLUDER_RADIUS),
-  mien: item.mien,
-}));
+const occluders = buildOccluders(NUM_OCCLUDERS);
 
 for (const item of occluders) {
   makeOccluder(item.name, item.mien, item.radius, item.position);
 }
 
 Main.creatorsFunction = () => {
-  keepInBounds(seeker);
+  for (const detector of detectors) {
+    keepInBounds(detector);
+  }
   keepInBounds(target);
 
-  const state = evaluateLineOfSight(seeker, target);
-  if (state.blocker) {
-    Effects.addForeground(
-      new LineEffect(seeker, state.blocker.worldPosition, '#ff3344', 4, 0.04)
-    );
-  } else {
-    Effects.addForeground(
-      new LineEffect(seeker, target, '#33ff88', 4, 0.04)
-    );
+  for (const detector of detectors) {
+    const state = evaluateLineOfSight(detector, target);
+    if (state.blocker) {
+      Effects.addForeground(
+        new LineEffect(
+          detector,
+          state.blocker.worldPosition,
+          BLOCKED_LINE_COLOR,
+          LOS_LINE_WIDTH,
+          LOS_LINE_DURATION
+        )
+      );
+    } else {
+      Effects.addForeground(
+        new LineEffect(
+          detector,
+          target,
+          VISIBLE_LINE_COLOR,
+          LOS_LINE_WIDTH,
+          LOS_LINE_DURATION
+        )
+      );
+    }
   }
 };
 
 Main.run(60);
 
-function makeMover(name, polygon, startPos, velocity, spin) {
-  const obj = new SimObject(name, 'always');
-  const body = new Part(name + '-body', polygon);
+function makeMover(config) {
+  const obj = new SimObject(config.name, 'always');
+  const body = new Part(
+    config.name + '-body',
+    Polygon.regular(config.sides, config.radius, config.mien)
+  );
   body.addTo(obj, { x: 0, y: 0 }, 0);
-  obj.velocity = velocity;
-  obj.spin = spin;
+  obj.velocity = config.velocity;
+  obj.spin = config.spin;
   obj.finalize();
-  Sim.add(obj, startPos, 0);
+  Sim.add(obj, config.startPos, 0);
   return obj;
+}
+
+function buildDetectors(count) {
+  return Array.from({ length: count }, (_, index) => {
+    const template = DETECTOR_TEMPLATES[index % DETECTOR_TEMPLATES.length];
+    if (index < DETECTOR_TEMPLATES.length) {
+      return {
+        ...template,
+        startPos: { ...template.startPos },
+        velocity: { ...template.velocity },
+      };
+    }
+
+    const ringIndex = Math.floor(index / DETECTOR_TEMPLATES.length);
+    const angle = (index / count) * Math.PI * 2;
+    const radius = DETECTOR_RING_RADIUS + ringIndex * DETECTOR_RING_STEP;
+
+    return {
+      ...template,
+      name: `los-detector-${index + 1}`,
+      startPos: {
+        x: Math.round(Math.cos(angle) * radius),
+        y: Math.round(Math.sin(angle) * radius),
+      },
+      velocity: { ...template.velocity },
+    };
+  });
+}
+
+function buildOccluders(count) {
+  return Array.from({ length: count }, (_, index) => {
+    const layout = OCCLUDER_LAYOUT[index % OCCLUDER_LAYOUT.length];
+
+    return {
+      name: `los-occluder-${index + 1}`,
+      position: {
+        x: randomWorldCoordinate(),
+        y: randomWorldCoordinate(),
+      },
+      radius: Math.max(8, Math.round(layout.size * EFFECTIVE_MAX_OCCLUDER_RADIUS)),
+      mien: layout.mien,
+    };
+  });
+}
+
+function randomWorldCoordinate() {
+  return Math.round((Math.random() * 2 - 1) * OCCLUDER_PLACEMENT_SCALE);
 }
 
 function makeOccluder(name, mien, radius, position) {
