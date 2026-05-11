@@ -113,6 +113,7 @@ export class Main {
   static checkCollisions() {
     // Collisions
     Main.collisions.clear();
+    Sim.rebuildQuadTrees();
     for (const simObject of Sim.dynamicObjects.values()) {
       if (simObject.collides) {
         const sb = Main._scratchBounds;
@@ -124,13 +125,14 @@ export class Main {
         sb.y1 = pos.y + r;
         const dynamicCandidates = Sim.dynamicQuadtree.findInRange(sb);
         for (const candidate of dynamicCandidates) {
+          if (candidate === simObject) continue; // Skip self
           if (candidate.collides) {
             const rc = candidate.radius + simObject.radius;
             const d = Math.hypot(
               candidate.position.x - simObject.position.x,
               candidate.position.y - simObject.position.y
             );
-            if (rc <= d) {
+            if (d <= rc) {
               if (!Main.collisions.has(simObject.name)) {
                 Main.collisions.set(simObject.name, []);
               }

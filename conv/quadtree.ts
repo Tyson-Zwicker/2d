@@ -105,12 +105,10 @@ export class QuadTree {
     if (isNaN(object.radius)) {
       throw new Error(`Sim Object ${object.name} has bad radius: ${object.radius}`);
     }
-    QuadTree._scratchBounds.setWithTrust (
-      object.position.x - object.radius,
-      object.position.y - object.radius,
-      object.position.x + object.radius,
-      object.position.y + object.radius
-    );
+    QuadTree._scratchBounds.x0 = object.position.x - object.radius;
+    QuadTree._scratchBounds.y0 = object.position.y - object.radius;
+    QuadTree._scratchBounds.x1 = object.position.x + object.radius;
+    QuadTree._scratchBounds.y1 = object.position.y + object.radius;
 
     const objectTouchesThisBoundary = this.bounds.touches(QuadTree._scratchBounds);
     if (!objectTouchesThisBoundary) return false;
