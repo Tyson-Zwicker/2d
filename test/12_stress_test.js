@@ -21,9 +21,9 @@ const NUM_ONSCREEN  = 0;      // 'onscreen'-only movers
 const PARTS_PER_OBJ = 1;     // parts per dynamic object (1 root + extras)
 const MAP_SIZE      = 5000;  // world half-extent
 const BOUNCE_BOUNDS = 4000;  // objects bounce inside this radius
-const PARTICLES_PER_FRAME  = 1200;   // background particles added each frame
-const RADIALS_PER_FRAME    = 120;    // radial rings added each frame
-const LINES_PER_FRAME      = 120;    // line effects added each frame
+const PARTICLES_PER_FRAME  = 200;   // background particles added each frame
+const RADIALS_PER_FRAME    = 20;    // radial rings added each frame
+const LINES_PER_FRAME      = 20;    // line effects added each frame
 const ENABLE_COLLISIONS    = true; // give objects collision radii
 // ─────────────────────────────────────────────────────────────────────────────
 

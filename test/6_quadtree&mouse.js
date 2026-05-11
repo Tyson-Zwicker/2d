@@ -13,6 +13,8 @@ let numObjects = Math.pow(2, 7);
 for (let i = 0; i < numObjects; i++) {
   let obj = new SimObject('obj' + i, 'always');
   new Part('op' + i, Polygon.regular(3 + i, collisionBoxRadius, Mien.Yellow)).addTo(obj, { x: 0, y: 0 }, 0);
+  obj.collides = true;
+  
   obj.finalize();
   Sim.add(obj, { x: mapSize - Math.random() * 2 * mapSize, y: mapSize - Math.random() * 2 * mapSize }, 0);
 }
@@ -37,15 +39,15 @@ Main.creatorsFunction = () => {
   let searchTime = Date.now();
   let result = Sim.dynamicQuadtree.findInRange(wb);
   searchTime = Date.now() - searchTime;
-  console.log(searchTime, result.length);
-  /*Console log it if there is any...
+  
+  //Console log it if there is any...
   if (result.length>0){
-    //console.log ('-Collision Detected-');
+    console.log ('-Collision Detected-');
     for (let rCount = 0;rCount<result.length;rCount++){
-      //console.log (result[rCount]);
+      console.log (result[rCount]);
     }
-    //console.log (searchTime
+   console.log(searchTime, result.length);
   }
-  */
+  
 }
 Main.run(60);

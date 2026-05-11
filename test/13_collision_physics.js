@@ -8,9 +8,9 @@ import { Vec } from '../dist/geometry.js';
 
 // Configuration
 const ELASTICITY = 0.8; // 0=perfectly inelastic, 1=perfectly elastic
-const ARENA_SIZE = 600; // Confined space size
-const NUM_OBJECTS = 15;
-const MAX_VELOCITY = 150;
+const ARENA_SIZE = 50000; // Confined space size
+const NUM_OBJECTS = 4500;
+const MAX_VELOCITY = 300;
 
 // Create confined arena walls
 Camera.x = 0;
@@ -57,8 +57,8 @@ Main.creatorsFunction = () => {
   const gfx = View.context;
   
   // Convert world coords to screen coords
-  const topLeft = View.worldToScreen(-halfSize, -halfSize);
-  const bottomRight = View.worldToScreen(halfSize, halfSize);
+  const topLeft = View.worldToScreen({ x: -halfSize, y: -halfSize });
+  const bottomRight = View.worldToScreen({ x: halfSize, y: halfSize });
   const width = bottomRight.x - topLeft.x;
   const height = bottomRight.y - topLeft.y;
   
@@ -93,34 +93,37 @@ Main.creatorsFunction = () => {
     }
   }
   
-  // Handle object-to-object collisions
-  for (let i = 0; i < objects.length; i++) {
-    for (let j = i + 1; j < objects.length; j++) {
-      const objA = objects[i];
-      const objB = objects[j];
+  // Handle object-to-object collisions using quadtree-based detection
+  // Main.collisions is populated by Main.checkCollisions() in the main loop
+  const processedPairs = new Set(); // Track pairs to avoid double-processing
+  
+  for (const [objName, colliders] of Main.collisions) {
+    const objA = Sim.dynamicObjects.get(objName);
+    if (!objA) continue;
+    
+    for (const objB of colliders) {
+      // Create unique pair identifier (sorted to avoid duplicates)
+      const pairId = objA.name < objB.name 
+        ? `${objA.name}:${objB.name}` 
+        : `${objB.name}:${objA.name}`;
       
-      // Check if objects are colliding
-      const dx = objB.worldPosition.x - objA.worldPosition.x;
-      const dy = objB.worldPosition.y - objA.worldPosition.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const minDist = objA.radius + objB.radius;
+      if (processedPairs.has(pairId)) continue;
+      processedPairs.add(pairId);
       
-      if (distance < minDist) {
-        // Apply collision response
-        const response = Vec.collisionResponse(objA, objB, ELASTICITY);
-        
-        // Update velocities
-        objA.velocity.x = response.velocityA.x;
-        objA.velocity.y = response.velocityA.y;
-        objB.velocity.x = response.velocityB.x;
-        objB.velocity.y = response.velocityB.y;
-        
-        // Apply position corrections to separate objects
-        objA.worldPosition.x += response.correctionA.x;
-        objA.worldPosition.y += response.correctionA.y;
-        objB.worldPosition.x += response.correctionB.x;
-        objB.worldPosition.y += response.correctionB.y;
-      }
+      // Apply collision response
+      const response = Vec.collisionResponse(objA, objB, ELASTICITY);
+      
+      // Update velocities
+      objA.velocity.x = response.velocityA.x;
+      objA.velocity.y = response.velocityA.y;
+      objB.velocity.x = response.velocityB.x;
+      objB.velocity.y = response.velocityB.y;
+      
+      // Apply position corrections to separate objects
+      objA.worldPosition.x += response.correctionA.x;
+      objA.worldPosition.y += response.correctionA.y;
+      objB.worldPosition.x += response.correctionB.x;
+      objB.worldPosition.y += response.correctionB.y;
     }
   }
   
@@ -130,6 +133,13 @@ Main.creatorsFunction = () => {
   gfx.fillText(`Objects: ${NUM_OBJECTS}`, 10, 20);
   gfx.fillText(`Elasticity: ${ELASTICITY}`, 10, 40);
   gfx.fillText(`Arena: ${ARENA_SIZE}x${ARENA_SIZE}`, 10, 60);
+  
+  // Count total collisions
+  let collisionCount = 0;
+  for (const colliders of Main.collisions.values()) {
+    collisionCount += colliders.length;
+  }
+  gfx.fillText(`Collisions: ${collisionCount / 2}`, 10, 80);
   
   // Calculate total momentum and kinetic energy for display
   let totalMomentumX = 0;
@@ -143,8 +153,8 @@ Main.creatorsFunction = () => {
   }
   const totalMomentum = Math.sqrt(totalMomentumX ** 2 + totalMomentumY ** 2);
   
-  gfx.fillText(`Momentum: ${totalMomentum.toFixed(1)}`, 10, 80);
-  gfx.fillText(`Kinetic Energy: ${totalKE.toFixed(1)}`, 10, 100);
+  gfx.fillText(`Momentum: ${totalMomentum.toFixed(1)}`, 10, 100);
+  gfx.fillText(`Kinetic Energy: ${totalKE.toFixed(1)}`, 10, 120);
 };
 
 Main.run(60);
