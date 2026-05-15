@@ -8,8 +8,8 @@ import { Vec } from '../dist/geometry.js';
 
 // Configuration
 const ELASTICITY = 0.8; // 0=perfectly inelastic, 1=perfectly elastic
-const ARENA_SIZE = 50000; // Confined space size
-const NUM_OBJECTS = 4500;
+const ARENA_SIZE = 105000; // Confined space size
+const NUM_OBJECTS = 14500;
 const MAX_VELOCITY = 300;
 
 // Create confined arena walls
