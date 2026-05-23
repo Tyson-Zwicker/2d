@@ -1,13 +1,18 @@
 import { Point, RectBounds } from './geometry.js';
 import { SimObject } from './simobject.js';
 
+export interface CollisionPair {
+  objectA: SimObject;
+  objectB: SimObject;
+}
+
 // ============================================================================
 // QuadTree
 // ============================================================================
 
 export class QuadTree {
   bounds: RectBounds;
-  static _scratchBounds: RectBounds = new RectBounds (0,0,1,1);
+  static _scratchBounds: RectBounds = new RectBounds(0, 0, 1, 1);
   capacity: number;
   objects: SimObject[];
   divided: boolean;
@@ -86,7 +91,7 @@ export class QuadTree {
       const oy = object.position.y;
       const r = object.radius;
       if (rectBounds.x0 <= ox + r && rectBounds.x1 >= ox - r &&
-          rectBounds.y0 <= oy + r && rectBounds.y1 >= oy - r) {
+        rectBounds.y0 <= oy + r && rectBounds.y1 >= oy - r) {
         found.push(object);
       }
     }
@@ -99,6 +104,44 @@ export class QuadTree {
     }
 
     return found;
+  }
+
+  findCollisionPairs(): CollisionPair[] {
+    const collidableObjects = this.getCollidableObjects();
+    const pairs: CollisionPair[] = [];
+    const seenPairs = new Set<string>();
+
+    for (const object of collidableObjects) {
+      const bounds = new RectBounds(
+        object.position.x - object.radius,
+        object.position.y - object.radius,
+        object.position.x + object.radius,
+        object.position.y + object.radius
+      );
+      const candidates = this.findInRange(bounds);
+
+      for (const candidate of candidates) {
+        if (candidate === object || !candidate.collides) continue;
+
+        const pairId =
+          object.name < candidate.name
+            ? `${object.name}:${candidate.name}`
+            : `${candidate.name}:${object.name}`;
+        if (seenPairs.has(pairId)) continue;
+
+        const overlapDistance = object.radius + candidate.radius;
+        const distance = Math.hypot(
+          candidate.position.x - object.position.x,
+          candidate.position.y - object.position.y
+        );
+        if (distance > overlapDistance) continue;
+
+        seenPairs.add(pairId);
+        pairs.push({ objectA: object, objectB: candidate });
+      }
+    }
+
+    return pairs;
   }
 
   insert(object: SimObject): boolean {
@@ -159,5 +202,22 @@ export class QuadTree {
       this.capacity);
 
     this.divided = true;
+  }
+
+  private getCollidableObjects(found: SimObject[] = []): SimObject[] {
+    for (const object of this.objects) {
+      if (object.collides) {
+        found.push(object);
+      }
+    }
+
+    if (this.divided) {
+      this.northwest!.getCollidableObjects(found);
+      this.northeast!.getCollidableObjects(found);
+      this.southwest!.getCollidableObjects(found);
+      this.southeast!.getCollidableObjects(found);
+    }
+
+    return found;
   }
 }

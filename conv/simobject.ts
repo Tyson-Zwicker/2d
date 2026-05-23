@@ -80,7 +80,7 @@ export class Part implements PartParent {
 
   get worldPosition(): Point {
     if (!this.root) throw new Error('Part not attached to SimObject');
-    return Vec.add(this.root.worldPosition, this.localPosition);
+    return Vec.add(this.root.worldPosition, Vec.rotate(this.localPosition, this.root.worldRotation));
   }
 
   get worldRotation(): number {
@@ -295,6 +295,17 @@ export class SimObject implements PartParent {
         this.moveParts(this.body);
       }
     }
+  }
+
+  applyCollisionFrom(other: SimObject, velocity: Point, correction: Point): void {
+    if (other === this) {
+      throw new Error(`SimObject cannot apply a collision from itself: ${this.name}`);
+    }
+
+    this.velocity.x = velocity.x;
+    this.velocity.y = velocity.y;
+    this.worldPosition.x += correction.x;
+    this.worldPosition.y += correction.y;
   }
 
   private moveParts(part: Part): void {

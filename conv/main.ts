@@ -4,7 +4,6 @@ import { Events } from './events.js';
 import { Sim } from './sim.js';
 import { GUI } from './gui.js';
 import { SimObject } from './simobject.js';
-import { RectBounds } from './geometry.js';
 
 export class Main {
   static delta: number = 0;
@@ -17,8 +16,6 @@ export class Main {
   static pauseSim: boolean = false;
   static fpsMillis: number = 0;
   static loopTime: number = 0;
-  static collisions: Map<string, SimObject[]> = new Map();
-  private static readonly _scratchBounds: RectBounds = new RectBounds(0, 0, 1, 1);
 
   static {
     View.initialize();
@@ -108,40 +105,6 @@ export class Main {
       candidate.render();
     }
     Effects.renderForeground();
-    Main.checkCollisions();
-  }
-  static checkCollisions() {
-    // Collisions
-    Main.collisions.clear();
-    Sim.rebuildQuadTrees();
-    for (const simObject of Sim.dynamicObjects.values()) {
-      if (simObject.collides) {
-        const sb = Main._scratchBounds;
-        const pos = simObject.worldPosition;
-        const r = simObject.radius;
-        sb.x0 = pos.x - r;
-        sb.y0 = pos.y - r;
-        sb.x1 = pos.x + r;
-        sb.y1 = pos.y + r;
-        const dynamicCandidates = Sim.dynamicQuadtree.findInRange(sb);
-        for (const candidate of dynamicCandidates) {
-          if (candidate === simObject) continue; // Skip self
-          if (candidate.collides) {
-            const rc = candidate.radius + simObject.radius;
-            const d = Math.hypot(
-              candidate.position.x - simObject.position.x,
-              candidate.position.y - simObject.position.y
-            );
-            if (d <= rc) {
-              if (!Main.collisions.has(simObject.name)) {
-                Main.collisions.set(simObject.name, []);
-              }
-              Main.collisions.get(simObject.name)!.push(candidate);
-            }
-          }
-        }
-      }
-    }
   }
   static checkMouse(): void {
     let interactionOccured = false;

@@ -1,6 +1,6 @@
-import { Point, RectBounds } from './geometry.js';
+import { Point, RectBounds, Vec } from './geometry.js';
 import { SimObject } from './simobject.js';
-import { QuadTree } from './quadtree.js';
+import { CollisionPair, QuadTree } from './quadtree.js';
 
 export class Sim {
   static simObjects: Map<string, SimObject> = new Map();
@@ -20,6 +20,7 @@ export class Sim {
   static dynamicQuadtree: QuadTree = new QuadTree(
     new RectBounds(-500000, -500000, 500000, 500000)
   );
+  static dynamicCollisionPairs: CollisionPair[] = [];
 
   static add(obj: SimObject, position: Point, rotation: number = 0): void {
     if (typeof position.x !== 'number') {
@@ -87,5 +88,23 @@ export class Sim {
     for (const simObject of Sim.dynamicObjects.values()) {
       Sim.dynamicQuadtree.insert(simObject);
     }
+  }
+
+  static detectDynamicCollisions(): CollisionPair[] {
+    Sim.rebuildQuadTrees();
+    Sim.dynamicCollisionPairs = Sim.dynamicQuadtree.findCollisionPairs();
+    return Sim.dynamicCollisionPairs;
+  }
+
+  static resolveDynamicCollisions(elasticity: number): CollisionPair[] {
+    const collisionPairs = Sim.detectDynamicCollisions();
+
+    for (const { objectA, objectB } of collisionPairs) {
+      const response = Vec.collisionResponse(objectA, objectB, elasticity);
+      objectA.applyCollisionFrom(objectB, response.velocityA, response.correctionA);
+      objectB.applyCollisionFrom(objectA, response.velocityB, response.correctionB);
+    }
+
+    return collisionPairs;
   }
 }
