@@ -16,7 +16,7 @@ export class Main {
   static pauseSim: boolean = false;
   static fpsMillis: number = 0;
   static loopTime: number = 0;
-
+  
   static {
     View.initialize();
     GUI.initialize();
