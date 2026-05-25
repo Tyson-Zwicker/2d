@@ -297,6 +297,16 @@ export class SimObject implements PartParent {
     }
   }
 
+  applyForce(force: Point, delta: number): void {
+    if (this.canMove === 'never') return;
+    if (this.mass <= 0) {
+      throw new Error(`SimObject.applyForce requires positive mass: ${this.name}`);
+    }
+
+    this.velocity.x += (force.x / this.mass) * delta;
+    this.velocity.y += (force.y / this.mass) * delta;
+  }
+
   applyCollisionFrom(other: SimObject, velocity: Point, correction: Point): void {
     if (other === this) {
       throw new Error(`SimObject cannot apply a collision from itself: ${this.name}`);
