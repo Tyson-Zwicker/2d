@@ -4,12 +4,11 @@ import { SimObject, Part } from '../dist/simobject.js';
 import { Polygon } from '../dist/polygon.js';
 import { Mien } from '../dist/mien.js';
 import { View, Camera } from '../dist/view.js';
-import { Vec } from '../dist/geometry.js';
 
 // Configuration
 const ELASTICITY = 0.8; // 0=perfectly inelastic, 1=perfectly elastic
-const ARENA_SIZE = 105000; // Confined space size
-const NUM_OBJECTS = 14500;
+const ARENA_SIZE = 5000; // Confined space size
+const NUM_OBJECTS = 1500;
 const MAX_VELOCITY = 300;
 
 // Create confined arena walls
@@ -93,39 +92,8 @@ Main.creatorsFunction = () => {
     }
   }
   
-  // Handle object-to-object collisions using quadtree-based detection
-  // Main.collisions is populated by Main.checkCollisions() in the main loop
-  const processedPairs = new Set(); // Track pairs to avoid double-processing
-  
-  for (const [objName, colliders] of Main.collisions) {
-    const objA = Sim.dynamicObjects.get(objName);
-    if (!objA) continue;
-    
-    for (const objB of colliders) {
-      // Create unique pair identifier (sorted to avoid duplicates)
-      const pairId = objA.name < objB.name 
-        ? `${objA.name}:${objB.name}` 
-        : `${objB.name}:${objA.name}`;
-      
-      if (processedPairs.has(pairId)) continue;
-      processedPairs.add(pairId);
-      
-      // Apply collision response
-      const response = Vec.collisionResponse(objA, objB, ELASTICITY);
-      
-      // Update velocities
-      objA.velocity.x = response.velocityA.x;
-      objA.velocity.y = response.velocityA.y;
-      objB.velocity.x = response.velocityB.x;
-      objB.velocity.y = response.velocityB.y;
-      
-      // Apply position corrections to separate objects
-      objA.worldPosition.x += response.correctionA.x;
-      objA.worldPosition.y += response.correctionA.y;
-      objB.worldPosition.x += response.correctionB.x;
-      objB.worldPosition.y += response.correctionB.y;
-    }
-  }
+  // Resolve object-to-object collisions through the engine API.
+  const collisions = Sim.resolveDynamicCollisions(ELASTICITY);
   
   // Display info
   gfx.fillStyle = '#fff';
@@ -135,11 +103,7 @@ Main.creatorsFunction = () => {
   gfx.fillText(`Arena: ${ARENA_SIZE}x${ARENA_SIZE}`, 10, 60);
   
   // Count total collisions
-  let collisionCount = 0;
-  for (const colliders of Main.collisions.values()) {
-    collisionCount += colliders.length;
-  }
-  gfx.fillText(`Collisions: ${collisionCount / 2}`, 10, 80);
+  gfx.fillText(`Collisions: ${collisions.length}`, 10, 80);
   
   // Calculate total momentum and kinetic energy for display
   let totalMomentumX = 0;
