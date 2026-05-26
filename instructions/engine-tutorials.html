@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2D Engine Tutorials</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-2: #0d1a30;
+      --panel: rgba(12, 24, 44, 0.88);
+      --panel-2: rgba(18, 35, 61, 0.92);
+      --panel-3: rgba(24, 44, 75, 0.82);
+      --ink: #eef4ff;
+      --muted: #9db0cb;
+      --line: rgba(158, 184, 216, 0.2);
+      --accent: #7dd3fc;
+      --accent-2: #f4b860;
+      --accent-3: #8ef9f3;
+      --shadow: rgba(2, 8, 23, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI Variable", "Trebuchet MS", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.18), transparent 24%),
+        radial-gradient(circle at top right, rgba(244, 184, 96, 0.16), transparent 20%),
+        radial-gradient(circle at 50% 0%, rgba(142, 249, 243, 0.08), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-color: rgba(125, 211, 252, 0.4);
+      transition: color 160ms ease, text-decoration-color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+    }
+
+    a:hover {
+      color: var(--accent-2);
+      text-decoration-color: rgba(244, 184, 96, 0.55);
+    }
+
+    code {
+      font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+      color: var(--accent-3);
+      background: transparent;
+      border-radius: 6px;
+      padding: 0.1rem 0.3rem;
+    }
+
+    pre {
+      margin: 0;
+      overflow-x: auto;
+      padding: 1rem;
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .page {
+      width: calc(100vw - 2rem);
+      margin: 0 auto;
+      padding: 1.5rem 0 3.5rem;
+    }
+
+    header {
+      background:
+        linear-gradient(135deg, rgba(125, 211, 252, 0.12), rgba(13, 26, 48, 0.78)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 2rem;
+      margin: 1rem 0 1.5rem;
+      box-shadow: 0 24px 60px var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    header p {
+      margin: 0.5rem 0;
+      max-width: 70ch;
+      color: var(--muted);
+    }
+
+    .top-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .top-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.4rem;
+      text-decoration: none;
+      border: 1px solid rgba(125, 211, 252, 0.18);
+      border-radius: 999px;
+      padding: 0.55rem 0.9rem;
+      background: linear-gradient(180deg, rgba(125, 211, 252, 0.12), rgba(125, 211, 252, 0.05));
+      color: var(--ink);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .top-links a:hover {
+      background: linear-gradient(180deg, rgba(244, 184, 96, 0.18), rgba(244, 184, 96, 0.08));
+      color: var(--ink);
+      border-color: rgba(244, 184, 96, 0.3);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    aside {
+      position: sticky;
+      top: 1rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 1rem;
+      box-shadow: 0 20px 44px var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    aside h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    aside ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    aside li + li {
+      margin-top: 0.35rem;
+    }
+
+    main {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 1.25rem;
+      box-shadow: 0 20px 44px var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.45rem;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      color: var(--accent);
+      margin-bottom: 0.45rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.9rem;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .card h3,
+    .card h4 {
+      margin-top: 0;
+    }
+
+    .steps,
+    .concepts,
+    .links,
+    .tips {
+      padding-left: 1.2rem;
+      margin: 0.6rem 0 0;
+    }
+
+    .steps li + li,
+    .concepts li + li,
+    .links li + li,
+    .tips li + li {
+      margin-top: 0.4rem;
+    }
+
+    .snippet {
+      margin-top: 1rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>2D Engine Tutorials</h1>
+      <p>This companion guide turns the reference manual into concrete build sequences. It now also folds in the authored notes from <code>instructions/walkthrough/</code>, so the setup steps, first-object flow, part hierarchy patterns, GUI anchoring, and <code>Mien</code> customization live alongside the demo-backed tutorials.</p>
+      <div class="top-links">
+        <a href="./engine-manual.html">Open Class Reference</a>
+        <a href="../test/1_parts.js">View Object Demo</a>
+        <a href="../test/2_effects&amp;mouse.js">View Effects Demo</a>
+        <a href="../test/5_gui.js">View GUI Demo</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside>
+        <h2>Walkthroughs</h2>
+        <ul>
+          <li><a href="#overview">How To Use This Page</a></li>
+          <li><a href="#tutorial-setup">Set Up A Minimal Project</a></li>
+          <li><a href="#tutorial-simobject">Create Your First SimObject</a></li>
+          <li><a href="#tutorial-object">Build A Complex SimObject</a></li>
+          <li><a href="#tutorial-rotation">Spin Parts And Orbit Shapes</a></li>
+          <li><a href="#tutorial-effects">Add Per-Frame Effects</a></li>
+          <li><a href="#tutorial-gui">Build Panels, Buttons, and Lists</a></li>
+          <li><a href="#tutorial-mien">Customize Mien</a></li>
+        </ul>
+      </aside>
+
+      <main>
+        <section id="overview">
+          <h2>How To Use This Page</h2>
+          <p>Each tutorial shows one small task in engine order: define the data, assemble the runtime objects, register them with the engine, then start the loop with <a href="./engine-manual.html#main">Main</a>.</p>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Reference First</h3>
+              <p>Use <a href="./engine-manual.html#simobject">SimObject</a>, <a href="./engine-manual.html#part">Part</a>, <a href="./engine-manual.html#gui-panel">GUIPanel</a>, and the other linked manual entries when you want full constructor and method details.</p>
+            </div>
+            <div class="card">
+              <h3>Demo Grounding</h3>
+              <p>These walkthroughs are based on <a href="../test/1_parts.js">test/1_parts.js</a>, <a href="../test/2_effects&amp;mouse.js">test/2_effects&amp;mouse.js</a>, and <a href="../test/5_gui.js">test/5_gui.js</a>.</p>
+            </div>
+            <div class="card">
+              <h3>Typical Order</h3>
+              <p>Create objects, attach parts or UI, call <code>finalize()</code> where needed, insert into <a href="./engine-manual.html#sim">Sim</a>, then start <a href="./engine-manual.html#main">Main.run(...)</a>.</p>
+            </div>
+          </div>
+          <p class="muted">This page now incorporates the non-empty walkthrough notes for setup, first-run bootstrapping, complex part trees, spin/orbit behavior, GUI usage, and <code>Mien</code> styling. The markdown files <code>Moving the SimObject.md</code> and <code>An complex example.md</code> are currently empty, so there is no additional content derived from them yet.</p>
+        </section>
+
+        <section id="tutorial-setup">
+          <h2>Set Up A Minimal Project</h2>
+          <p>This is the smallest working shape described by the added walkthrough notes: an HTML host page, one module script, and a local server that serves the directory. The engine does not require a framework; it just needs a page that loads your module.</p>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Create a project directory that can serve static files.</li>
+            <li>Add an HTML file that loads your simulation script as a module.</li>
+            <li>Add a JavaScript or TypeScript entry file that imports <a href="./engine-manual.html#main">Main</a> and calls <code>Main.run(...)</code>.</li>
+            <li>Serve the directory over HTTP instead of opening the file directly from disk.</li>
+            <li>Use <code>fps = 0</code> when you want a single frame for debugging, or a positive value for a continuous loop.</li>
+          </ol>
+
+          <h3>Minimal Host Page</h3>
+          <div class="snippet">
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;title&gt;Engine Sandbox&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;script type="module" src="./test.js"&gt;&lt;/script&gt;
+&lt;/html&gt;</code></pre>
+          </div>
+
+          <h3>Minimal Entry File</h3>
+          <div class="snippet">
+<pre><code>import { Main } from '../dist/main.js';
+
+Main.run(60);</code></pre>
+          </div>
+
+          <h3>Serve It Locally</h3>
+          <ul class="tips">
+            <li>From the project directory, run <code>python3 -m http.server 8080</code> or any equivalent static file server.</li>
+            <li>Open the served page in a browser instead of relying on a file URL.</li>
+            <li>If the engine is not running, the background color acts as a reminder that the page is loaded but the simulation loop is idle.</li>
+          </ul>
+        </section>
+
+        <section id="tutorial-simobject">
+          <h2>Create Your First SimObject</h2>
+          <p>This is the direct bridge between the new walkthrough notes and the engine reference: build one polygon, wrap it in one <a href="./engine-manual.html#part">Part</a>, attach that part to a <a href="./engine-manual.html#simobject">SimObject</a>, then finalize and register it.</p>
+
+          <h3>Concepts In Play</h3>
+          <ul class="concepts">
+            <li><a href="./engine-manual.html#polygon">Polygon</a> defines the visible geometry.</li>
+            <li><a href="./engine-manual.html#part">Part</a> is the attachable unit that holds geometry and child parts.</li>
+            <li><a href="./engine-manual.html#simobject">SimObject</a> is the world object that owns the part tree.</li>
+            <li><a href="./engine-manual.html#sim">Sim</a> stores finalized objects in the simulation.</li>
+          </ul>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Create a polygon and choose a built-in or custom <a href="./engine-manual.html#mien">Mien</a>.</li>
+            <li>Create a <code>Part</code> around that polygon.</li>
+            <li>Create a uniquely named <code>SimObject</code> and choose its movement mode.</li>
+            <li>Attach the part to the object with <code>addTo(simObject, { x: 0, y: 0 })</code>.</li>
+            <li>Call <code>finalize()</code> before adding the object to <a href="./engine-manual.html#sim">Sim</a>.</li>
+            <li>Register it with <code>Sim.add(...)</code> and then start <code>Main.run(...)</code>.</li>
+          </ol>
+
+          <div class="snippet">
+<pre><code>import { Main } from '../dist/main.js';
+import { Sim } from '../dist/sim.js';
+import { SimObject, Part } from '../dist/simobject.js';
+import { Polygon } from '../dist/polygon.js';
+import { Mien } from '../dist/mien.js';
+
+const triangleObject = new SimObject('the-red-triangle', 'always');
+const trianglePolygon = Polygon.regular(3, 100, Mien.Red);
+const trianglePart = new Part('triangle', trianglePolygon);
+
+trianglePart.addTo(triangleObject, { x: 0, y: 0 });
+
+triangleObject.finalize();
+Sim.add(triangleObject, { x: 0, y: 0 }, 0);
+Main.run(60);</code></pre>
+          </div>
+
+          <h3>Why Finalize Matters</h3>
+          <ul class="tips">
+            <li><code>finalize()</code> is the handoff point where the engine discovers the full part tree and prepares the object for use.</li>
+            <li>The object name must be unique in <a href="./engine-manual.html#sim">Sim</a>; part names are mainly for debugging and do not need to be unique.</li>
+            <li>For a root part, the offset is usually <code>{ x: 0, y: 0 }</code>; non-zero root offsets are a special case, not the default pattern.</li>
+          </ul>
+        </section>
+
+        <section id="tutorial-object">
+          <h2>Build A Complex SimObject</h2>
+          <p class="muted">Based on <a href="../test/1_parts.js">test/1_parts.js</a>.</p>
+          <p>This pattern extends the first-object flow: a <a href="./engine-manual.html#simobject">SimObject</a> owns a tree of <a href="./engine-manual.html#part">Part</a> instances, and each part holds one or more <a href="./engine-manual.html#polygon">Polygon</a> shapes. Child parts inherit position and rotation from their parents, so offsets and local rotation become the main composition tools.</p>
+
+          <h3>Concepts In Play</h3>
+          <ul class="concepts">
+            <li><a href="./engine-manual.html#simobject">SimObject</a> is the top-level world entity that you add to <a href="./engine-manual.html#sim">Sim</a>.</li>
+            <li><a href="./engine-manual.html#part">Part</a> is the attachable body piece that forms a hierarchy.</li>
+            <li><a href="./engine-manual.html#polygon">Polygon</a> describes the geometry for each part.</li>
+            <li><a href="./engine-manual.html#mien">Mien</a> controls appearance and interaction-state colors.</li>
+          </ul>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Create a root <code>SimObject</code> and give it a unique name.</li>
+            <li>Build one or more polygons. In the demo, the base arrow shape is a manually defined point array, which also demonstrates that polygon point order controls how edges are connected.</li>
+            <li>Create a root <code>Part</code> and attach it directly to the object with <code>addTo(simObject, offset)</code>.</li>
+            <li>Create child parts by scaling or translating the base polygon, then attach them to earlier parts instead of the root.</li>
+            <li>Assign <code>spin</code> to any part that should animate independently.</li>
+            <li>Call <code>finalize()</code> on the object once the full part tree is assembled.</li>
+            <li>Insert the object into the world with <a href="./engine-manual.html#sim">Sim.add(...)</a>.</li>
+          </ol>
+
+          <div class="snippet">
+<pre><code>import { Main } from '../dist/main.js';
+import { Sim } from '../dist/sim.js';
+import { SimObject, Part } from '../dist/simobject.js';
+import { Polygon } from '../dist/polygon.js';
+import { Mien } from '../dist/mien.js';
+
+const ship = new SimObject('demo-ship', 'always');
+
+const hull = new Polygon([
+  { x: -50, y: -15 },
+  { x: 5, y: -15 },
+  { x: 5, y: -50 },
+  { x: 50, y: 0 },
+  { x: 5, y: 50 },
+  { x: 5, y: 15 },
+  { x: -50, y: 15 },
+], Mien.Green);
+
+const hullPart = new Part('hull', hull);
+hullPart.addTo(ship, { x: 0, y: 0 });
+
+const fin = Polygon.translate(Polygon.scale(hull, 0.5), { x: 25, y: 0 });
+fin.mien = Mien.Blue;
+
+const finPart = new Part('fin', fin);
+finPart.addTo(hullPart, { x: 50, y: 0 }, 0);
+
+hullPart.spin = 0.1;
+finPart.spin = -0.3;
+
+ship.finalize();
+Sim.add(ship, { x: 0, y: 0 }, 0);
+Main.run(60);</code></pre>
+          </div>
+
+          <h3>What The Demo Adds Beyond The Minimal Version</h3>
+          <ul class="tips">
+            <li>It chains several nested arrow parts so you can see inherited transforms clearly.</li>
+            <li>It uses an invisible <a href="./engine-manual.html#polygon">Polygon</a> with <a href="./engine-manual.html#mien">Mien.Transparent</a> as an anchor point for another orbiting part.</li>
+            <li>It randomizes spin values so multiple objects built from the same pattern do not move identically.</li>
+            <li>When a child part looks attached at the wrong place, check whether the offset includes both the parent reach and the child radius, not just one of them.</li>
+          </ul>
+
+          <h3>Relevant Files</h3>
+          <ul class="links">
+            <li><a href="../test/1_parts.js">Demo source: test/1_parts.js</a></li>
+            <li><a href="../conv/simobject.ts">Engine source: conv/simobject.ts</a></li>
+            <li><a href="../conv/polygon.ts">Engine source: conv/polygon.ts</a></li>
+            <li><a href="../conv/mien.ts">Engine source: conv/mien.ts</a></li>
+          </ul>
+        </section>
+
+        <section id="tutorial-rotation">
+          <h2>Spin Parts And Orbit Shapes</h2>
+          <p>The added walkthrough notes distinguish between three different effects that can look similar at first glance: object rotation, part spin, and an off-center polygon that makes a part appear to orbit its parent.</p>
+
+          <h3>Concepts In Play</h3>
+          <ul class="concepts">
+            <li><code>SimObject.spin</code> rotates the whole object in world space.</li>
+            <li><code>Part.spin</code> rotates a child part around its own axis while it stays attached to the parent hierarchy.</li>
+            <li><code>Polygon.translate(...)</code> can move a shape away from the part origin so the part appears to orbit when it spins.</li>
+          </ul>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Attach a child part to a parent with an offset if you want it rigidly mounted away from the parent center.</li>
+            <li>Set <code>part.spin</code> when you want the child to rotate on its own axis.</li>
+            <li>Translate the polygon itself before creating the part if you want the visible shape to sweep around the part origin.</li>
+            <li>Use the two patterns together when you want a nested mechanism that both rotates and appears to orbit.</li>
+          </ol>
+
+          <div class="snippet">
+<pre><code>import { Main } from '../dist/main.js';
+import { Sim } from '../dist/sim.js';
+import { SimObject, Part } from '../dist/simobject.js';
+import { Polygon } from '../dist/polygon.js';
+import { Mien } from '../dist/mien.js';
+
+const system = new SimObject('spin-demo', 'always');
+const star = new Part('star', Polygon.regular(18, 80, Mien.Yellow));
+star.addTo(system, { x: 0, y: 0 });
+
+const translatedPlanetShape = Polygon.translate(
+  Polygon.regular(10, 18, Mien.Blue),
+  { x: 180, y: 0 }
+);
+
+const planet = new Part('planet', translatedPlanetShape);
+planet.spin = 0.4;
+planet.addTo(star, { x: 0, y: 0 }, 0);
+
+const rigidMoon = new Part('moon', Polygon.regular(6, 10, Mien.Magenta));
+rigidMoon.spin = -4;
+rigidMoon.addTo(planet, { x: 30, y: 0 }, 0);
+
+system.finalize();
+Sim.add(system, { x: 0, y: 0 }, 0);
+Main.run(60);</code></pre>
+          </div>
+
+          <h3>What To Watch For</h3>
+          <ul class="tips">
+            <li>A translated polygon and a zero-offset attachment produce an orbiting visual without moving the part origin itself.</li>
+            <li>An attached child with a non-zero offset follows the parent transform rigidly unless you also give that child its own <code>spin</code>.</li>
+            <li>If a nested mechanism looks wrong, separate the problem into attachment offset, local rotation, and polygon translation instead of adjusting all three at once.</li>
+          </ul>
+        </section>
+
+        <section id="tutorial-effects">
+          <h2>Add Per-Frame Effects</h2>
+          <p class="muted">Based on <a href="../test/2_effects&amp;mouse.js">test/2_effects&amp;mouse.js</a>.</p>
+          <p>Effects in this engine are short-lived renderable objects that you push into <a href="./engine-manual.html#effects">Effects</a>. The normal pattern is to generate them inside <code>Main.creatorsFunction</code>, because that callback runs once per frame after the visible simulation objects are rendered.</p>
+
+          <h3>Concepts In Play</h3>
+          <ul class="concepts">
+            <li><a href="./engine-manual.html#effects">Effects</a> manages foreground and background effect arrays.</li>
+            <li><a href="./engine-manual.html#circle-effect">CircleEffect</a> draws a filled expanding disc or arc.</li>
+            <li><a href="./engine-manual.html#radial-effect">RadialEffect</a> draws an expanding ring.</li>
+            <li><a href="./engine-manual.html#line-effect">LineEffect</a> draws a temporary line between two anchors.</li>
+            <li><a href="./engine-manual.html#particle-effect">ParticleEffect</a> is useful for bursts and plumes.</li>
+            <li><a href="./engine-manual.html#view">View</a> is how the demo converts mouse coordinates into world space.</li>
+          </ul>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Create any simulation objects you want the effects to react to or connect with.</li>
+            <li>Assign a function to <code>Main.creatorsFunction</code>.</li>
+            <li>Inside that callback, create effects and add them with <code>Effects.addForeground(...)</code> or <code>Effects.addBackground(...)</code>.</li>
+            <li>For mouse-driven effects, use <code>View.screenToWorld(x, y)</code> so the effect spawns in world coordinates.</li>
+            <li>For bursts, use <code>ParticleEffect.generateGroup(...)</code> rather than creating every particle manually.</li>
+            <li>Let the engine remove expired effects automatically; their <code>render()</code> methods return <code>false</code> when finished.</li>
+          </ol>
+
+          <div class="snippet">
+<pre><code>import { Main } from '../dist/main.js';
+import { View } from '../dist/view.js';
+import { Effects } from '../dist/effects.js';
+import { CircleEffect } from '../dist/circle-effect.js';
+import { RadialEffect } from '../dist/radial-effect.js';
+import { LineEffect } from '../dist/line-effect.js';
+import { ParticleEffect } from '../dist/particle-effect.js';
+
+let lastBurst = 0;
+
+Main.creatorsFunction = () =&gt; {
+  const mouseWorld = View.screenToWorld(View.mouse.x, View.mouse.y);
+  Effects.addForeground(
+    new RadialEffect(mouseWorld, 5, 20, '#09f', 3, 0.4, 0, 360)
+  );
+
+  const now = Date.now();
+  if (now &gt; lastBurst + 500) {
+    lastBurst = now;
+    Effects.addBackground(
+      new CircleEffect({ x: -300, y: -300 }, 5, 300, '#f7f', 0.3)
+    );
+    Effects.addBackground(
+      ParticleEffect.generateGroup({ x: 0, y: -100 }, 90, 90, 25, 60, 2, '#f00', 20, 1, 4)
+    );
+  }
+};
+
+Main.run(60);</code></pre>
+          </div>
+
+          <h3>What The Demo Adds Beyond The Minimal Version</h3>
+          <ul class="tips">
+            <li>It also creates two moving <a href="./engine-manual.html#simobject">SimObject</a> instances and occasionally draws a <a href="./engine-manual.html#line-effect">LineEffect</a> between them.</li>
+            <li>It bounces those objects manually by clamping world position and flipping velocity when they leave the play area.</li>
+            <li>It uses both foreground and background effect layers so persistent world objects stay readable.</li>
+          </ul>
+
+          <h3>Relevant Files</h3>
+          <ul class="links">
+            <li><a href="../test/2_effects&amp;mouse.js">Demo source: test/2_effects&amp;mouse.js</a></li>
+            <li><a href="../conv/effects.ts">Engine source: conv/effects.ts</a></li>
+            <li><a href="../conv/circle-effect.ts">Engine source: conv/circle-effect.ts</a></li>
+            <li><a href="../conv/radial-effect.ts">Engine source: conv/radial-effect.ts</a></li>
+            <li><a href="../conv/line-effect.ts">Engine source: conv/line-effect.ts</a></li>
+            <li><a href="../conv/particle-effect.ts">Engine source: conv/particle-effect.ts</a></li>
+          </ul>
+        </section>
+
+        <section id="tutorial-gui">
+          <h2>Build Panels, Buttons, and Lists</h2>
+          <p class="muted">Based on <a href="../test/5_gui.js">test/5_gui.js</a>.</p>
+          <p>The GUI system is panel-based. You create a <a href="./engine-manual.html#gui-panel">GUIPanel</a>, then fill it with <a href="./engine-manual.html#gui-element">GUIElement</a> entries by calling <code>addText(...)</code>, <code>addButton(...)</code>, <code>addList(...)</code>, or <code>addGraph(...)</code>. Buttons can be attached to GUI elements or directly to world objects.</p>
+
+          <h3>Concepts In Play</h3>
+          <ul class="concepts">
+            <li><a href="./engine-manual.html#gui">GUI</a> maintains the panel registry and handles modal behavior.</li>
+            <li><a href="./engine-manual.html#gui-panel">GUIPanel</a> controls layout, anchoring, and visibility. A panel can be anchored to a screen point, a <code>GUIElement</code>, or a <a href="./engine-manual.html#simobject">SimObject</a>.</li>
+            <li><a href="./engine-manual.html#gui-element">GUIElement</a> stores one text/button/list/graph entry.</li>
+            <li><a href="./engine-manual.html#button">Button</a> handles click logic for both GUI and world objects.</li>
+            <li><a href="./engine-manual.html#events">Events</a> lets you poll GUI selections from per-frame logic.</li>
+          </ul>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Create a panel anchored to screen coordinates or to a world object.</li>
+            <li>Add text, buttons, and lists to the panel with the relevant helper methods.</li>
+            <li>For a list widget, pass an array of <code>{ textArray, value }</code> items.</li>
+            <li>Create a second panel anchored to a returned <a href="./engine-manual.html#gui-element">GUIElement</a> when you want a hanging or flyout panel.</li>
+            <li>For anchored world panels, create the <a href="./engine-manual.html#simobject">SimObject</a>, finalize it, and add it to <a href="./engine-manual.html#sim">Sim</a> first.</li>
+            <li>Use button callbacks to show or hide subpanels or object-attached panels.</li>
+            <li>Inside <code>Main.creatorsFunction</code>, query <a href="./engine-manual.html#events">Events</a> if you want frame-based reactions to GUI selections.</li>
+          </ol>
+
+          <div class="snippet">
+<pre><code>import { Main } from '../dist/main.js';
+import { GUIPanel } from '../dist/gui.js';
+import { Events } from '../dist/events.js';
+
+const panel = new GUIPanel({ x: 0, y: 50 }, 'vertical', { width: 200, height: 200 }, true);
+panel.addText(['Inventory'], 'left');
+panel.addButton(['Press Button'], 'center', 'button1', false, (data) =&gt; {
+  console.log('pressed value=' + data.value);
+});
+
+panel.addList(
+  ['Pick'],
+  'center',
+  [
+    { textArray: ['one'], value: 1 },
+    { textArray: ['two', 'with', 'lines'], value: 2 },
+    { textArray: ['third one!'], value: 3 },
+  ],
+  1,
+  'horizontal'
+);
+
+Main.creatorsFunction = () =&gt; {
+  const selections = Events.getEvents('listItemSelected');
+  for (const event of selections) {
+    console.log(event.value);
+  }
+};
+
+Main.run(60);</code></pre>
+          </div>
+
+          <h3>Anchored Panel Pattern</h3>
+          <div class="snippet">
+<pre><code>const rootPanel = new GUIPanel({ x: 20, y: 40 }, 'vertical', { width: 180, height: 40 });
+const menuButton = rootPanel.addButton(['More'], 'center', 'more', false, () =&gt; {
+  if (detailsPanel.isVisible()) detailsPanel.hide();
+  else detailsPanel.show();
+});
+
+const detailsPanel = new GUIPanel(menuButton, 'vertical', { width: 150, height: 32 }, false, false);
+detailsPanel.addText(['Extra controls'], 'left');</code></pre>
+          </div>
+
+          <h3>What The Demo Adds Beyond The Minimal Version</h3>
+          <ul class="tips">
+            <li>It creates a subpanel anchored to a text element, then toggles that subpanel with a button.</li>
+            <li>It also creates two world objects and attaches hidden panels to them, then uses <a href="./engine-manual.html#button">Button</a> instances bound directly to those objects.</li>
+            <li>That pattern is useful when you want a clickable world object to reveal contextual information or controls.</li>
+          </ul>
+
+          <h3>Relevant Files</h3>
+          <ul class="links">
+            <li><a href="../test/5_gui.js">Demo source: test/5_gui.js</a></li>
+            <li><a href="../conv/gui.ts">Engine source: conv/gui.ts</a></li>
+            <li><a href="../conv/button.ts">Engine source: conv/button.ts</a></li>
+            <li><a href="../conv/events.ts">Engine source: conv/events.ts</a></li>
+          </ul>
+        </section>
+
+        <section id="tutorial-mien">
+          <h2>Customize Mien</h2>
+          <p><a href="./engine-manual.html#mien">Mien</a> is the engine’s appearance bundle. It carries fill color, border color, text color, font settings, and border width, and it can override those values per mood so the same object renders differently when hovered, pressed, shadowed, or highlighted.</p>
+
+          <h3>Concepts In Play</h3>
+          <ul class="concepts">
+            <li><code>setColors(bg, border, text, mood?)</code> sets the base colors or one mood-specific override.</li>
+            <li><code>setFont(name, size, mood?)</code> changes font face and size.</li>
+            <li><code>setBorderWidth(width, mood?)</code> changes line thickness.</li>
+            <li>Built-in values like <code>Mien.Red</code>, <code>Mien.Blue</code>, and <code>Mien.Transparent</code> are good starting points when you only need a small tweak.</li>
+          </ul>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Create a new <code>Mien</code> if you want a reusable custom style, or start from a built-in one when you only need a preset color family.</li>
+            <li>Set the normal colors first so the object has a stable default appearance.</li>
+            <li>Add mood-specific overrides for states like <code>hovered</code>, <code>pressed</code>, <code>shadowed</code>, or <code>highlighted</code>.</li>
+            <li>Pass the <code>Mien</code> into polygons, GUI elements, or panels that should share the look.</li>
+          </ol>
+
+          <div class="snippet">
+<pre><code>import { Mien } from '../dist/mien.js';
+import { Polygon } from '../dist/polygon.js';
+
+const warning = new Mien('warning');
+warning.setColors('#321000', '#ffb347', '#fff4d6');
+warning.setColors('#5a2100', '#ffd27a', '#111111', 'hovered');
+warning.setColors('#f7d18b', '#fff4d6', '#111111', 'pressed');
+warning.setBorderWidth(2);
+warning.setFont('monospace', 16);
+
+const badge = Polygon.regular(6, 24, warning);</code></pre>
+          </div>
+
+          <h3>Practical Notes</h3>
+          <ul class="tips">
+            <li>Calling <code>setColors(..., 'normal')</code> updates both the explicit <code>normal</code> mood and the base appearance the other moods inherit from.</li>
+            <li><code>Mien.Transparent</code> is useful for invisible anchors and interaction geometry that should not draw visibly.</li>
+            <li>The same <code>Mien</code> ideas apply to both simulation geometry and GUI widgets, which keeps world objects and panels visually consistent.</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2D Engine Instruction Manual</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-2: #0d1a30;
+      --panel: rgba(12, 24, 44, 0.88);
+      --panel-2: rgba(18, 35, 61, 0.92);
+      --panel-3: rgba(24, 44, 75, 0.82);
+      --ink: #eef4ff;
+      --muted: #9db0cb;
+      --line: rgba(158, 184, 216, 0.2);
+      --accent: #7dd3fc;
+      --accent-2: #f4b860;
+      --accent-3: #8ef9f3;
+      --shadow: rgba(2, 8, 23, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI Variable", "Trebuchet MS", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.18), transparent 24%),
+        radial-gradient(circle at top right, rgba(244, 184, 96, 0.16), transparent 20%),
+        radial-gradient(circle at 50% 0%, rgba(142, 249, 243, 0.08), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-color: rgba(125, 211, 252, 0.4);
+      transition: color 160ms ease, text-decoration-color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+    }
+
+    a:hover {
+      color: var(--accent-2);
+      text-decoration-color: rgba(244, 184, 96, 0.55);
+    }
+
+    code {
+      font-family: "SFMono-Regular", "Cascadia Code", "Consolas", monospace;
+      color: var(--accent-3);
+      background: transparent;
+      border-radius: 6px;
+      padding: 0.1rem 0.3rem;
+    }
+
+    .page {
+      width: calc(100vw - 2rem);
+      margin: 0 auto;
+      padding: 1.5rem 0 3.5rem;
+    }
+
+    header {
+      background:
+        linear-gradient(135deg, rgba(125, 211, 252, 0.12), rgba(13, 26, 48, 0.78)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 2rem;
+      margin: 1rem 0 1.5rem;
+      box-shadow: 0 24px 60px var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    header p {
+      margin: 0.5rem 0;
+      max-width: 70ch;
+      color: var(--muted);
+    }
+
+    .header-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .header-links a,
+    .toolbar button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.4rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(125, 211, 252, 0.18);
+      background: linear-gradient(180deg, rgba(125, 211, 252, 0.12), rgba(125, 211, 252, 0.05));
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .header-links a:hover,
+    .toolbar button:hover {
+      background: linear-gradient(180deg, rgba(244, 184, 96, 0.18), rgba(244, 184, 96, 0.08));
+      color: var(--ink);
+      border-color: rgba(244, 184, 96, 0.3);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    aside {
+      position: sticky;
+      top: 1rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 1rem;
+      box-shadow: 0 20px 44px var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    aside h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    aside nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    aside nav li + li {
+      margin-top: 0.35rem;
+    }
+
+    aside nav .section-title {
+      margin-top: 0.9rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    main {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 1.25rem;
+      box-shadow: 0 20px 44px var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    section h2 {
+      margin-top: 0;
+      font-size: 1.45rem;
+      letter-spacing: -0.02em;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .demo-list,
+    .method-list,
+    .item-list,
+    .flow-list {
+      padding-left: 1.25rem;
+      margin: 0.6rem 0 0;
+    }
+
+    .demo-list li + li,
+    .method-list li + li,
+    .item-list li + li,
+    .flow-list li + li {
+      margin-top: 0.35rem;
+    }
+
+    .subsystem {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .subsystem h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .class-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .class-card h4 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .class-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .collapse-toggle {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 999px;
+      padding: 0.4rem 0.7rem;
+      font: inherit;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .collapse-toggle:hover {
+      color: var(--accent-2);
+      border-color: rgba(244, 184, 96, 0.38);
+      background: rgba(244, 184, 96, 0.08);
+    }
+
+    .class-card .source {
+      margin: 0.2rem 0 0.8rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .related {
+      margin: 0.75rem 0 0;
+      padding: 0.65rem 0.8rem;
+      background: var(--panel-2);
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-2);
+    }
+
+    .class-body {
+      display: block;
+    }
+
+    .class-card.is-collapsed .class-body {
+      display: none;
+    }
+
+    .label {
+      font-weight: 700;
+      color: var(--accent-2);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-top: 0.9rem;
+    }
+
+    .panel {
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.85rem;
+    }
+
+    .panel h5 {
+      margin: 0 0 0.55rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .panel p {
+      margin: 0;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 0.95rem;
+      padding: 0 0.25rem;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+      }
+
+      .split {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>2D Engine Instruction Manual</h1>
+      <p>This HTML reference is based on <code>instructions/engine-manual.md</code>. It documents the exported classes in <code>conv/</code>, describes each constructor, and lists public methods and accessors.</p>
+      <p><strong>Scope note:</strong> <code>Ecosystem</code> is intentionally excluded.</p>
+      <div class="header-links">
+        <a href="./engine-tutorials.html">Open Tutorial Walkthroughs</a>
+        <a href="#class-reference">Jump To Class Reference</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside>
+        <h2>Contents</h2>
+        <nav>
+          <ul>
+            <li><a href="#demo-map">Demo Map</a></li>
+            <li><a href="#engine-flow">Typical Engine Flow</a></li>
+            <li><a href="./engine-tutorials.html">Tutorial Walkthroughs</a></li>
+            <li class="section-title">Simulation</li>
+            <li><a href="#main">Main</a></li>
+            <li><a href="#sim">Sim</a></li>
+            <li><a href="#simobject">SimObject</a></li>
+            <li><a href="#part">Part</a></li>
+            <li><a href="#quadtree">QuadTree</a></li>
+            <li class="section-title">Rendering and Effects</li>
+            <li><a href="#view">View</a></li>
+            <li><a href="#camera">Camera</a></li>
+            <li><a href="#effects">Effects</a></li>
+            <li><a href="#circle-effect">CircleEffect</a></li>
+            <li><a href="#radial-effect">RadialEffect</a></li>
+            <li><a href="#line-effect">LineEffect</a></li>
+            <li><a href="#particle-effect">ParticleEffect</a></li>
+            <li><a href="#polygon">Polygon</a></li>
+            <li><a href="#mien">Mien</a></li>
+            <li class="section-title">GUI and Interaction</li>
+            <li><a href="#gui">GUI</a></li>
+            <li><a href="#gui-panel">GUIPanel</a></li>
+            <li><a href="#gui-element">GUIElement</a></li>
+            <li><a href="#button">Button</a></li>
+            <li><a href="#events">Events</a></li>
+            <li><a href="#text">Text</a></li>
+            <li class="section-title">Geometry and Utilities</li>
+            <li><a href="#vec">Vec</a></li>
+            <li><a href="#line-seg">LineSeg</a></li>
+            <li><a href="#rect-bounds">RectBounds</a></li>
+            <li><a href="#rnd">Rnd</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main>
+        <section id="demo-map">
+          <h2>Demo Map</h2>
+          <ul class="demo-list">
+            <li><a href="../test/1_parts.js">test/1_parts.js</a>: building <a href="#simobject">SimObject</a> hierarchies with <a href="#part">Part</a> and <a href="#polygon">Polygon</a></li>
+            <li><a href="../test/2_effects&amp;mouse.js">test/2_effects&amp;mouse.js</a>: <a href="#effects">Effects</a>, <a href="#circle-effect">CircleEffect</a>, <a href="#radial-effect">RadialEffect</a>, <a href="#line-effect">LineEffect</a>, and mouse interaction</li>
+            <li><a href="../test/4_button&amp;pan.js">test/4_button&amp;pan.js</a>: <a href="#button">Button</a>, <a href="#camera">Camera</a> panning, and object interaction</li>
+            <li><a href="../test/5_gui.js">test/5_gui.js</a>: <a href="#gui-panel">GUIPanel</a>, <a href="#gui-element">GUIElement</a>, anchored GUI, and object-attached panels</li>
+            <li><a href="../test/7_gui_mien_graph.js">test/7_gui_mien_graph.js</a>: <a href="#mien">Mien</a>, GUI styling, and graph widgets</li>
+            <li><a href="../test/8_anchored_effects.js">test/8_anchored_effects.js</a>: object-anchored effects and <a href="#line-effect">LineEffect</a></li>
+            <li><a href="../test/9_pause_gui.js">test/9_pause_gui.js</a> and <a href="../test/10_modal_gui.js">test/10_modal_gui.js</a>: GUI pause control and modal panels</li>
+            <li><a href="../test/11_line_of_sight.js">test/11_line_of_sight.js</a> through <a href="../test/16_moving_ping_line_of_sight.js">test/16_moving_ping_line_of_sight.js</a>: <a href="#line-seg">LineSeg</a>, <a href="#vec">Vec</a>, <a href="#rect-bounds">RectBounds</a>, <a href="#sim">Sim</a>, and effect usage</li>
+            <li><a href="../test/12_stress_test.js">test/12_stress_test.js</a>: large-scale object/effect usage and quadtree-backed queries</li>
+            <li><a href="../test/13_collision_physics.js">test/13_collision_physics.js</a>: collision response with <a href="#sim">Sim.resolveDynamicCollisions(...)</a></li>
+            <li><a href="../test/17_warship_duel.js">test/17_warship_duel.js</a> and <a href="../test/18_moving_warship_duel.js">test/18_moving_warship_duel.js</a>: steerable objects, forces, anchored effects, and projectile spawning</li>
+          </ul>
+        </section>
+
+        <section id="class-reference">
+          <h2>Class Reference</h2>
+          <div class="toolbar">
+            <button type="button" id="expand-all">Expand All Classes</button>
+            <button type="button" id="collapse-all">Collapse All Classes</button>
+          </div>
+
+          <div class="subsystem">
+            <h3>Simulation</h3>
+
+            <article class="class-card" id="main">
+              <div class="class-heading">
+                <h4>Main</h4>
+                <button type="button" class="collapse-toggle" aria-expanded="true">Collapse</button>
+              </div>
+              <div class="class-body">
+              <p class="source">Source: <code>conv/main.ts</code></p>
+              <p>Static main loop controller that ties together view clearing, simulation, effect rendering, GUI rendering, and mouse handling.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#view">View</a>, <a href="#camera">Camera</a>, <a href="#sim">Sim</a>, <a href="#effects">Effects</a>, <a href="#gui">GUI</a>, <a href="#events">Events</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>run(fps = 0)</code>: initializes loop state and starts the engine.</li>
+                    <li><code>loop(startTime?)</code>: runs one loop iteration and schedules the next frame.</li>
+                    <li><code>doWork()</code>: performs one frame of engine work.</li>
+                    <li><code>moveCameraAndSimObjects(dynamicOnScreen, staticOnScreen)</code>: updates camera motion and moves eligible objects.</li>
+                    <li><code>renderSimAndEffects(dynamicOnScreen, staticOnScreen)</code>: renders visible objects and both effect layers.</li>
+                    <li><code>checkMouse()</code>: routes mouse checks through GUI and clickable sim objects.</li>
+                    <li><code>showDelta()</code>: draws frame diagnostics.</li>
+                    <li><code>setPaused(paused)</code>: updates pause state.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Typical use</h5>
+                  <p>Set <code>Main.creatorsFunction</code> for per-frame game logic, then start the engine with <code>Main.run(fps)</code>.</p>
+                </div>
+              </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="sim">
+              <h4>Sim</h4>
+              <p class="source">Source: <code>conv/sim.ts</code></p>
+              <p>Static registry for all simulation objects plus quadtree maintenance and dynamic collision resolution.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#simobject">SimObject</a>, <a href="#quadtree">QuadTree</a>, <a href="#rect-bounds">RectBounds</a>, <a href="#vec">Vec</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>add(obj, position, rotation = 0)</code>: inserts a finalized <a href="#simobject">SimObject</a> into the simulation.</li>
+                    <li><code>get(name)</code>: returns a registered object by name.</li>
+                    <li><code>remove(name)</code>: removes an object from all registries.</li>
+                    <li><code>rebuildQuadTrees()</code>: rebuilds dynamic quadtree state and refreshes static state when needed.</li>
+                    <li><code>detectDynamicCollisions()</code>: returns overlapping dynamic collision pairs.</li>
+                    <li><code>resolveDynamicCollisions(elasticity)</code>: applies elastic collision response.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Objects must be finalized before insertion. Static and dynamic objects are stored in separate quadtrees.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="simobject">
+              <h4>SimObject</h4>
+              <p class="source">Source: <code>conv/simobject.ts</code></p>
+              <p>Top-level simulation entity that owns a hierarchy of <a href="#part">Part</a> instances and carries movement, collision, and interaction state.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#part">Part</a>, <a href="#polygon">Polygon</a>, <a href="#button">Button</a>, <a href="#sim">Sim</a>, <a href="#vec">Vec</a>, <a href="#mien">Mien</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <ul class="item-list">
+                    <li><code>new SimObject(name, canMove = 'always', mass = 1)</code></li>
+                    <li><code>name</code>: unique object name in <a href="#sim">Sim</a></li>
+                    <li><code>canMove</code>: <code>'always'</code>, <code>'never'</code>, or <code>'onscreen'</code></li>
+                    <li><code>mass</code>: used by <code>applyForce(...)</code> and collision response</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>localPosition</code>: fixed root-local origin</li>
+                    <li><code>localRotation</code>: fixed root-local rotation</li>
+                    <li><code>position</code>: alias for <code>worldPosition</code></li>
+                    <li><code>parts</code>: direct child parts of the root body</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>finalize()</code>: caches part layout and marks the object ready for <a href="#sim">Sim.add(...)</a>.</li>
+                    <li><code>getPart(name)</code>: returns a named part or <code>undefined</code>.</li>
+                    <li><code>isMouseIn(simObject)</code>: static helper for radius-based mouse hit testing.</li>
+                    <li><code>move(delta)</code>: advances position and rotation.</li>
+                    <li><code>applyForce(force, delta)</code>: changes velocity using mass-scaled acceleration.</li>
+                    <li><code>applyCollisionFrom(other, velocity, correction)</code>: applies resolved collision state.</li>
+                    <li><code>render()</code>: renders every finalized part.</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="part">
+              <h4>Part</h4>
+              <p class="source">Source: <code>conv/simobject.ts</code></p>
+              <p>Single renderable body segment within a <a href="#simobject">SimObject</a> hierarchy. Parts can have child parts and local spin.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#simobject">SimObject</a>, <a href="#polygon">Polygon</a>, <a href="#button">Button</a>, <a href="#camera">Camera</a>, <a href="#view">View</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <ul class="item-list">
+                    <li><code>new Part(name, polygons)</code></li>
+                    <li><code>name</code>: part identifier</li>
+                    <li><code>polygons</code>: one <a href="#polygon">Polygon</a> or an array of polygons</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>worldPosition</code>: part position in world space</li>
+                    <li><code>worldRotation</code>: part rotation in world space</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>clone()</code>: returns a new part with the same name and polygon references.</li>
+                    <li><code>calculateLocals()</code>: recomputes local position and rotation.</li>
+                    <li><code>addTo(parent, offset, rotation = 0, depthModifier = 0)</code>: attaches the part to a parent.</li>
+                    <li><code>get(name)</code>: recursively finds a child part.</li>
+                    <li><code>getWorldPolygons()</code>: converts polygon points into screen-ready coordinates.</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="quadtree">
+              <h4>QuadTree</h4>
+              <p class="source">Source: <code>conv/quadtree.ts</code></p>
+              <p>Spatial index used for visibility queries and dynamic collision pair generation.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#simobject">SimObject</a>, <a href="#rect-bounds">RectBounds</a>, <a href="#sim">Sim</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <ul class="item-list">
+                    <li><code>new QuadTree(bounds, capacity = 4)</code></li>
+                    <li><code>bounds</code>: world-space <a href="#rect-bounds">RectBounds</a></li>
+                    <li><code>capacity</code>: number of objects allowed before subdivision</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>clear()</code>: empties the node and releases children.</li>
+                    <li><code>init(bounds, capacity)</code>: reinitializes the node.</li>
+                    <li><code>findInRange(rectBounds, found = [])</code>: returns objects overlapping the search area.</li>
+                    <li><code>findCollisionPairs()</code>: returns unique overlapping collidable pairs.</li>
+                    <li><code>insert(object)</code>: inserts a <a href="#simobject">SimObject</a>.</li>
+                    <li><code>subdivide()</code>: creates child quadrants.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Dynamic and static simulation registries each maintain their own quadtree in <a href="#sim">Sim</a>.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="subsystem">
+            <h3>Rendering and Effects</h3>
+
+            <article class="class-card" id="view">
+              <h4>View</h4>
+              <p class="source">Source: <code>conv/view.ts</code></p>
+              <p>Static canvas, mouse, and world/screen coordinate conversion layer.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#camera">Camera</a>, <a href="#simobject">SimObject</a>, <a href="#button">Button</a>, <a href="#gui">GUI</a>, <a href="#text">Text</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>initialize()</code>: creates the canvas and binds DOM event handlers.</li>
+                    <li><code>screenToWorld(x, y)</code>: converts screen coordinates to world coordinates.</li>
+                    <li><code>mouseToWorld()</code>: converts current mouse position to world coordinates.</li>
+                    <li><code>worldToScreen(w)</code>: converts a world point to screen coordinates.</li>
+                    <li><code>canSee(point, radius?)</code>: checks visibility against camera bounds.</li>
+                    <li><code>clear()</code>: fills the canvas with the current background color.</li>
+                    <li><code>handleCameraDrag(mouseInteractedWithSomething)</code>: manages drag-to-pan behavior.</li>
+                    <li><code>cancelDrag()</code>: clears drag state.</li>
+                    <li><code>resizeCanvas()</code>: updates canvas size and screen center.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p><a href="#camera">Camera</a> and <a href="#view">View</a> are tightly coupled and share coordinate transforms.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="camera">
+              <h4>Camera</h4>
+              <p class="source">Source: <code>conv/view.ts</code></p>
+              <p>Static camera controller for world position, zoom, anchoring, and animated pans.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#view">View</a>, <a href="#simobject">SimObject</a>, <a href="#rect-bounds">RectBounds</a>, <a href="#main">Main</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>zoom</code>: current zoom level</li>
+                    <li><code>zoomFactor</code>: wheel-zoom divisor</li>
+                    <li><code>x</code>, <code>y</code>: camera center in world space</li>
+                    <li><code>cameraBounds</code>: current visible world rectangle</li>
+                    <li><code>canMove</code>: <code>false</code> while anchored or panning</li>
+                    <li><code>isPanning</code>: <code>true</code> during pan animation</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>setCameraBounds()</code>: recomputes the visible world bounds.</li>
+                    <li><code>anchorTo(simObject)</code>: locks the camera to a point-like object.</li>
+                    <li><code>freeAnchor()</code>: removes the anchor and stops panning.</li>
+                    <li><code>panTo(x, y, zoom?)</code>: animates the camera toward a target.</li>
+                    <li><code>move()</code>: advances the current pan animation.</li>
+                    <li><code>moveToUpperLeftScreen()</code>: pans toward the current upper-left screen corner.</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="effects">
+              <h4>Effects</h4>
+              <p class="source">Source: <code>conv/effects.ts</code></p>
+              <p>Static container for transient visual effects.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#circle-effect">CircleEffect</a>, <a href="#radial-effect">RadialEffect</a>, <a href="#line-effect">LineEffect</a>, <a href="#particle-effect">ParticleEffect</a>, <a href="#main">Main</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>addForeground(effect)</code>: adds one effect or an array of effects to the foreground layer.</li>
+                    <li><code>addBackground(effect)</code>: adds one effect or an array of effects to the background layer.</li>
+                    <li><code>renderForeground()</code>: renders active foreground effects and removes expired ones.</li>
+                    <li><code>renderBackground()</code>: renders active background effects and removes expired ones.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Effects are short-lived renderable objects whose <code>render()</code> method returns <code>true</code> while they remain active.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="circle-effect">
+              <h4>CircleEffect</h4>
+              <p class="source">Source: <code>conv/circle-effect.ts</code></p>
+              <p>Filled expanding circle or arc effect rendered in the background or foreground effect layer.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#effects">Effects</a>, <a href="#simobject">SimObject</a>, <a href="#view">View</a>, <a href="#camera">Camera</a>, <a href="#main">Main</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <ul class="item-list">
+                    <li><code>new CircleEffect(anchor, initialRadius, expansionRate, color, durationInSeconds, startAngle?, endAngle?)</code></li>
+                    <li><code>anchor</code>: world point or <a href="#simobject">SimObject</a></li>
+                    <li><code>initialRadius</code>: starting radius in world units</li>
+                    <li><code>expansionRate</code>: radius growth per second</li>
+                    <li><code>color</code>: base CSS color string</li>
+                    <li><code>durationInSeconds</code>: total lifetime</li>
+                    <li><code>startAngle</code>, <code>endAngle</code>: optional arc limits in degrees</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>render()</code>: draws one frame, advances lifetime, and reports whether the effect should remain active.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>When the anchor is a <a href="#simobject">SimObject</a>, the effect follows the object while it lives.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="radial-effect">
+              <h4>RadialEffect</h4>
+              <p class="source">Source: <code>conv/radial-effect.ts</code></p>
+              <p>Expanding stroked circle or arc effect.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#effects">Effects</a>, <a href="#circle-effect">CircleEffect</a>, <a href="#simobject">SimObject</a>, <a href="#main">Main</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p><code>new RadialEffect(anchor, initialRadius, expansionRate, color, thickness, durationInSeconds, startAngle?, endAngle?)</code></p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>render()</code>: draws one frame, expands the radius, fades the stroke, and returns <code>true</code> while active.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Use this when you want an outline ring instead of the filled disc produced by <a href="#circle-effect">CircleEffect</a>.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="line-effect">
+              <h4>LineEffect</h4>
+              <p class="source">Source: <code>conv/line-effect.ts</code></p>
+              <p>Transient line drawn between two points or two moving objects.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#effects">Effects</a>, <a href="#simobject">SimObject</a>, <a href="#view">View</a>, <a href="#camera">Camera</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p><code>new LineEffect(startAnchor, endAnchor, color, thickness, durationInSeconds)</code></p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>render()</code>: draws one frame, decreases lifetime, and returns <code>true</code> while active.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Anchors can be points or <a href="#simobject">SimObject</a> instances, so the line can follow moving objects.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="particle-effect">
+              <h4>ParticleEffect</h4>
+              <p class="source">Source: <code>conv/particle-effect.ts</code></p>
+              <p>Small square particle that drifts with its own velocity while staying anchored to a point or object origin.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#effects">Effects</a>, <a href="#simobject">SimObject</a>, <a href="#rnd">Rnd</a>, <a href="#vec">Vec</a>, <a href="#main">Main</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p><code>new ParticleEffect(anchor, velocity, color, thickness, durationInSeconds)</code></p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>render()</code>: draws one particle frame, advances offset and lifetime, and returns <code>true</code> while active.</li>
+                    <li><code>generateGroup(origin, angle, angleSpan, velMin, velMax, thickness, color, groupSize, durMin, durMax)</code>: creates randomized particle bursts.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p><code>generateGroup(...)</code> is the easiest way to build plume and impact effects.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="polygon">
+              <h4>Polygon</h4>
+              <p class="source">Source: <code>conv/polygon.ts</code></p>
+              <p>Basic polygon geometry plus helpers for generating and transforming shapes.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#part">Part</a>, <a href="#mien">Mien</a>, <a href="#vec">Vec</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <ul class="item-list">
+                    <li><code>new Polygon(points, mien = Mien.Gray)</code></li>
+                    <li><code>points</code>: polygon vertices in local space</li>
+                    <li><code>mien</code>: render style palette</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>fromArray(points, mien = Mien.Gray)</code>: builds a polygon from numeric coordinates.</li>
+                    <li><code>translate(polygon, vector)</code>: returns a translated copy.</li>
+                    <li><code>flipVertical(polygon)</code>: returns a vertically mirrored copy.</li>
+                    <li><code>flipHorizontal(polygon)</code>: returns a horizontally mirrored copy.</li>
+                    <li><code>scale(polygon, scale)</code>: returns a scaled copy.</li>
+                    <li><code>rotate(polygon, angle)</code>: returns a rotated copy.</li>
+                    <li><code>regular(sides, radius, mien = Mien.Gray)</code>: builds a regular polygon centered at the origin.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Most demos use <code>Polygon.regular(...)</code> for quick bodies, then attach the result to a <a href="#part">Part</a>.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="mien">
+              <h4>Mien</h4>
+              <p class="source">Source: <code>conv/mien.ts</code></p>
+              <p>Style palette for polygons and GUI widgets, including mood variants for hover, pressed, shadowed, and highlighted states.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#polygon">Polygon</a>, <a href="#simobject">SimObject</a>, <a href="#part">Part</a>, <a href="#gui">GUI</a>, <a href="#gui-panel">GUIPanel</a>, <a href="#gui-element">GUIElement</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p><code>new Mien(name?)</code></p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>setFont(name, size?, mood?)</code>: sets font family and size.</li>
+                    <li><code>setColors(bg, border, text, mood?)</code>: sets colors for the base style or a mood override.</li>
+                    <li><code>setBorderWidth(width, mood?)</code>: sets border width.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>normal</code>, <code>hovered</code>, <code>pressed</code>, <code>shadowed</code>, <code>highlighted</code></li>
+                    <li>Preset palettes: <code>Red</code>, <code>Green</code>, <code>Blue</code>, <code>Gray</code>, <code>Yellow</code>, <code>Cyan</code>, <code>Magenta</code>, <code>Transparent</code></li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="subsystem">
+            <h3>GUI and Interaction</h3>
+
+            <article class="class-card" id="gui">
+              <h4>GUI</h4>
+              <p class="source">Source: <code>conv/gui.ts</code></p>
+              <p>Static registry and renderer for all GUI panels and elements.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#gui-panel">GUIPanel</a>, <a href="#gui-element">GUIElement</a>, <a href="#button">Button</a>, <a href="#mien">Mien</a>, <a href="#view">View</a>, <a href="#main">Main</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>initialize(lineSpace = 1, margin = 3, mien = Mien.Green)</code>: resets GUI state.</li>
+                    <li><code>configurePauseHandlers(getPaused, setPaused)</code>: hooks modal behavior into pause state.</li>
+                    <li><code>hasModal()</code>: reports whether a modal panel is active.</li>
+                    <li><code>getInteractivePanels()</code>: returns visible panels that should receive mouse interaction.</li>
+                    <li><code>showModal(panel, onResolve)</code>: displays a modal panel and optionally pauses the simulation.</li>
+                    <li><code>resolveModal(value)</code>: closes the active modal and resolves it.</li>
+                    <li><code>isMouseIn(element)</code>: checks whether the mouse is inside a GUI element's bounds.</li>
+                    <li><code>render()</code>: renders non-modal panels, overlay, and modal panel.</li>
+                    <li><code>removePanel(panel)</code>: removes a panel and dependent subpanels.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Modal support is demonstrated in <a href="../test/10_modal_gui.js">test/10_modal_gui.js</a>.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="gui-panel">
+              <h4>GUIPanel</h4>
+              <p class="source">Source: <code>conv/gui.ts</code></p>
+              <p>Container that lays out <a href="#gui-element">GUIElement</a> instances vertically or horizontally and may be anchored to screen space, another GUI element, or a <a href="#simobject">SimObject</a>.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#gui">GUI</a>, <a href="#gui-element">GUIElement</a>, <a href="#button">Button</a>, <a href="#mien">Mien</a>, <a href="#simobject">SimObject</a>, <a href="#view">View</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <ul class="item-list">
+                    <li><code>new GUIPanel(anchor, direction, constraint, flex = false, visible = true, mien?)</code></li>
+                    <li><code>anchor</code>: screen point, <a href="#gui-element">GUIElement</a>, or <a href="#simobject">SimObject</a></li>
+                    <li><code>direction</code>: <code>'vertical'</code> or <code>'horizontal'</code></li>
+                    <li><code>constraint</code>: base element size <code>{ width, height }</code></li>
+                    <li><code>flex</code>: allows content-sized layout in the layout direction</li>
+                    <li><code>visible</code>: initial visibility</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>position</code>: current anchor position in screen coordinates</li>
+                  </ul>
+                  <h5 style="margin-top:0.8rem;">Methods</h5>
+                  <ul class="method-list">
+                    <li><code>show()</code>, <code>isVisible()</code>, <code>hide()</code></li>
+                    <li><code>drawConnector(corner, size, direction)</code></li>
+                    <li><code>render()</code></li>
+                    <li><code>addText(...)</code>, <code>addButton(...)</code>, <code>addList(...)</code>, <code>addGraph(...)</code></li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Panels can be anchored to screen space or to moving world objects through <a href="#simobject">SimObject</a>.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="gui-element">
+              <h4>GUIElement</h4>
+              <p class="source">Source: <code>conv/gui.ts</code></p>
+              <p>Single text, button, list, or graph entry inside a <a href="#gui-panel">GUIPanel</a>.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#gui-panel">GUIPanel</a>, <a href="#gui">GUI</a>, <a href="#button">Button</a>, <a href="#text">Text</a>, <a href="#events">Events</a>, <a href="#mien">Mien</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p><code>new GUIElement(panel, textArray, alignment, mien?)</code></p>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>drawnSize</code>: actual width and height used during the last render</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>attachListItemPanel(listElement, direction)</code>: creates a child list panel.</li>
+                    <li><code>receiveListItemSelection(data)</code>: updates the list value, removes the child panel, and emits an event.</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="button">
+              <h4>Button</h4>
+              <p class="source">Source: <code>conv/button.ts</code></p>
+              <p>Attaches clickable behavior to either a <a href="#simobject">SimObject</a> or a <a href="#gui-element">GUIElement</a>.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#gui-element">GUIElement</a>, <a href="#simobject">SimObject</a>, <a href="#gui">GUI</a>, <a href="#events">Events</a>, <a href="#view">View</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <ul class="item-list">
+                    <li><code>new Button(value, toggle = false, objectOrElement, clickFn?)</code></li>
+                    <li><code>value</code>: payload returned in click events</li>
+                    <li><code>toggle</code>: if <code>true</code>, clicking flips <code>toggled</code></li>
+                    <li><code>objectOrElement</code>: owner <a href="#simobject">SimObject</a> or <a href="#gui-element">GUIElement</a></li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>owner</code>: returns the owning element or object</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>checkForMouse()</code>: updates hover/press/click state and reports whether interaction occurred.</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="events">
+              <h4>Events</h4>
+              <p class="source">Source: <code>conv/events.ts</code></p>
+              <p>Static event store for click and list-selection style events.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#button">Button</a>, <a href="#gui-element">GUIElement</a>, <a href="#main">Main</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>reset()</code>: clears all event buckets.</li>
+                    <li><code>add(type, ownerName, data)</code>: stores one event by type and owner name.</li>
+                    <li><code>get(type, ownerName)</code>: fetches the most recent event for one owner.</li>
+                    <li><code>getAll(type)</code>: returns all event payloads stored for a type.</li>
+                    <li><code>getEvents(type)</code>: alias for <code>getAll(type)</code>.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p><a href="#main">Main.doWork()</a> resets events once per frame before processing input and rendering.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="text">
+              <h4>Text</h4>
+              <p class="source">Source: <code>conv/text.ts</code></p>
+              <p>Helper for measuring and truncating multi-line GUI text.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#gui-element">GUIElement</a>, <a href="#gui-panel">GUIPanel</a>, <a href="#view">View</a>, <a href="#mien">Mien</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p><code>new Text(linesArray, lineLengthsArray, width, height)</code></p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>getTextFromArray(text, maxSize, fontName, fontSize, lineSpace, margin)</code>: measures and truncates a list of strings into a <code>Text</code> instance.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Used internally by <a href="#gui-element">GUIElement</a> to fit text into panel constraints.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="subsystem">
+            <h3>Geometry and Utilities</h3>
+
+            <article class="class-card" id="vec">
+              <h4>Vec</h4>
+              <p class="source">Source: <code>conv/geometry.ts</code></p>
+              <p>Static 2D vector math library used everywhere in the engine.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#line-seg">LineSeg</a>, <a href="#rect-bounds">RectBounds</a>, <a href="#simobject">SimObject</a>, <a href="#polygon">Polygon</a>, <a href="#rnd">Rnd</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Accessor</h5>
+                  <ul class="method-list">
+                    <li><code>radians</code>: conversion factor from degrees to radians</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>add</code>, <code>addInPlace</code>, <code>sub</code>, <code>subInPlace</code></li>
+                    <li><code>magnitude</code>, <code>dist</code>, <code>scale</code>, <code>scaleInPlace</code></li>
+                    <li><code>perp</code>, <code>norm</code>, <code>rotate</code>, <code>rotateInPlace</code></li>
+                    <li><code>dot</code>, <code>cross</code>, <code>equal</code></li>
+                    <li><code>fromAngleAndMagnitude</code>, <code>fromPolar</code>, <code>toPolar</code></li>
+                    <li><code>trueBearingFromTo</code>, <code>turnToFace</code></li>
+                    <li><code>collisionResponse(objA, objB, elasticity)</code></li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="line-seg">
+              <h4>LineSeg</h4>
+              <p class="source">Source: <code>conv/geometry.ts</code></p>
+              <p>Utility class for line-segment and ray math.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#vec">Vec</a>, <a href="#rect-bounds">RectBounds</a>, <a href="#line-effect">LineEffect</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>No explicit constructor. The class is normally used through static methods.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>ray(origin, angle, startMagnitude, endMagnitude)</code></li>
+                    <li><code>angleBetweenLines(lineAStart, lineAEnd, lineBStart, lineBEnd)</code></li>
+                    <li><code>lineIntersection(lineAStart, lineAEnd, lineBStart, lineBEnd)</code></li>
+                    <li><code>closestPointOnSegment(segmentStart, segmentEnd, point)</code></li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>These helpers show up heavily in the line-of-sight demos.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="rect-bounds">
+              <h4>RectBounds</h4>
+              <p class="source">Source: <code>conv/geometry.ts</code></p>
+              <p>Axis-aligned rectangle used for camera bounds, quadtree queries, and hit testing.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#camera">Camera</a>, <a href="#quadtree">QuadTree</a>, <a href="#view">View</a>, <a href="#rnd">Rnd</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p><code>new RectBounds(x0, y0, x1, y1)</code></p>
+                </div>
+                <div class="panel">
+                  <h5>Accessors</h5>
+                  <ul class="method-list">
+                    <li><code>width</code>, <code>height</code>, <code>area</code>, <code>isValid</code></li>
+                  </ul>
+                  <h5 style="margin-top:0.8rem;">Methods</h5>
+                  <ul class="method-list">
+                    <li><code>fromCenterAndSize(x, y, width, height)</code></li>
+                    <li><code>setWithTrust(x0, y0, x1, y1)</code></li>
+                    <li><code>isPointInside(x, y)</code></li>
+                    <li><code>isPointOnEdge(x, y)</code></li>
+                    <li><code>touches(other)</code></li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>The constructor normalizes corner order, so callers can pass coordinates in any corner pairing.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="class-card" id="rnd">
+              <h4>Rnd</h4>
+              <p class="source">Source: <code>conv/rnd.ts</code></p>
+              <p>Random utility helpers for numbers, vectors, rays, bounds, and colors.</p>
+              <div class="related"><span class="label">Related concepts:</span> <a href="#vec">Vec</a>, <a href="#line-seg">LineSeg</a>, <a href="#rect-bounds">RectBounds</a>, <a href="#particle-effect">ParticleEffect</a>.</div>
+              <div class="split">
+                <div class="panel">
+                  <h5>Constructor</h5>
+                  <p>None. Use static members only.</p>
+                </div>
+                <div class="panel">
+                  <h5>Methods</h5>
+                  <ul class="method-list">
+                    <li><code>bool()</code>, <code>int(min?, max?)</code>, <code>float(min?, max?)</code>, <code>hex(min?, max?, digits?)</code></li>
+                    <li><code>angle(center, span)</code>, <code>point(bounds)</code>, <code>vec(minAngle, maxAngle, minMag, maxMag)</code></li>
+                    <li><code>bound(x, y, w = 1, h = 1)</code></li>
+                    <li><code>ray(origin, minAngle, maxAngle, minStart, maxStart, minLength, maxLength)</code></li>
+                    <li><code>color(min)</code></li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <h5>Notes</h5>
+                  <p>Useful for fast demo generation, projectile spreads, and particle bursts.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="engine-flow">
+          <h2>Typical Engine Flow</h2>
+          <ol class="flow-list">
+            <li>Create <a href="#simobject">SimObject</a> instances.</li>
+            <li>Build each object's body with <a href="#part">Part</a> and <a href="#polygon">Polygon</a>.</li>
+            <li>Call <code>finalize()</code> on each object.</li>
+            <li>Insert objects with <a href="#sim">Sim.add(...)</a>.</li>
+            <li>Assign <code>Main.creatorsFunction</code> if you want per-frame spawning or gameplay logic.</li>
+            <li>Start the loop with <a href="#main">Main.run(fps)</a>.</li>
+          </ol>
+          <p>The smallest example of that flow is <a href="../test/1_parts.js">test/1_parts.js</a>, while richer examples are <a href="../test/12_stress_test.js">test/12_stress_test.js</a>, <a href="../test/17_warship_duel.js">test/17_warship_duel.js</a>, and <a href="../test/18_moving_warship_duel.js">test/18_moving_warship_duel.js</a>.</p>
+        </section>
+
+        <footer>
+          <p>Generated from the markdown manual in <code>instructions/engine-manual.md</code>. Internal links are provided for related classes and common engine workflows.</p>
+        </footer>
+      </main>
+    </div>
+  </div>
+  <script>
+    const classCards = Array.from(document.querySelectorAll('.class-card'));
+
+    function ensureCardStructure(card) {
+      let heading = card.querySelector('.class-heading');
+      if (!heading) {
+        const title = card.querySelector('h4');
+        if (!title) return;
+        heading = document.createElement('div');
+        heading.className = 'class-heading';
+        title.parentNode.insertBefore(heading, title);
+        heading.appendChild(title);
+      }
+
+      let toggle = heading.querySelector('.collapse-toggle');
+      if (!toggle) {
+        toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'collapse-toggle';
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.textContent = 'Collapse';
+        heading.appendChild(toggle);
+      }
+
+      let body = card.querySelector('.class-body');
+      if (!body) {
+        body = document.createElement('div');
+        body.className = 'class-body';
+        let next = heading.nextSibling;
+        while (next) {
+          const current = next;
+          next = next.nextSibling;
+          body.appendChild(current);
+        }
+        card.appendChild(body);
+      }
+
+      toggle.addEventListener('click', () => {
+        const collapsed = card.classList.toggle('is-collapsed');
+        toggle.textContent = collapsed ? 'Expand' : 'Collapse';
+        toggle.setAttribute('aria-expanded', String(!collapsed));
+      });
+    }
+
+    function setCollapsed(card, collapsed) {
+      const toggle = card.querySelector('.collapse-toggle');
+      card.classList.toggle('is-collapsed', collapsed);
+      if (toggle) {
+        toggle.textContent = collapsed ? 'Expand' : 'Collapse';
+        toggle.setAttribute('aria-expanded', String(!collapsed));
+      }
+    }
+
+    classCards.forEach(ensureCardStructure);
+
+    const expandAll = document.getElementById('expand-all');
+    const collapseAll = document.getElementById('collapse-all');
+
+    expandAll?.addEventListener('click', () => {
+      classCards.forEach((card) => setCollapsed(card, false));
+    });
+
+    collapseAll?.addEventListener('click', () => {
+      classCards.forEach((card) => setCollapsed(card, true));
+    });
+
+    document.querySelectorAll('.source code').forEach((code) => {
+      const rawPath = code.textContent.trim();
+      const link = document.createElement('a');
+      link.href = '../' + rawPath;
+      link.textContent = rawPath;
+      link.setAttribute('title', 'Open source file');
+      code.replaceWith(link);
+    });
+  </script>
+</body>
+</html>
