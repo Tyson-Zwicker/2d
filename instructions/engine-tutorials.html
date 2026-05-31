@@ -254,6 +254,7 @@
         <a href="../test/1_parts.js">View Object Demo</a>
         <a href="../test/2_effects&amp;mouse.js">View Effects Demo</a>
         <a href="../test/5_gui.js">View GUI Demo</a>
+        <a href="../test/13_collision_physics.js">View Collision Demo</a>
       </div>
     </header>
 
@@ -267,6 +268,7 @@
           <li><a href="#tutorial-object">Build A Complex SimObject</a></li>
           <li><a href="#tutorial-rotation">Spin Parts And Orbit Shapes</a></li>
           <li><a href="#tutorial-effects">Add Per-Frame Effects</a></li>
+          <li><a href="#tutorial-collision">Detect And Resolve Collisions</a></li>
           <li><a href="#tutorial-gui">Build Panels, Buttons, and Lists</a></li>
           <li><a href="#tutorial-mien">Customize Mien</a></li>
         </ul>
@@ -283,7 +285,7 @@
             </div>
             <div class="card">
               <h3>Demo Grounding</h3>
-              <p>These walkthroughs are based on <a href="../test/1_parts.js">test/1_parts.js</a>, <a href="../test/2_effects&amp;mouse.js">test/2_effects&amp;mouse.js</a>, and <a href="../test/5_gui.js">test/5_gui.js</a>.</p>
+              <p>These walkthroughs are based on <a href="../test/1_parts.js">test/1_parts.js</a>, <a href="../test/2_effects&amp;mouse.js">test/2_effects&amp;mouse.js</a>, <a href="../test/5_gui.js">test/5_gui.js</a>, and <a href="../test/13_collision_physics.js">test/13_collision_physics.js</a>.</p>
             </div>
             <div class="card">
               <h3>Typical Order</h3>
@@ -588,6 +590,108 @@ Main.run(60);</code></pre>
             <li><a href="../conv/radial-effect.ts">Engine source: conv/radial-effect.ts</a></li>
             <li><a href="../conv/line-effect.ts">Engine source: conv/line-effect.ts</a></li>
             <li><a href="../conv/particle-effect.ts">Engine source: conv/particle-effect.ts</a></li>
+          </ul>
+        </section>
+
+        <section id="tutorial-collision">
+          <h2>Detect And Resolve Collisions</h2>
+          <p class="muted">Based on <a href="../test/13_collision_physics.js">test/13_collision_physics.js</a>.</p>
+          <p>The engine’s collision system is circle-based at the <a href="./engine-manual.html#simobject">SimObject</a> level. You opt objects into collision checks with <code>collides = true</code>, give them a meaningful <code>radius</code>, and then choose between detection-only with <a href="./engine-manual.html#sim">Sim.detectDynamicCollisions()</a> or full elastic response with <a href="./engine-manual.html#sim">Sim.resolveDynamicCollisions(elasticity)</a>.</p>
+
+          <h3>Concepts In Play</h3>
+          <ul class="concepts">
+            <li><code>collides</code> must be <code>true</code> or the object is ignored by collision pair generation.</li>
+            <li>Only dynamic objects participate in these helpers, so use <code>canMove = 'always'</code> or <code>'onscreen'</code> for objects you want included.</li>
+            <li><code>radius</code> is the collision size used by the quadtree and overlap test. You can keep the auto-computed value from <code>finalize()</code> or override it with a simpler circular hit volume.</li>
+            <li><code>mass</code> changes how much each object yields during the response.</li>
+            <li><code>Sim.detectDynamicCollisions()</code> returns overlapping dynamic pairs without changing velocities.</li>
+            <li><code>Sim.resolveDynamicCollisions(elasticity)</code> computes new velocities and separation offsets, then applies them through <code>SimObject.applyCollisionFrom(...)</code>.</li>
+          </ul>
+
+          <h3>Step By Step</h3>
+          <ol class="steps">
+            <li>Create the object normally with parts and call <code>finalize()</code>.</li>
+            <li>Set <code>collides = true</code> on every object that should participate.</li>
+            <li>Set <code>radius</code> to the collision circle you want the engine to use.</li>
+            <li>Choose a sensible <code>mass</code> if you want heavier objects to push lighter ones aside realistically.</li>
+            <li>Add the finalized objects to <a href="./engine-manual.html#sim">Sim</a>.</li>
+            <li>Inside <code>Main.creatorsFunction</code>, call <code>Sim.detectDynamicCollisions()</code> when you only need collision events, or <code>Sim.resolveDynamicCollisions(elasticity)</code> when you want bounce and separation.</li>
+            <li>Handle world-boundary collisions yourself, because <code>resolveDynamicCollisions(...)</code> only responds to dynamic object pairs.</li>
+          </ol>
+
+          <h3>Detection Only</h3>
+          <div class="snippet">
+<pre><code>import { Main } from '../dist/main.js';
+import { Sim } from '../dist/sim.js';
+import { SimObject, Part } from '../dist/simobject.js';
+import { Polygon } from '../dist/polygon.js';
+import { Mien } from '../dist/mien.js';
+
+const scout = new SimObject('scout', 'always', 1);
+new Part('body', Polygon.regular(6, 24, Mien.Cyan)).addTo(scout, { x: 0, y: 0 }, 0);
+scout.finalize();
+scout.collides = true;
+scout.radius = 24;
+Sim.add(scout, { x: -80, y: 0 }, 0);
+scout.velocity.x = 60;
+
+const target = new SimObject('target', 'always', 3);
+new Part('body', Polygon.regular(8, 34, Mien.Orange)).addTo(target, { x: 0, y: 0 }, 0);
+target.finalize();
+target.collides = true;
+target.radius = 34;
+Sim.add(target, { x: 80, y: 0 }, 0);
+
+Main.creatorsFunction = () =&gt; {
+  const pairs = Sim.detectDynamicCollisions();
+  for (const { objectA, objectB } of pairs) {
+    console.log(`overlap: ${objectA.name} with ${objectB.name}`);
+  }
+};
+
+Main.run(60);</code></pre>
+          </div>
+
+          <h3>Realistic Collision Response</h3>
+          <p>Use <code>Sim.resolveDynamicCollisions(elasticity)</code> when you want the engine to do the normal elastic-collision math for you. An elasticity of <code>1</code> is a perfectly elastic bounce, <code>0</code> is fully inelastic, and values in between trade bounce for energy loss.</p>
+          <div class="snippet">
+<pre><code>const ELASTICITY = 0.8;
+const ARENA_HALF_SIZE = 2500;
+
+Main.creatorsFunction = () =&gt; {
+  for (const obj of [scout, target]) {
+    if (obj.worldPosition.x - obj.radius &lt; -ARENA_HALF_SIZE) {
+      obj.worldPosition.x = -ARENA_HALF_SIZE + obj.radius;
+      obj.velocity.x = Math.abs(obj.velocity.x) * ELASTICITY;
+    } else if (obj.worldPosition.x + obj.radius &gt; ARENA_HALF_SIZE) {
+      obj.worldPosition.x = ARENA_HALF_SIZE - obj.radius;
+      obj.velocity.x = -Math.abs(obj.velocity.x) * ELASTICITY;
+    }
+  }
+
+  const collisions = Sim.resolveDynamicCollisions(ELASTICITY);
+  if (collisions.length &gt; 0) {
+    console.log(`resolved ${collisions.length} collisions this frame`);
+  }
+};</code></pre>
+          </div>
+
+          <h3>What Makes The Reaction Look Realistic</h3>
+          <ul class="tips">
+            <li>Use a collision radius that matches the effective body you want to simulate, not necessarily every decorative polygon point.</li>
+            <li>Keep masses proportional to the visual or gameplay weight of the objects. The engine splits the separation correction and velocity change by mass.</li>
+            <li>Use the same elasticity for wall and object response when you want a consistent material feel across the scene.</li>
+            <li>If you want a collision to trigger damage, effects, or sound, inspect the returned collision pairs after calling <code>detectDynamicCollisions()</code> or <code>resolveDynamicCollisions(...)</code>.</li>
+            <li><code>Main.creatorsFunction</code> runs after movement and rendering work for the frame, so the collision response you apply there affects the next visual update.</li>
+          </ul>
+
+          <h3>Relevant Files</h3>
+          <ul class="links">
+            <li><a href="../test/13_collision_physics.js">Demo source: test/13_collision_physics.js</a></li>
+            <li><a href="../conv/sim.ts">Engine source: conv/sim.ts</a></li>
+            <li><a href="../conv/quadtree.ts">Engine source: conv/quadtree.ts</a></li>
+            <li><a href="../conv/geometry.ts">Engine source: conv/geometry.ts</a></li>
+            <li><a href="../conv/simobject.ts">Engine source: conv/simobject.ts</a></li>
           </ul>
         </section>
 
