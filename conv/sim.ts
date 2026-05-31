@@ -1,4 +1,4 @@
-import { Point, RectBounds, Vec } from './geometry.js';
+import { Point, RectBounds, Vec, LineSeg } from './geometry.js';
 import { SimObject } from './simobject.js';
 import { CollisionPair, QuadTree } from './quadtree.js';
 
@@ -106,5 +106,85 @@ export class Sim {
     }
 
     return collisionPairs;
+  }
+
+  /**
+   * Check if two SimObjects have unobstructed line of sight.
+   * Uses quadtree broad-phase filtering followed by precise segment-circle intersection tests.
+   * @param observer The observing SimObject
+   * @param target The target SimObject to check visibility to
+   * @param padding The padding around the segment bounding box for quadtree queries (default: 90)
+   * @returns true if the target is visible from the observer, false if blocked
+   */
+  static canSee(
+    observer: SimObject,
+    target: SimObject,
+    padding: number = 90
+  ): boolean {
+    const bounds = Sim.segmentBounds(
+      observer.worldPosition,
+      target.worldPosition,
+      padding
+    );
+    const candidates: SimObject[] = [];
+
+    Sim.staticQuadtree.findInRange(bounds, candidates);
+    Sim.dynamicQuadtree.findInRange(bounds, candidates);
+
+    const seen = new Set<string>();
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (const candidate of candidates) {
+      if (candidate === observer || candidate === target) continue;
+      if (seen.has(candidate.name)) continue;
+      seen.add(candidate.name);
+
+      const hitDistance = Sim.segmentBlockDistance(
+        observer.worldPosition,
+        target.worldPosition,
+        candidate.worldPosition,
+        candidate.radius
+      );
+
+      if (hitDistance !== null && hitDistance < nearestDistance) {
+        nearestDistance = hitDistance;
+      }
+    }
+
+    return nearestDistance === Number.POSITIVE_INFINITY;
+  }
+
+  /**
+   * Create a padded bounding box around a line segment for quadtree queries.
+   * Padding is necessary because circles whose centers are outside the raw segment
+   * bounding box can still intersect the segment.
+   */
+  private static segmentBounds(
+    start: Point,
+    end: Point,
+    padding: number
+  ): RectBounds {
+    return new RectBounds(
+      Math.min(start.x, end.x) - padding,
+      Math.min(start.y, end.y) - padding,
+      Math.max(start.x, end.x) + padding,
+      Math.max(start.y, end.y) + padding
+    );
+  }
+
+  /**
+   * Test if a line segment is blocked by a circular obstacle.
+   * @returns The distance from start to the blocking point, or null if not blocked
+   */
+  private static segmentBlockDistance(
+    start: Point,
+    end: Point,
+    circleCenter: Point,
+    radius: number
+  ): number | null {
+    const closest = LineSeg.closestPointOnSegment(start, end, circleCenter);
+    const separation = Vec.dist(closest, circleCenter);
+    if (separation > radius) return null;
+    return Vec.dist(start, closest);
   }
 }
