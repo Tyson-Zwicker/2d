@@ -10,13 +10,13 @@ import { RadialEffect } from '../dist/radial-effect.js';
 
 // Configuration
 const ELASTICITY = 0.0; // Perfectly inelastic for merging
-const ARENA_SIZE = 5000;
-const NUM_OBJECTS_PER_TYPE = 700;
+const ARENA_SIZE = 50000;
+const NUM_INITIAL_DENSITY_1_OBJECTS =2000; // Number of objects per color type
 const OBJECT_RADIUS = 5; // All objects have same radius
-const MAX_VELOCITY = 100;
-const GRAVITY_CONSTANT = 1200; // Gravitational attraction strength
+const MAX_VELOCITY = 10;
+const GRAVITY_CONSTANT = 10000; // Gravitational attraction strength
 
-// 7 types with different initial masses (same radius = different densities)
+// 7 color types - all initial objects have density 1 (mass = 1, radius = 5)
 const TYPES = [
   { color: new Color(255, 0, 0), mass: 1 },      // Red - density 1
   { color: new Color(255, 127, 0), mass: 1 },    // Orange - density 1
@@ -34,10 +34,10 @@ Camera.zoom = 1.5;
 let objects = [];
 let nextId = 0;
 
-// Create initial objects
+// Create initial objects (all with density 1)
 for (let typeIdx = 0; typeIdx < TYPES.length; typeIdx++) {
   const type = TYPES[typeIdx];
-  for (let i = 0; i < NUM_OBJECTS_PER_TYPE; i++) {
+  for (let i = 0; i < NUM_INITIAL_DENSITY_1_OBJECTS; i++) {
     createObject(type.mass, type.color);
   }
 }

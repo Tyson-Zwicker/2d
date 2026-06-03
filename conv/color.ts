@@ -7,6 +7,8 @@
 // - Avoid using toHex() (6-digit #RRGGBB) with effects as it creates
 //   #RRGGBBo (7 chars) which is non-standard
 
+import { Mien } from './mien.js';
+
 export class Color {
   r: number;  // 0-255
   g: number;  // 0-255
@@ -195,5 +197,16 @@ export class Color {
   withAlphaFloat(alpha: number): Color {
     this.validateFloatRange(alpha, 'alpha');
     return new Color(this.r, this.g, this.b, alpha * 255);
+  }
+
+  /**
+   * Convert to Mien (visual appearance) object
+   * Creates a Mien with this color as the background
+   */
+  toMien(): Mien {
+    const mien = new Mien();
+    const hex = this.toHex();
+    mien.setColors(hex, hex, '#fff', 'normal');
+    return mien;
   }
 }
